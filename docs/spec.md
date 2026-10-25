@@ -41,7 +41,7 @@ Each client only sees modules for services they buy.
 
 | Phase | Scope | Users |
 |---|---|---|
-| 1. MVP (2–3 wks) | Multi-tenant base, magic-link auth, Home + monthly note, Requests, Messages, Files/approvals, manual invoices, admin panel | Our clients |
+| 1. MVP ✅ built | Multi-tenant base, password + invite-link auth, Home + monthly note, work log, Requests, Messages, Files/approvals, manual invoices, admin panel | Our clients |
 | 2. Secondary features (separate session) | Leads inbox from site forms, performance/analytics, site health, git work log | Our clients |
 | 3. Agencies beta | Agency signup, branding (logo/colors + "Powered by"), Stripe subscriptions, super-admin, landing page + waitlist | 1 partner agency, then a few more |
 | 4. Grow | Stripe client payments, SEO/Ads modules, custom domains, full white-label plan, premium client tier | Paying agencies |
@@ -54,13 +54,21 @@ Agencies get their logo and accent color with a "Powered by [Portal]" badge. Ful
 
 ## Stack
 
-- Next.js (App Router) + TypeScript + Tailwind + shadcn/ui, hosted on Vercel
-- Supabase: Postgres + row-level security, magic-link auth, storage, realtime
-- Stripe for billing (agency subscriptions, later client payments)
+For now everything runs on the **home server** to keep costs at zero while the company is small:
+
+- Next.js 15 (App Router, server actions) + TypeScript + Tailwind, run as a systemd service
+- Postgres 16 (the server's existing instance) via Drizzle ORM; tenant isolation enforced in the data layer (`src/lib/data`)
+- Password login + one-time invite links (no email sending); sessions in Postgres
+- Uploaded files on local disk
+- Messages refresh by polling every 15s (no realtime service)
+
+Later, when it pays for itself: Supabase or another managed Postgres + a Node host, object storage for files, Stripe for billing (agency subscriptions, later client payments). The app only depends on a Postgres URL, a files folder and Node, so the move is a config change plus a data copy.
 
 ## Core data model
 
-`agencies` · `clients` · `users` (role: super_admin / agency_admin / client) · `client_services` (enabled modules) · `requests` + `request_comments` · `messages` · `files` · `invoices` · `work_log` · `leads` · `monthly_notes` · `site_metrics`
+Built in Phase 1: `agencies` · `clients` · `users` (role: agency_admin / client) · `sessions` · `invites` · `requests` + `request_comments` · `messages` · `files` · `invoices` · `work_log` · `monthly_notes`.
+
+Later: super_admin role · `client_services` (enabled modules) · `leads` · `site_metrics`
 
 ## Not doing for now
 
