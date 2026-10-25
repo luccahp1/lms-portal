@@ -1,13 +1,15 @@
+import Link from "next/link";
 import { requireAdmin } from "@/lib/auth/session";
 import { getClient, listClientUsers } from "@/lib/data/clients";
-import { updateClientAction } from "@/app/actions";
-import { Button, Card, CardTitle, Field, Input, Pill } from "@/components/ui";
-import { ReinviteButton } from "./ReinviteButton";
+import { removeClientUserAction, updateClientAction } from "@/app/actions";
+import { formatDate } from "@/lib/format";
+import { Button, Card, CardTitle, Field, Input } from "@/components/ui";
+import { ResetLinkButton } from "./ResetLinkButton";
 
 export default async function ClientSettings({ params }: { params: Promise<{ id: string }> }) {
   const viewer = await requireAdmin();
   const { id } = await params;
-  const [client, contacts] = await Promise.all([getClient(viewer, id), listClientUsers(viewer, id)]);
+  const [client, people] = await Promise.all([getClient(viewer, id), listClientUsers(viewer, id)]);
 
   return (
     <>
@@ -31,17 +33,33 @@ export default async function ClientSettings({ params }: { params: Promise<{ id:
       </Card>
 
       <Card>
-        <CardTitle>Login</CardTitle>
+        <CardTitle>Who can log in</CardTitle>
+        {people.length === 0 && (
+          <p className="text-muted">
+            Nobody yet. Send them your{" "}
+            <Link href="/admin/signups" className="text-accent hover:underline">
+              sign-up link
+            </Link>
+            , then approve them under Sign-ups.
+          </p>
+        )}
         <ul className="flex flex-col">
-          {contacts.map((u) => (
+          {people.map((u) => (
             <li key={u.id} className="flex flex-wrap items-center justify-between gap-3 border-t border-subtle py-3 first:border-t-0">
               <div className="flex flex-col leading-snug">
                 <span className="font-medium">{u.name}</span>
-                <span className="text-[13px] text-muted">{u.email}</span>
+                <span className="text-[13px] text-muted">
+                  {u.email} · since {formatDate(u.createdAt)}
+                </span>
               </div>
-              <div className="flex items-center gap-3">
-                <Pill tone={u.activated ? "good" : "warn"}>{u.activated ? "Active" : "Invite not accepted"}</Pill>
-                <ReinviteButton userId={u.id} label={u.activated ? "Password reset link" : "New invite link"} />
+              <div className="flex flex-wrap items-center gap-2">
+                <ResetLinkButton userId={u.id} />
+                <form action={removeClientUserAction}>
+                  <input type="hidden" name="userId" value={u.id} />
+                  <Button type="submit" variant="danger">
+                    Remove access
+                  </Button>
+                </form>
               </div>
             </li>
           ))}

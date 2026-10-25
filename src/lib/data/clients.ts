@@ -22,44 +22,29 @@ export async function getClient(viewer: Viewer, clientId?: string) {
   return row;
 }
 
+/** People who can log in to a client's portal. */
 export async function listClientUsers(viewer: Viewer, clientId: string) {
   assertAdmin(viewer);
   const id = await resolveClientId(viewer, clientId);
   return db
-    .select({ id: users.id, name: users.name, email: users.email, activated: users.passwordHash })
+    .select({ id: users.id, name: users.name, email: users.email, createdAt: users.createdAt })
     .from(users)
-    .where(and(eq(users.clientId, id), eq(users.agencyId, viewer.agencyId)))
-    .then((rows) => rows.map((r) => ({ ...r, activated: r.activated !== null })));
+    .where(and(eq(users.clientId, id), eq(users.agencyId, viewer.agencyId), eq(users.status, "active")))
+    .orderBy(asc(users.createdAt));
 }
 
-export async function createClient(
-  viewer: Viewer,
-  input: { name: string; websiteUrl?: string; planName?: string; contactName: string; contactEmail: string },
-) {
+export async function createClient(viewer: Viewer, input: { name: string; websiteUrl?: string; planName?: string }) {
   assertAdmin(viewer);
-  return db.transaction(async (tx) => {
-    const [client] = await tx
-      .insert(clients)
-      .values({
-        agencyId: viewer.agencyId,
-        name: input.name,
-        websiteUrl: input.websiteUrl || null,
-        planName: input.planName || null,
-      })
-      .returning();
-    const [user] = await tx
-      .insert(users)
-      .values({
-        agencyId: viewer.agencyId,
-        clientId: client.id,
-        role: "client",
-        name: input.contactName,
-        email: input.contactEmail.toLowerCase(),
-      })
-      .returning();
-    const token = await createInvite(user.id, tx);
-    return { client, user, inviteToken: token };
-  });
+  const [client] = await db
+    .insert(clients)
+    .values({
+      agencyId: viewer.agencyId,
+      name: input.name,
+      websiteUrl: input.websiteUrl || null,
+      planName: input.planName || null,
+    })
+    .returning();
+  return client;
 }
 
 export async function updateClient(
@@ -75,13 +60,24 @@ export async function updateClient(
     .where(eq(clients.id, id));
 }
 
-/** New invite link for a client contact (e.g. the first one expired). */
-export async function reinviteClientUser(viewer: Viewer, userId: string) {
+async function loadClientUser(viewer: Viewer, userId: string) {
   assertAdmin(viewer);
   const [user] = await db
     .select({ id: users.id })
     .from(users)
     .where(and(eq(users.id, userId), eq(users.agencyId, viewer.agencyId), eq(users.role, "client")));
   if (!user) throw new NotFoundError();
+  return user;
+}
+
+/** One-time link that lets a client set a new password (until email reset exists). */
+export async function createPasswordResetLink(viewer: Viewer, userId: string) {
+  const user = await loadClientUser(viewer, userId);
   return createInvite(user.id);
+}
+
+/** Remove someone's access to the portal. Their messages and requests stay. */
+export async function removeClientUser(viewer: Viewer, userId: string) {
+  const user = await loadClientUser(viewer, userId);
+  await db.delete(users).where(eq(users.id, user.id));
 }

@@ -7,6 +7,7 @@ export type Viewer = {
   userId: string;
   agencyId: string;
   role: "agency_admin" | "client";
+  status: "pending" | "active";
   clientId: string | null;
   name: string;
   email: string;
@@ -25,7 +26,7 @@ export class ForbiddenError extends Error {
 }
 
 export function assertAdmin(viewer: Viewer) {
-  if (viewer.role !== "agency_admin") throw new ForbiddenError();
+  if (viewer.role !== "agency_admin" || viewer.status !== "active") throw new ForbiddenError();
 }
 
 /**
@@ -34,7 +35,7 @@ export function assertAdmin(viewer: Viewer) {
  */
 export async function resolveClientId(viewer: Viewer, clientId?: string): Promise<string> {
   if (viewer.role === "client") {
-    if (!viewer.clientId) throw new ForbiddenError();
+    if (viewer.status !== "active" || !viewer.clientId) throw new ForbiddenError();
     if (clientId && clientId !== viewer.clientId) throw new NotFoundError();
     return viewer.clientId;
   }

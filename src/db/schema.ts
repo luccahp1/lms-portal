@@ -9,11 +9,14 @@ import {
   index,
   uniqueIndex,
 } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 
 // Tenancy: every row belongs to an agency. Client-owned rows also carry client_id.
 // All reads/writes go through src/lib/data, which always filters by these columns.
 
 export const userRole = pgEnum("user_role", ["agency_admin", "client"]);
+// Self sign-ups start pending until an agency admin links them to a client.
+export const userStatus = pgEnum("user_status", ["pending", "active"]);
 export const requestStatus = pgEnum("request_status", ["received", "in_progress", "review", "done"]);
 export const fileApproval = pgEnum("file_approval", ["none", "pending", "approved", "changes_requested"]);
 export const invoiceStatus = pgEnum("invoice_status", ["draft", "sent", "paid"]);
@@ -25,6 +28,11 @@ export const agencies = pgTable("agencies", {
   id: id(),
   name: text("name").notNull(),
   accentColor: text("accent_color").notNull().default("#5160E0"),
+  // Secret part of the agency's public sign-up link: /join/<joinCode>
+  joinCode: text("join_code")
+    .notNull()
+    .unique()
+    .default(sql`replace(gen_random_uuid()::text, '-', '')`),
   createdAt: createdAt(),
 });
 
@@ -46,12 +54,15 @@ export const users = pgTable(
   {
     id: id(),
     agencyId: uuid("agency_id").notNull().references(() => agencies.id, { onDelete: "cascade" }),
-    // Set only for role = client.
+    // Set for active client users; null while a sign-up is pending.
     clientId: uuid("client_id").references(() => clients.id, { onDelete: "cascade" }),
     role: userRole("role").notNull(),
+    status: userStatus("status").notNull().default("active"),
     email: text("email").notNull(),
     name: text("name").notNull(),
-    // Null until the invite is accepted.
+    // Business name the person typed when signing up, to help the admin match them.
+    signupBusiness: text("signup_business"),
+    // Null only for a bootstrap admin who hasn't used their setup link yet.
     passwordHash: text("password_hash"),
     createdAt: createdAt(),
   },

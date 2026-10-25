@@ -10,15 +10,15 @@ Built first for our own clients, designed multi-tenant so it can be sold to othe
 
 ## Status
 
-**Phase 1 (built):** agency admin + client portal with monthly updates, work log, requests (with comments and approvals), messages, files (with approvals), and invoices. Password login with invite links (no email sending).
+**Phase 1 (built):** agency admin + client portal with monthly updates, work log, requests (with comments and approvals), messages, files (with approvals), and invoices. Clients sign up themselves with email + password through the agency's sign-up link; an admin approves each one. No email sending yet.
 
 **Phase 2 (later):** leads inbox from client website forms, performance/analytics, site health.
 
 ## Stack
 
-Next.js 15 (App Router, server actions) · TypeScript · Tailwind CSS 4 · Postgres 16 via Drizzle ORM · files on local disk · Vitest.
+Next.js 15 (App Router, server actions) · TypeScript · Tailwind CSS 4 · Postgres 16 via Drizzle ORM · Cloudflare R2 for files (local folder in development) · Vitest.
 
-Runs on a single small server: one Node process, the existing Postgres, no Docker.
+Runs on a single small server: one Node process, the existing Postgres, no Docker. Client files live in R2, off the server.
 
 ## How it's organised
 
@@ -43,10 +43,10 @@ createdb lms_portal                # or create the role/db however you like
 npm install
 npm run db:migrate
 npm run seed:demo                  # admin@demo.test / client@demo.test, password demo-password
-npm run dev
+npm run dev                        # sign-up link: Admin → Sign-ups
 ```
 
-First real admin (prints an invite link to set the password):
+First real admin (prints a one-time link to set the password):
 
 ```bash
 npm run create-admin -- "Agency name" "Your name" you@example.com

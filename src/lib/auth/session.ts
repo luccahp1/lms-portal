@@ -53,6 +53,7 @@ export const getViewer = cache(async (): Promise<Viewer | null> => {
       userId: users.id,
       agencyId: users.agencyId,
       role: users.role,
+      status: users.status,
       clientId: users.clientId,
       name: users.name,
       email: users.email,
@@ -63,10 +64,17 @@ export const getViewer = cache(async (): Promise<Viewer | null> => {
   return row ?? null;
 });
 
+/** Logged in and approved. Pending sign-ups are sent to the waiting page. */
 export async function requireViewer(): Promise<Viewer> {
   const viewer = await getViewer();
   if (!viewer) redirect("/login");
+  if (viewer.status !== "active") redirect("/pending");
   return viewer;
+}
+
+export function homePath(viewer: Viewer) {
+  if (viewer.status !== "active") return "/pending";
+  return viewer.role === "agency_admin" ? "/admin" : "/portal";
 }
 
 export async function requireAdmin(): Promise<Viewer> {

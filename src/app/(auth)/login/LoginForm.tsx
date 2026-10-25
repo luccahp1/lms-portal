@@ -18,7 +18,10 @@ export function LoginForm() {
       <Button type="submit" disabled={pending}>
         {pending ? "Logging in…" : "Log in"}
       </Button>
-      <p className="text-xs text-muted">Forgot your password? Message your account manager for a new link.</p>
+      <p className="text-xs text-muted">
+        New client? Use the sign-up link your agency sent you. Forgot your password? Ask your account manager for a reset
+        link.
+      </p>
     </form>
   );
 }

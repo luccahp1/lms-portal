@@ -29,6 +29,6 @@ export async function makeAgency() {
   return { agency, admin: toViewer(admin), clientA: made[0]!, clientB: made[1]! };
 }
 
-function toViewer(u: typeof users.$inferSelect): Viewer {
-  return { userId: u.id, agencyId: u.agencyId, role: u.role, clientId: u.clientId, name: u.name, email: u.email };
+export function toViewer(u: typeof users.$inferSelect): Viewer {
+  return { userId: u.id, agencyId: u.agencyId, role: u.role, status: u.status, clientId: u.clientId, name: u.name, email: u.email };
 }

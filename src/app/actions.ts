@@ -15,9 +15,10 @@ import * as messagesData from "@/lib/data/messages";
 import * as filesData from "@/lib/data/files";
 import * as updatesData from "@/lib/data/updates";
 import * as invoicesData from "@/lib/data/invoices";
+import * as signupsData from "@/lib/data/signups";
 import { requestStatus, invoiceStatus } from "@/db/schema";
 
-export type ActionState = { error?: string; inviteUrl?: string; ok?: boolean } | undefined;
+export type ActionState = { error?: string; resetUrl?: string; ok?: boolean } | undefined;
 
 const optionalId = z.string().uuid().optional().or(z.literal("").transform(() => undefined));
 
@@ -41,8 +42,8 @@ function isUniqueViolation(err: unknown, constraint: string): boolean {
   return false;
 }
 
-function inviteUrl(token: string) {
-  return `${process.env.APP_URL || "http://localhost:3000"}/invite/${token}`;
+function resetUrl(token: string) {
+  return `${process.env.APP_URL || "http://localhost:3000"}/reset/${token}`;
 }
 
 // ---- Requests ----
@@ -134,22 +135,11 @@ const clientFields = {
 
 export async function createClientAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
   const viewer = await requireAdmin();
-  const parsed = z
-    .object({
-      ...clientFields,
-      contactName: z.string().trim().min(1, "Contact name is required.").max(200),
-      contactEmail: z.string().trim().email("Enter a valid contact email."),
-    })
-    .safeParse(Object.fromEntries(formData));
+  const parsed = z.object(clientFields).safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { error: parsed.error.issues[0]?.message };
-  try {
-    const { inviteToken } = await clientsData.createClient(viewer, parsed.data);
-    refresh();
-    return { ok: true, inviteUrl: inviteUrl(inviteToken) };
-  } catch (err) {
-    if (isUniqueViolation(err, "users_email_idx")) return { error: "Someone already uses that email address." };
-    throw err;
-  }
+  const client = await clientsData.createClient(viewer, parsed.data);
+  refresh();
+  redirect(`/admin/clients/${client.id}`);
 }
 
 export async function updateClientAction(formData: FormData) {
@@ -159,11 +149,42 @@ export async function updateClientAction(formData: FormData) {
   refresh();
 }
 
-export async function reinviteAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
+export async function resetLinkAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
   const viewer = await requireAdmin();
   const input = parse(z.object({ userId: z.string().uuid() }), formData);
-  const token = await clientsData.reinviteClientUser(viewer, input.userId);
-  return { ok: true, inviteUrl: inviteUrl(token) };
+  const token = await clientsData.createPasswordResetLink(viewer, input.userId);
+  return { ok: true, resetUrl: resetUrl(token) };
+}
+
+export async function removeClientUserAction(formData: FormData) {
+  const viewer = await requireAdmin();
+  const input = parse(z.object({ userId: z.string().uuid() }), formData);
+  await clientsData.removeClientUser(viewer, input.userId);
+  refresh();
+}
+
+// ---- Admin: sign-ups ----
+
+export async function approveSignupAction(formData: FormData) {
+  const viewer = await requireAdmin();
+  const input = parse(
+    z.object({ userId: z.string().uuid(), target: z.string().min(1), newClientName: z.string().trim().max(200).optional() }),
+    formData,
+  );
+  // target is either "new" or the id of an existing client.
+  const clientId =
+    input.target === "new"
+      ? await signupsData.approveSignup(viewer, input.userId, { newClientName: input.newClientName || "New client" })
+      : await signupsData.approveSignup(viewer, input.userId, { clientId: z.string().uuid().parse(input.target) });
+  refresh();
+  redirect(`/admin/clients/${clientId}`);
+}
+
+export async function rejectSignupAction(formData: FormData) {
+  const viewer = await requireAdmin();
+  const input = parse(z.object({ userId: z.string().uuid() }), formData);
+  await signupsData.rejectSignup(viewer, input.userId);
+  refresh();
 }
 
 // ---- Admin: updates & work log ----

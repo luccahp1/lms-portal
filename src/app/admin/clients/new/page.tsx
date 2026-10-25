@@ -8,7 +8,10 @@ export default async function NewClientPage() {
   await requireAdmin();
   return (
     <>
-      <PageHeader title="New client" subtitle="Add the business and the person who will log in. You’ll get an invite link to send them." />
+      <PageHeader
+        title="New client"
+        subtitle="Add the business. When they sign up with your sign-up link, you’ll connect their account to it."
+      />
       <NewClientForm />
     </>
   );

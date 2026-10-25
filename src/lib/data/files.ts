@@ -45,7 +45,7 @@ export async function uploadFile(
   if (input.data.length > MAX_UPLOAD_BYTES) throw new Error("File is too large");
   // Only the agency can ask the client to approve something.
   const approval: FileApproval = viewer.role === "agency_admin" && input.needsApproval ? "pending" : "none";
-  const storageKey = await storeFile(viewer.agencyId, id, input.data);
+  const storageKey = await storeFile(viewer.agencyId, id, input.data, input.mimeType);
   try {
     await db.insert(files).values({
       agencyId: viewer.agencyId,

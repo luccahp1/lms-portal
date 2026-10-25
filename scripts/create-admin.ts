@@ -36,7 +36,7 @@ async function main() {
   const token = await createInvite(user.id);
   const base = process.env.APP_URL || "http://localhost:3000";
   console.log(`Created admin ${user.email}`);
-  console.log(`Set your password here (valid 14 days): ${base}/invite/${token}`);
+  console.log(`Set your password here (link valid 14 days): ${base}/reset/${token}`);
 }
 
 main()
