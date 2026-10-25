@@ -4,16 +4,16 @@ Client portal for web and marketing agencies. Clients log in to see monthly upda
 
 Built first for our own clients, designed multi-tenant so it can be sold to other agencies.
 
-- **Pending task:** [DEPLOY_TASK.md](DEPLOY_TASK.md), a one-time deployment task for a Claude session (deleted when done)
+- **Roadmap:** [ROADMAP.md](ROADMAP.md)
 - Product spec: [docs/spec.md](docs/spec.md)
 - Deploying to the home server: [docs/deploy-home-server.md](docs/deploy-home-server.md)
 - Design mockup: [design/client-portal-mockup.dc.html](design/client-portal-mockup.dc.html)
 
 ## Status
 
-**Phase 1 (built):** agency admin + client portal with monthly updates, work log, requests (with comments and approvals), messages, files (with approvals), and invoices. Clients sign up themselves with email + password through the agency's sign-up link; an admin approves each one. No email sending yet.
+**Live** at https://portal.londonmarketingsolutions.ca. **Phase 1 (built):** agency admin + client portal with monthly updates, work log, requests (with comments and approvals), messages, files (with approvals), and invoices. Clients sign up themselves with email + password through the agency's sign-up link; an admin approves each one. No email sending yet.
 
-**Phase 2 (later):** leads inbox from client website forms, performance/analytics, site health.
+Next: housekeeping, email, then results modules (leads, performance, site health). See [ROADMAP.md](ROADMAP.md).
 
 ## Stack
 

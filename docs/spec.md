@@ -39,6 +39,8 @@ Each client only sees modules for services they buy.
 
 ## Roadmap
 
+The detailed, up-to-date build order is in [ROADMAP.md](../ROADMAP.md). The phases in short:
+
 | Phase | Scope | Users |
 |---|---|---|
 | 1. MVP ✅ built | Multi-tenant base, email + password sign-up with admin approval, Home + monthly note, work log, Requests, Messages, Files/approvals, manual invoices, admin panel | Our clients |
