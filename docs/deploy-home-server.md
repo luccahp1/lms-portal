@@ -99,6 +99,9 @@ chmod 600 /srv/apps/lms-portal/.env
 
 Use `COOKIE_SECURE=false` only for LAN testing over plain http.
 
+Uploads stop once the bucket holds `STORAGE_LIMIT_BYTES` in total (default 8 GB, inside R2's
+free 10 GB). Set it in `.env` to raise the limit when paid storage is fine.
+
 ### 6. Build, migrate, create the first admin
 
 ```bash
@@ -158,18 +161,19 @@ Check `which node` and adjust `ExecStart` if Node isn't at `/usr/bin/node`.
 
 ### 8. Make it reachable at portal.londonmarketingsolutions.ca (ask Lucca first: this exposes a service publicly)
 
-The agency domain `londonmarketingsolutions.ca` is on Cloudflare. The portal gets the
-subdomain **`portal.londonmarketingsolutions.ca`**, routed through the server's **existing
-Cloudflare Tunnel** (the same one pawsit.ca uses) to nginx :80, and nginx proxies to
-127.0.0.1:3010. No new UFW ports.
+The agency domain `londonmarketingsolutions.ca` is on the **LMS business** Cloudflare account.
+The portal gets the subdomain **`portal.londonmarketingsolutions.ca`**, routed through a
+Cloudflare Tunnel to nginx :80, and nginx proxies to 127.0.0.1:3010. No new UFW ports.
 
-**Tunnel:** check how the existing tunnel is managed (glossary; `/etc/cloudflared/`).
-- Token-based (dashboard-managed): add a **Public Hostname** in Cloudflare Zero Trust →
-  Networks → Tunnels → (the tunnel) → `portal.londonmarketingsolutions.ca` → `http://localhost:80`.
-  Lucca may need to click this himself.
-- Config-file based: add an ingress rule for the hostname **above** the catch-all rule,
-  back up the config first, run `cloudflared tunnel route dns <tunnel> portal.londonmarketingsolutions.ca`,
-  then restart cloudflared and confirm pawsit.ca still loads.
+**Tunnel:** the server's original tunnel (`pawsit`) belongs to Lucca's personal Cloudflare
+account, and a tunnel can only publish hostnames in its own account. So the portal has its
+own tunnel, **`lms`**, on the LMS account, run by a second unit on the server:
+
+- `/etc/systemd/system/cloudflared-lms.service`: a copy of `cloudflared.service` with
+  `EnvironmentFile=/etc/cloudflared/lms-tunnel.env` (`TUNNEL_TOKEN=...`, root 600).
+- Published application route on the `lms` tunnel: `portal.londonmarketingsolutions.ca` →
+  `http://localhost:80` (Networking → Tunnels → lms → Routes). Cloudflare creates the DNS record.
+- Restarting `cloudflared-lms` does not touch pawsit.ca and the other hostnames on `pawsit`.
 
 **Hard constraints when touching nginx:**
 - Back up first: `S cp -r /etc/nginx /srv/backups/nginx.$(date +%Y%m%d-%H%M%S).bak`

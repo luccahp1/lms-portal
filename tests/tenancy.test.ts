@@ -79,6 +79,24 @@ describe("agency isolation", () => {
   });
 });
 
+describe("storage limit", () => {
+  afterAll(() => {
+    delete process.env.STORAGE_LIMIT_BYTES;
+  });
+
+  it("refuses an upload that would take total storage past the limit", async () => {
+    const { admin, clientA, clientB } = await makeAgency();
+    process.env.STORAGE_LIMIT_BYTES = "5";
+    await filesData.uploadFile(admin, { name: "a.txt", mimeType: "text/plain", data: Buffer.from("abc"), needsApproval: false }, clientA.client.id);
+    // The limit covers the whole bucket, not one client.
+    await expect(
+      filesData.uploadFile(clientB.viewer, { name: "b.txt", mimeType: "text/plain", data: Buffer.from("def"), needsApproval: false }),
+    ).rejects.toBeInstanceOf(filesData.StorageFullError);
+    expect(await filesData.listFiles(clientB.viewer)).toHaveLength(0);
+    await filesData.uploadFile(clientB.viewer, { name: "c.txt", mimeType: "text/plain", data: Buffer.from("gh"), needsApproval: false });
+  });
+});
+
 describe("workflow rules", () => {
   it("clients approve only requests that are ready for review", async () => {
     const { admin, clientA } = await makeAgency();

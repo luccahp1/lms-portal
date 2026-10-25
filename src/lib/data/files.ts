@@ -1,10 +1,29 @@
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { files, users, type FileApproval } from "@/db/schema";
 import { assertAdmin, NotFoundError, resolveClientId, type Viewer } from "./viewer";
 import { deleteStoredFile, storeFile } from "@/lib/storage";
 
 export const MAX_UPLOAD_BYTES = 25 * 1024 * 1024;
+
+// Every agency shares one R2 bucket. Uploads stop before it leaves R2's free 10 GB;
+// raise STORAGE_LIMIT_BYTES once paid storage is fine.
+const DEFAULT_STORAGE_LIMIT_BYTES = 8 * 1024 ** 3;
+
+export class StorageFullError extends Error {
+  constructor() {
+    super("File storage is full");
+  }
+}
+
+function storageLimitBytes() {
+  return Number(process.env.STORAGE_LIMIT_BYTES) || DEFAULT_STORAGE_LIMIT_BYTES;
+}
+
+async function storedBytes() {
+  const [row] = await db.select({ total: sql<string>`coalesce(sum(${files.sizeBytes}), 0)` }).from(files);
+  return Number(row.total);
+}
 
 export async function listFiles(viewer: Viewer, clientId?: string) {
   const id = await resolveClientId(viewer, clientId);
@@ -43,6 +62,7 @@ export async function uploadFile(
   const id = await resolveClientId(viewer, clientId);
   if (input.data.length === 0) throw new Error("Empty file");
   if (input.data.length > MAX_UPLOAD_BYTES) throw new Error("File is too large");
+  if ((await storedBytes()) + input.data.length > storageLimitBytes()) throw new StorageFullError();
   // Only the agency can ask the client to approve something.
   const approval: FileApproval = viewer.role === "agency_admin" && input.needsApproval ? "pending" : "none";
   const storageKey = await storeFile(viewer.agencyId, id, input.data, input.mimeType);

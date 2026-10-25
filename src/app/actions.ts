@@ -97,16 +97,23 @@ export async function uploadFileAction(_prev: ActionState, formData: FormData): 
   if (!(file instanceof File) || file.size === 0) return { error: "Choose a file to upload." };
   if (file.size > filesData.MAX_UPLOAD_BYTES) return { error: "Files can be up to 25 MB." };
   const clientId = optionalId.parse(formData.get("clientId") ?? undefined);
-  await filesData.uploadFile(
-    viewer,
-    {
-      name: file.name.slice(0, 255),
-      mimeType: file.type,
-      data: Buffer.from(await file.arrayBuffer()),
-      needsApproval: formData.get("needsApproval") === "on",
-    },
-    clientId,
-  );
+  try {
+    await filesData.uploadFile(
+      viewer,
+      {
+        name: file.name.slice(0, 255),
+        mimeType: file.type,
+        data: Buffer.from(await file.arrayBuffer()),
+        needsApproval: formData.get("needsApproval") === "on",
+      },
+      clientId,
+    );
+  } catch (err) {
+    if (err instanceof filesData.StorageFullError) {
+      return { error: "File storage is full. Ask your agency to make room before uploading more." };
+    }
+    throw err;
+  }
   refresh();
   return { ok: true };
 }
