@@ -28,21 +28,20 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible{
 </div>
 </div>
 <div style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid #EDEDF0; border-radius: 10px">
-<div style="width: 28px; height: 28px; border-radius: 50%; background: #F1F1F4; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: #3A3A44">NP</div>
+<div style="width: 28px; height: 28px; border-radius: 50%; background: #F1F1F4; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: #3A3A44">CB</div>
 <div style="display: flex; flex-direction: column; line-height: 1.25; min-width: 0">
-<span style="font-weight: 600; font-size: 13px">Northside Plumbing</span>
-<span style="font-size: 12px; color: #63636E">Mike Alvarez</span>
+<span style="font-weight: 600; font-size: 13px">[Client Business]</span>
+<span style="font-size: 12px; color: #63636E">[Client name]</span>
 </div>
 </div>
 <div style="display: flex; flex-wrap: wrap; gap: 2px">
 <button type="button" onClick="{{go.home}}" style="flex: 1 1 150px; display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0 12px; border: 0; border-radius: 8px; background: {{nav.homeBg}}; color: {{nav.homeFg}}; font: inherit; font-size: 14px; font-weight: {{nav.homeW}}; cursor: pointer; text-align: left"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"></path><path d="M5 9.5V21h14V9.5"></path></svg>Home</button>
-<button type="button" onClick="{{go.leads}}" style="flex: 1 1 150px; display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0 12px; border: 0; border-radius: 8px; background: {{nav.leadsBg}}; color: {{nav.leadsFg}}; font: inherit; font-size: 14px; font-weight: {{nav.leadsW}}; cursor: pointer; text-align: left"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"></path><path d="M5.5 5h13L22 12v7H2v-7z"></path></svg><span style="flex: 1">Leads</span><span style="font-size: 12px; font-weight: 600; color: #FFFFFF; background: {{accent}}; border-radius: 10px; padding: 0 7px">{{newLeadCount}}</span></button>
-<button type="button" onClick="{{go.performance}}" style="flex: 1 1 150px; display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0 12px; border: 0; border-radius: 8px; background: {{nav.performanceBg}}; color: {{nav.performanceFg}}; font: inherit; font-size: 14px; font-weight: {{nav.performanceW}}; cursor: pointer; text-align: left"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><path d="m7 15 4-4 3 3 5-6"></path></svg>Performance</button>
 <button type="button" onClick="{{go.requests}}" style="flex: 1 1 150px; display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0 12px; border: 0; border-radius: 8px; background: {{nav.requestsBg}}; color: {{nav.requestsFg}}; font: inherit; font-size: 14px; font-weight: {{nav.requestsW}}; cursor: pointer; text-align: left"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"></rect><path d="M8 8h8M8 12h8M8 16h5"></path></svg>Requests</button>
 <button type="button" onClick="{{go.messages}}" style="flex: 1 1 150px; display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0 12px; border: 0; border-radius: 8px; background: {{nav.messagesBg}}; color: {{nav.messagesFg}}; font: inherit; font-size: 14px; font-weight: {{nav.messagesW}}; cursor: pointer; text-align: left"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"></path></svg>Messages</button>
 <button type="button" onClick="{{go.files}}" style="flex: 1 1 150px; display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0 12px; border: 0; border-radius: 8px; background: {{nav.filesBg}}; color: {{nav.filesFg}}; font: inherit; font-size: 14px; font-weight: {{nav.filesW}}; cursor: pointer; text-align: left"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>Files &amp; approvals</button>
-<button type="button" onClick="{{go.billing}}" style="flex: 1 1 150px; display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0 12px; border: 0; border-radius: 8px; background: {{nav.billingBg}}; color: {{nav.billingFg}}; font: inherit; font-size: 14px; font-weight: {{nav.billingW}}; cursor: pointer; text-align: left"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"></rect><path d="M2 10h20"></path></svg>Billing</button>
+<button type="button" onClick="{{go.performance}}" style="flex: 1 1 150px; display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0 12px; border: 0; border-radius: 8px; background: {{nav.performanceBg}}; color: {{nav.performanceFg}}; font: inherit; font-size: 14px; font-weight: {{nav.performanceW}}; cursor: pointer; text-align: left"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><path d="m7 15 4-4 3 3 5-6"></path></svg>Performance</button>
 <button type="button" onClick="{{go.health}}" style="flex: 1 1 150px; display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0 12px; border: 0; border-radius: 8px; background: {{nav.healthBg}}; color: {{nav.healthFg}}; font: inherit; font-size: 14px; font-weight: {{nav.healthW}}; cursor: pointer; text-align: left"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"></path><path d="m9 12 2 2 4-4"></path></svg>Site health</button>
+<button type="button" onClick="{{go.billing}}" style="flex: 1 1 150px; display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0 12px; border: 0; border-radius: 8px; background: {{nav.billingBg}}; color: {{nav.billingFg}}; font: inherit; font-size: 14px; font-weight: {{nav.billingW}}; cursor: pointer; text-align: left"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"></rect><path d="M2 10h20"></path></svg>Billing</button>
 </div>
 <div style="margin-top: auto; padding: 0 12px; font-size: 12px; color: #63636E">Powered by [Portal name]</div>
 </nav>
@@ -56,8 +55,8 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible{
 <div style="display: flex; flex-direction: column; gap: 24px">
 <div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px">
 <div>
-<h1 style="margin: 0; font-size: 28px; font-weight: 600; letter-spacing: -0.02em">Good morning, Mike</h1>
-<p style="margin: 4px 0 0; color: #63636E; font-size: 15px">Here’s how Northside Plumbing is doing this month.</p>
+<h1 style="margin: 0; font-size: 28px; font-weight: 600; letter-spacing: -0.02em">Welcome back</h1>
+<p style="margin: 4px 0 0; color: #63636E; font-size: 15px">Here’s what we’ve been up to on your website.</p>
 </div>
 <div style="display: flex; gap: 8px; flex-wrap: wrap">
 <button type="button" onClick="{{go.messages}}" style="min-height: 40px; padding: 0 16px; border: 1px solid #E2E2E7; border-radius: 8px; background: #FFFFFF; color: #1C1C24; font: inherit; font-weight: 500; cursor: pointer">Message us</button>
@@ -65,97 +64,109 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible{
 </div>
 </div>
 
-<!-- Hero number -->
-<section style="background: #FFFFFF; border: 1px solid #EDEDF0; border-radius: 14px; padding: 28px; display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 24px">
-<div style="display: flex; flex-direction: column; gap: 6px">
-<span style="font-size: 13px; color: #63636E; font-weight: 500">New leads in October</span>
-<div style="display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap">
-<span style="font-size: 56px; font-weight: 600; letter-spacing: -0.03em; line-height: 1">14</span>
-<span style="font-size: 13px; font-weight: 600; color: #1B7A50; background: #E7F6EE; border-radius: 20px; padding: 2px 10px">+5 vs September</span>
+<!-- Hero: monthly update from the agency -->
+<section style="background: #FFFFFF; border: 1px solid #EDEDF0; border-radius: 14px; padding: 28px; display: flex; flex-wrap: wrap; gap: 32px">
+<div style="flex: 2 1 340px; display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; align-items: center; gap: 12px">
+<div style="width: 40px; height: 40px; border-radius: 50%; background: {{accentSoft}}; color: {{accent}}; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 13px">AM</div>
+<div style="display: flex; flex-direction: column; line-height: 1.3">
+<span style="font-size: 20px; font-weight: 600; letter-spacing: -0.01em">Your October update</span>
+<span style="font-size: 13px; color: #63636E">From [Account manager] · Oct 24</span>
 </div>
-<span style="font-size: 13px; color: #63636E">61 leads since your new site launched in April</span>
 </div>
-<div style="display: flex; align-items: flex-end; gap: 10px; height: 96px" role="img" aria-label="Leads per month, April to October: 4, 6, 7, 9, 12, 9, 14">
-<sc-for list="{{months}}" as="m" hint-placeholder-count="7">
-<div style="display: flex; flex-direction: column; align-items: center; gap: 6px">
-<div style="width: 26px; height: {{m.h}}px; border-radius: 6px; background: {{m.bg}}"></div>
-<span style="font-size: 11px; color: #63636E">{{m.label}}</span>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px">
+<div>
+<div style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #1B7A50; margin-bottom: 6px">Done this month</div>
+<ul style="margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px">
+<li>New services page went live</li>
+<li>Contact form fixed on mobile</li>
+<li>Security updates and backups</li>
+</ul>
 </div>
-</sc-for>
+<div>
+<div style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #9A4B06; margin-bottom: 6px">Working on</div>
+<p style="margin: 0">Adding your team photo to the About page.</p>
+</div>
+<div>
+<div style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: {{accent}}; margin-bottom: 6px">Next month</div>
+<p style="margin: 0">A customer reviews section on the homepage.</p>
+</div>
+</div>
+</div>
+<div style="flex: 1 1 220px; display: flex; flex-direction: column; gap: 18px; padding-left: 24px; border-left: 1px solid #F1F1F4">
+<div style="display: flex; flex-direction: column">
+<span style="font-size: 13px; color: #63636E; font-weight: 500">Website visitors</span>
+<span style="font-size: 40px; font-weight: 600; letter-spacing: -0.03em; line-height: 1.15">1,284</span>
+<span style="font-size: 13px; color: #1B7A50; font-weight: 500">↑ 18% vs September</span>
+</div>
+<div style="display: flex; gap: 24px; flex-wrap: wrap">
+<div style="display: flex; flex-direction: column">
+<span style="font-size: 13px; color: #63636E; font-weight: 500">Form submissions</span>
+<span style="font-size: 22px; font-weight: 600">{{submissionCount}}</span>
+</div>
+<div style="display: flex; flex-direction: column">
+<span style="font-size: 13px; color: #63636E; font-weight: 500">Uptime</span>
+<span style="font-size: 22px; font-weight: 600">100%</span>
+</div>
+</div>
 </div>
 </section>
 
 <!-- Stat row -->
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px">
-<button type="button" onClick="{{go.performance}}" style="text-align: left; font: inherit; color: inherit; cursor: pointer; background: #FFFFFF; border: 1px solid #EDEDF0; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 6px">
-<span style="font-size: 13px; color: #63636E; font-weight: 500">Website visitors</span>
-<span style="font-size: 26px; font-weight: 600; letter-spacing: -0.02em">1,284</span>
-<span style="font-size: 13px; color: #1B7A50; font-weight: 500">↑ 18% vs last month</span>
-</button>
-<button type="button" onClick="{{go.health}}" style="text-align: left; font: inherit; color: inherit; cursor: pointer; background: #FFFFFF; border: 1px solid #EDEDF0; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 6px">
-<span style="font-size: 13px; color: #63636E; font-weight: 500">Site health</span>
-<span style="font-size: 26px; font-weight: 600; letter-spacing: -0.02em; display: flex; align-items: center; gap: 10px"><span style="width: 10px; height: 10px; border-radius: 50%; background: #22A06B"></span>All good</span>
-<span style="font-size: 13px; color: #63636E">100% uptime · backed up today</span>
-</button>
 <button type="button" onClick="{{go.requests}}" style="text-align: left; font: inherit; color: inherit; cursor: pointer; background: #FFFFFF; border: 1px solid #EDEDF0; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 6px">
 <span style="font-size: 13px; color: #63636E; font-weight: 500">Open requests</span>
 <span style="font-size: 26px; font-weight: 600; letter-spacing: -0.02em">{{openRequestCount}}</span>
 <span style="font-size: 13px; color: #9A4B06; font-weight: 500">{{reviewText}}</span>
 </button>
+<button type="button" onClick="{{go.files}}" style="text-align: left; font: inherit; color: inherit; cursor: pointer; background: #FFFFFF; border: 1px solid #EDEDF0; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 6px">
+<span style="font-size: 13px; color: #63636E; font-weight: 500">Files to approve</span>
+<span style="font-size: 26px; font-weight: 600; letter-spacing: -0.02em">{{pendingFileCount}}</span>
+<span style="font-size: 13px; color: #63636E">{{pendingFileText}}</span>
+</button>
+<button type="button" onClick="{{go.billing}}" style="text-align: left; font: inherit; color: inherit; cursor: pointer; background: #FFFFFF; border: 1px solid #EDEDF0; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 6px">
+<span style="font-size: 13px; color: #63636E; font-weight: 500">Next invoice</span>
+<span style="font-size: 26px; font-weight: 600; letter-spacing: -0.02em">$[AMOUNT]</span>
+<span style="font-size: 13px; color: #63636E">Due Nov 1</span>
+</button>
 </div>
 
-<!-- Note + leads -->
+<!-- Requests + messages -->
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px">
-<section style="background: #FFFFFF; border: 1px solid #EDEDF0; border-radius: 14px; padding: 24px; display: flex; flex-direction: column; gap: 16px">
-<div style="display: flex; align-items: center; gap: 12px">
-<div style="width: 36px; height: 36px; border-radius: 50%; background: {{accentSoft}}; color: {{accent}}; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 13px">AL</div>
-<div style="display: flex; flex-direction: column; line-height: 1.3">
-<span style="font-weight: 600">Your October update</span>
-<span style="font-size: 12px; color: #63636E">From Alex, your account manager · Oct 24</span>
+<section style="background: #FFFFFF; border: 1px solid #EDEDF0; border-radius: 14px; padding: 24px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; justify-content: space-between; align-items: center">
+<h2 style="margin: 0; font-size: 16px; font-weight: 600">Your requests</h2>
+<button type="button" onClick="{{go.requests}}" style="border: 0; background: none; color: {{accent}}; font: inherit; font-weight: 500; cursor: pointer; min-height: 32px">View all</button>
 </div>
+<sc-for list="{{requestsView}}" as="r" hint-placeholder-count="3">
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border-top: 1px solid #F1F1F4">
+<div style="min-width: 0; display: flex; flex-direction: column; line-height: 1.35">
+<span style="font-weight: 500">{{r.title}}</span>
+<span style="font-size: 13px; color: #63636E">{{r.meta}}</span>
 </div>
-<div style="display: flex; flex-direction: column; gap: 12px">
-<div>
-<div style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #1B7A50; margin-bottom: 4px">Wins</div>
-<ul style="margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px">
-<li>14 new leads, your best month since launch.</li>
-<li>The new service area page is bringing in searches from Westview.</li>
-<li>Fixed the contact form on iPhones, so no more missed enquiries.</li>
-</ul>
+<span style="flex: none; font-size: 12px; font-weight: 600; border-radius: 20px; padding: 1px 9px; background: {{r.pillBg}}; color: {{r.pillFg}}">{{r.status}}</span>
 </div>
-<div>
-<div style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #9A4B06; margin-bottom: 4px">Working on</div>
-<p style="margin: 0">Adding your team photo to the About page.</p>
-</div>
-<div>
-<div style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: {{accent}}; margin-bottom: 4px">Next month</div>
-<p style="margin: 0">A customer reviews section on the homepage before the winter rush.</p>
-</div>
-</div>
+</sc-for>
 </section>
 
 <section style="background: #FFFFFF; border: 1px solid #EDEDF0; border-radius: 14px; padding: 24px; display: flex; flex-direction: column; gap: 12px">
 <div style="display: flex; justify-content: space-between; align-items: center">
-<h2 style="margin: 0; font-size: 16px; font-weight: 600">Latest leads</h2>
-<button type="button" onClick="{{go.leads}}" style="border: 0; background: none; color: {{accent}}; font: inherit; font-weight: 500; cursor: pointer; min-height: 32px">View all</button>
+<h2 style="margin: 0; font-size: 16px; font-weight: 600">Latest messages</h2>
+<button type="button" onClick="{{go.messages}}" style="border: 0; background: none; color: {{accent}}; font: inherit; font-weight: 500; cursor: pointer; min-height: 32px">Open chat</button>
 </div>
-<sc-for list="{{recentLeads}}" as="l" hint-placeholder-count="4">
-<div style="display: flex; align-items: center; gap: 12px; padding: 10px 0; border-top: 1px solid #F1F1F4">
-<div style="width: 34px; height: 34px; flex: none; border-radius: 50%; background: #F1F1F4; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: #3A3A44">{{l.initials}}</div>
-<div style="flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.35">
-<span style="font-weight: 500">{{l.name}}</span>
-<span style="font-size: 13px; color: #63636E; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{l.ask}}</span>
-</div>
-<div style="display: flex; flex-direction: column; align-items: flex-end; gap: 2px">
-<span style="font-size: 12px; font-weight: 600; border-radius: 20px; padding: 1px 9px; background: {{l.pillBg}}; color: {{l.pillFg}}">{{l.status}}</span>
-<span style="font-size: 12px; color: #63636E">{{l.when}}</span>
+<sc-for list="{{latestMessages}}" as="m" hint-placeholder-count="2">
+<div style="display: flex; gap: 12px; padding: 10px 0; border-top: 1px solid #F1F1F4">
+<div style="width: 32px; height: 32px; flex: none; border-radius: 50%; background: {{m.avatarBg}}; color: {{m.avatarFg}}; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600">{{m.initials}}</div>
+<div style="min-width: 0; display: flex; flex-direction: column; line-height: 1.4">
+<span style="font-size: 13px; color: #63636E">{{m.name}} · {{m.time}}</span>
+<span>{{m.text}}</span>
 </div>
 </div>
 </sc-for>
 </section>
 </div>
 
-<!-- Work log + side column -->
+<!-- Work log + site -->
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px">
 <section style="background: #FFFFFF; border: 1px solid #EDEDF0; border-radius: 14px; padding: 24px; display: flex; flex-direction: column; gap: 12px">
 <div style="display: flex; flex-direction: column">
@@ -164,9 +175,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible{
 </div>
 <sc-for list="{{worklog}}" as="w" hint-placeholder-count="5">
 <div style="display: flex; gap: 14px; padding: 8px 0">
-<div style="display: flex; flex-direction: column; align-items: center; padding-top: 6px">
-<div style="width: 8px; height: 8px; border-radius: 50%; background: {{accent}}"></div>
-</div>
+<div style="padding-top: 7px"><div style="width: 8px; height: 8px; border-radius: 50%; background: {{accent}}"></div></div>
 <div style="flex: 1; display: flex; flex-direction: column; line-height: 1.4">
 <span>{{w.text}}</span>
 <span style="font-size: 12px; color: #63636E">{{w.date}} · {{w.tag}}</span>
@@ -175,116 +184,18 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible{
 </sc-for>
 </section>
 
-<div style="display: flex; flex-direction: column; gap: 16px">
-<section style="background: #FFFFFF; border: 1px solid #EDEDF0; border-radius: 14px; padding: 24px; display: flex; flex-direction: column; gap: 12px">
-<div style="display: flex; justify-content: space-between; align-items: center">
-<h2 style="margin: 0; font-size: 16px; font-weight: 600">Your requests</h2>
-<button type="button" onClick="{{go.requests}}" style="border: 0; background: none; color: {{accent}}; font: inherit; font-weight: 500; cursor: pointer; min-height: 32px">View all</button>
+<button type="button" onClick="{{go.health}}" style="text-align: left; font: inherit; color: inherit; cursor: pointer; background: #FFFFFF; border: 1px solid #EDEDF0; border-radius: 14px; padding: 24px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; justify-content: space-between; align-items: center; width: 100%">
+<span style="font-size: 16px; font-weight: 600">Your website</span>
+<span style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #1B7A50"><span style="width: 8px; height: 8px; border-radius: 50%; background: #22A06B"></span>All good</span>
 </div>
-<sc-for list="{{requestsView}}" as="r" hint-placeholder-count="3">
-<div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border-top: 1px solid #F1F1F4">
-<span style="min-width: 0">{{r.title}}</span>
-<span style="flex: none; font-size: 12px; font-weight: 600; border-radius: 20px; padding: 1px 9px; background: {{r.pillBg}}; color: {{r.pillFg}}">{{r.status}}</span>
-</div>
-</sc-for>
-</section>
-<section style="background: #FFFFFF; border: 1px solid #EDEDF0; border-radius: 14px; padding: 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap">
-<div style="display: flex; flex-direction: column; gap: 2px">
-<span style="font-size: 13px; color: #63636E; font-weight: 500">Next invoice</span>
-<span style="font-size: 20px; font-weight: 600">$[AMOUNT]</span>
-<span style="font-size: 13px; color: #63636E">Due Nov 1 · Growth Care plan</span>
-</div>
-<button type="button" onClick="{{go.billing}}" style="min-height: 40px; padding: 0 16px; border: 1px solid #E2E2E7; border-radius: 8px; background: #FFFFFF; color: #1C1C24; font: inherit; font-weight: 500; cursor: pointer">View billing</button>
-</section>
-</div>
-</div>
-</div>
-</sc-if>
-
-<!-- LEADS -->
-<sc-if value="{{is.leads}}" hint-placeholder-val="{{false}}">
-<div style="display: flex; flex-direction: column; gap: 24px">
-<div>
-<h1 style="margin: 0; font-size: 28px; font-weight: 600; letter-spacing: -0.02em">Leads</h1>
-<p style="margin: 4px 0 0; color: #63636E; font-size: 15px">Everyone who contacted you through your website. Mark them as contacted once you’ve called back.</p>
-</div>
-<section style="background: #FFFFFF; border: 1px solid #EDEDF0; border-radius: 14px; overflow-x: auto">
-<table style="width: 100%; min-width: 720px; border-collapse: collapse; font-size: 14px">
-<thead>
-<tr style="text-align: left; color: #63636E; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em">
-<th style="padding: 14px 20px; font-weight: 600">Name</th>
-<th style="padding: 14px 12px; font-weight: 600">Asked about</th>
-<th style="padding: 14px 12px; font-weight: 600">Came from</th>
-<th style="padding: 14px 12px; font-weight: 600">When</th>
-<th style="padding: 14px 20px; font-weight: 600; text-align: right">Status</th>
-</tr>
-</thead>
-<tbody>
-<sc-for list="{{leadsView}}" as="l" hint-placeholder-count="6">
-<tr style="border-top: 1px solid #F1F1F4">
-<td style="padding: 14px 20px">
-<div style="display: flex; flex-direction: column; line-height: 1.35">
-<span style="font-weight: 500">{{l.name}}</span>
-<span style="font-size: 13px; color: #63636E">{{l.phone}}</span>
-</div>
-</td>
-<td style="padding: 14px 12px">{{l.ask}}</td>
-<td style="padding: 14px 12px; color: #63636E">{{l.source}}</td>
-<td style="padding: 14px 12px; color: #63636E; white-space: nowrap">{{l.when}}</td>
-<td style="padding: 14px 20px; text-align: right">
-<button type="button" onClick="{{l.toggle}}" aria-label="{{l.toggleLabel}}" style="min-height: 32px; padding: 0 12px; border: 0; border-radius: 20px; background: {{l.pillBg}}; color: {{l.pillFg}}; font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap">{{l.status}}</button>
-</td>
-</tr>
-</sc-for>
-</tbody>
-</table>
-</section>
-</div>
-</sc-if>
-
-<!-- PERFORMANCE -->
-<sc-if value="{{is.performance}}" hint-placeholder-val="{{false}}">
-<div style="display: flex; flex-direction: column; gap: 24px">
-<div>
-<h1 style="margin: 0; font-size: 28px; font-weight: 600; letter-spacing: -0.02em">Performance</h1>
-<p style="margin: 4px 0 0; color: #63636E; font-size: 15px">Last 30 days on northsideplumbing.com</p>
-</div>
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px">
-<sc-for list="{{perfStats}}" as="p" hint-placeholder-count="4">
-<div style="background: #FFFFFF; border: 1px solid #EDEDF0; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 4px">
-<span style="font-size: 13px; color: #63636E; font-weight: 500">{{p.label}}</span>
-<span style="font-size: 26px; font-weight: 600; letter-spacing: -0.02em">{{p.value}}</span>
-<span style="font-size: 13px; color: #1B7A50; font-weight: 500">{{p.delta}}</span>
+<sc-for list="{{healthStats}}" as="h" hint-placeholder-count="4">
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-top: 1px solid #F1F1F4; width: 100%">
+<span style="color: #63636E">{{h.label}}</span>
+<span style="font-weight: 500">{{h.value}}</span>
 </div>
 </sc-for>
-</div>
-<section style="background: #FFFFFF; border: 1px solid #EDEDF0; border-radius: 14px; padding: 24px; display: flex; flex-direction: column; gap: 16px">
-<h2 style="margin: 0; font-size: 16px; font-weight: 600">Daily visitors</h2>
-<div style="display: flex; align-items: flex-end; gap: 4px; height: 160px; overflow: hidden" role="img" aria-label="Daily website visitors over the last 30 days, trending upward">
-<sc-for list="{{daily}}" as="d" hint-placeholder-count="30">
-<div style="flex: 1; min-width: 4px; height: {{d.h}}px; border-radius: 4px 4px 0 0; background: {{d.bg}}"></div>
-</sc-for>
-</div>
-<div style="display: flex; justify-content: space-between; font-size: 12px; color: #63636E"><span>Sep 25</span><span>Oct 25</span></div>
-</section>
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px">
-<section style="background: #FFFFFF; border: 1px solid #EDEDF0; border-radius: 14px; padding: 24px; display: flex; flex-direction: column; gap: 12px">
-<h2 style="margin: 0; font-size: 16px; font-weight: 600">How people find you</h2>
-<sc-for list="{{sources}}" as="s" hint-placeholder-count="4">
-<div style="display: flex; flex-direction: column; gap: 6px">
-<div style="display: flex; justify-content: space-between"><span>{{s.label}}</span><span style="font-weight: 600">{{s.pct}}%</span></div>
-<div style="height: 8px; border-radius: 4px; background: #F1F1F4"><div style="height: 8px; border-radius: 4px; width: {{s.pct}}%; background: {{accent}}"></div></div>
-</div>
-</sc-for>
-</section>
-<section style="background: #FFFFFF; border: 1px solid #EDEDF0; border-radius: 14px; padding: 24px; display: flex; flex-direction: column; gap: 4px">
-<h2 style="margin: 0 0 8px; font-size: 16px; font-weight: 600">Most visited pages</h2>
-<sc-for list="{{pages}}" as="pg" hint-placeholder-count="5">
-<div style="display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-top: 1px solid #F1F1F4">
-<span>{{pg.path}}</span><span style="color: #63636E">{{pg.views}}</span>
-</div>
-</sc-for>
-</section>
+</button>
 </div>
 </div>
 </sc-if>
@@ -390,54 +301,64 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible{
 </div>
 </sc-if>
 
-<!-- BILLING -->
-<sc-if value="{{is.billing}}" hint-placeholder-val="{{false}}">
+<!-- PERFORMANCE -->
+<sc-if value="{{is.performance}}" hint-placeholder-val="{{false}}">
 <div style="display: flex; flex-direction: column; gap: 24px">
 <div>
-<h1 style="margin: 0; font-size: 28px; font-weight: 600; letter-spacing: -0.02em">Billing</h1>
-<p style="margin: 4px 0 0; color: #63636E; font-size: 15px">Your plan and invoices.</p>
+<h1 style="margin: 0; font-size: 28px; font-weight: 600; letter-spacing: -0.02em">Performance</h1>
+<p style="margin: 4px 0 0; color: #63636E; font-size: 15px">Last 30 days on [clientsite].com</p>
 </div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px">
+<sc-for list="{{perfStats}}" as="p" hint-placeholder-count="3">
+<div style="background: #FFFFFF; border: 1px solid #EDEDF0; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 4px">
+<span style="font-size: 13px; color: #63636E; font-weight: 500">{{p.label}}</span>
+<span style="font-size: 26px; font-weight: 600; letter-spacing: -0.02em">{{p.value}}</span>
+<span style="font-size: 13px; color: #1B7A50; font-weight: 500">{{p.delta}}</span>
+</div>
+</sc-for>
+</div>
+<section style="background: #FFFFFF; border: 1px solid #EDEDF0; border-radius: 14px; padding: 24px; display: flex; flex-direction: column; gap: 16px">
+<h2 style="margin: 0; font-size: 16px; font-weight: 600">Daily visitors</h2>
+<div style="display: flex; align-items: flex-end; gap: 4px; height: 160px; overflow: hidden" role="img" aria-label="Daily website visitors over the last 30 days, trending upward">
+<sc-for list="{{daily}}" as="d" hint-placeholder-count="30">
+<div style="flex: 1; min-width: 4px; height: {{d.h}}px; border-radius: 4px 4px 0 0; background: {{d.bg}}"></div>
+</sc-for>
+</div>
+<div style="display: flex; justify-content: space-between; font-size: 12px; color: #63636E"><span>Sep 25</span><span>Oct 25</span></div>
+</section>
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px">
 <section style="background: #FFFFFF; border: 1px solid #EDEDF0; border-radius: 14px; padding: 24px; display: flex; flex-direction: column; gap: 12px">
-<span style="font-size: 13px; color: #63636E; font-weight: 500">Your plan</span>
-<div style="display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap"><span style="font-size: 22px; font-weight: 600">Growth Care</span><span style="color: #63636E">$[PLAN PRICE] / month</span></div>
-<ul style="margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; color: #3A3A44">
-<li>Hosting, security updates and daily backups</li>
-<li>Unlimited small content changes</li>
-<li>Monthly performance update</li>
-<li>Lead inbox and this portal</li>
-</ul>
+<h2 style="margin: 0; font-size: 16px; font-weight: 600">How people find you</h2>
+<sc-for list="{{sources}}" as="s" hint-placeholder-count="4">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; justify-content: space-between"><span>{{s.label}}</span><span style="font-weight: 600">{{s.pct}}%</span></div>
+<div style="height: 8px; border-radius: 4px; background: #F1F1F4"><div style="height: 8px; border-radius: 4px; width: {{s.pct}}%; background: {{accent}}"></div></div>
+</div>
+</sc-for>
 </section>
-<section style="background: #FFFFFF; border: 1px solid #EDEDF0; border-radius: 14px; padding: 24px; display: flex; flex-direction: column; gap: 12px">
-<span style="font-size: 13px; color: #63636E; font-weight: 500">Next invoice</span>
-<span style="font-size: 32px; font-weight: 600; letter-spacing: -0.02em">$[AMOUNT]</span>
-<span style="color: #63636E">Due November 1, 2026</span>
-<button type="button" style="align-self: flex-start; min-height: 40px; padding: 0 16px; border: 0; border-radius: 8px; background: {{accent}}; color: #FFFFFF; font: inherit; font-weight: 500; cursor: pointer">Pay now</button>
+<section style="background: #FFFFFF; border: 1px solid #EDEDF0; border-radius: 14px; padding: 24px; display: flex; flex-direction: column; gap: 4px">
+<h2 style="margin: 0 0 8px; font-size: 16px; font-weight: 600">Most visited pages</h2>
+<sc-for list="{{pages}}" as="pg" hint-placeholder-count="5">
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-top: 1px solid #F1F1F4">
+<span>{{pg.path}}</span><span style="color: #63636E">{{pg.views}}</span>
+</div>
+</sc-for>
 </section>
 </div>
-<section style="background: #FFFFFF; border: 1px solid #EDEDF0; border-radius: 14px; overflow-x: auto">
-<table style="width: 100%; min-width: 560px; border-collapse: collapse">
-<thead>
-<tr style="text-align: left; color: #63636E; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em">
-<th style="padding: 14px 24px; font-weight: 600">Invoice</th>
-<th style="padding: 14px 12px; font-weight: 600">Date</th>
-<th style="padding: 14px 12px; font-weight: 600">Amount</th>
-<th style="padding: 14px 12px; font-weight: 600">Status</th>
-<th style="padding: 14px 24px; font-weight: 600; text-align: right">PDF</th>
-</tr>
-</thead>
-<tbody>
-<sc-for list="{{invoices}}" as="i" hint-placeholder-count="4">
-<tr style="border-top: 1px solid #F1F1F4">
-<td style="padding: 14px 24px; font-weight: 500">{{i.num}}</td>
-<td style="padding: 14px 12px; color: #63636E">{{i.date}}</td>
-<td style="padding: 14px 12px">$[AMOUNT]</td>
-<td style="padding: 14px 12px"><span style="font-size: 12px; font-weight: 600; border-radius: 20px; padding: 2px 10px; background: {{i.pillBg}}; color: {{i.pillFg}}">{{i.status}}</span></td>
-<td style="padding: 14px 24px; text-align: right"><a href="#">Download</a></td>
-</tr>
+<section style="background: #FFFFFF; border: 1px solid #EDEDF0; border-radius: 14px; padding: 24px; display: flex; flex-direction: column; gap: 4px">
+<div style="display: flex; flex-direction: column; margin-bottom: 8px">
+<h2 style="margin: 0; font-size: 16px; font-weight: 600">Website form submissions</h2>
+<span style="font-size: 13px; color: #63636E">Sent through the contact form on your site</span>
+</div>
+<sc-for list="{{submissions}}" as="sub" hint-placeholder-count="4">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 12px; padding: 10px 0; border-top: 1px solid #F1F1F4">
+<div style="display: flex; flex-direction: column; line-height: 1.4; min-width: 0">
+<span style="font-weight: 500">{{sub.name}}</span>
+<span style="font-size: 13px; color: #63636E">{{sub.message}}</span>
+</div>
+<span style="font-size: 13px; color: #63636E; white-space: nowrap">{{sub.when}}</span>
+</div>
 </sc-for>
-</tbody>
-</table>
 </section>
 </div>
 </sc-if>
@@ -470,6 +391,57 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible{
 </div>
 </sc-if>
 
+<!-- BILLING -->
+<sc-if value="{{is.billing}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; flex-direction: column; gap: 24px">
+<div>
+<h1 style="margin: 0; font-size: 28px; font-weight: 600; letter-spacing: -0.02em">Billing</h1>
+<p style="margin: 4px 0 0; color: #63636E; font-size: 15px">Your plan and invoices.</p>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px">
+<section style="background: #FFFFFF; border: 1px solid #EDEDF0; border-radius: 14px; padding: 24px; display: flex; flex-direction: column; gap: 12px">
+<span style="font-size: 13px; color: #63636E; font-weight: 500">Your plan</span>
+<div style="display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap"><span style="font-size: 22px; font-weight: 600">[Plan name]</span><span style="color: #63636E">$[PLAN PRICE] / month</span></div>
+<ul style="margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; color: #3A3A44">
+<li>Hosting, security updates and daily backups</li>
+<li>Small content changes</li>
+<li>Monthly update</li>
+<li>This portal</li>
+</ul>
+</section>
+<section style="background: #FFFFFF; border: 1px solid #EDEDF0; border-radius: 14px; padding: 24px; display: flex; flex-direction: column; gap: 12px">
+<span style="font-size: 13px; color: #63636E; font-weight: 500">Next invoice</span>
+<span style="font-size: 32px; font-weight: 600; letter-spacing: -0.02em">$[AMOUNT]</span>
+<span style="color: #63636E">Due November 1, 2026</span>
+</section>
+</div>
+<section style="background: #FFFFFF; border: 1px solid #EDEDF0; border-radius: 14px; overflow-x: auto">
+<table style="width: 100%; min-width: 560px; border-collapse: collapse">
+<thead>
+<tr style="text-align: left; color: #63636E; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em">
+<th style="padding: 14px 24px; font-weight: 600">Invoice</th>
+<th style="padding: 14px 12px; font-weight: 600">Date</th>
+<th style="padding: 14px 12px; font-weight: 600">Amount</th>
+<th style="padding: 14px 12px; font-weight: 600">Status</th>
+<th style="padding: 14px 24px; font-weight: 600; text-align: right">PDF</th>
+</tr>
+</thead>
+<tbody>
+<sc-for list="{{invoices}}" as="i" hint-placeholder-count="4">
+<tr style="border-top: 1px solid #F1F1F4">
+<td style="padding: 14px 24px; font-weight: 500">{{i.num}}</td>
+<td style="padding: 14px 12px; color: #63636E">{{i.date}}</td>
+<td style="padding: 14px 12px">$[AMOUNT]</td>
+<td style="padding: 14px 12px"><span style="font-size: 12px; font-weight: 600; border-radius: 20px; padding: 2px 10px; background: {{i.pillBg}}; color: {{i.pillFg}}">{{i.status}}</span></td>
+<td style="padding: 14px 24px; text-align: right"><a href="#">Download</a></td>
+</tr>
+</sc-for>
+</tbody>
+</table>
+</section>
+</div>
+</sc-if>
+
 </div>
 </main>
 </div>
@@ -484,37 +456,27 @@ class Component extends DCLogic {
       draftTitle: '',
       draftDetails: '',
       msgDraft: '',
-      leads: [
-        { id: 1, name: 'Sarah Kim', phone: '(555) 201-4410', ask: 'Water heater replacement quote', source: 'Contact form', when: 'Today, 9:14 AM', status: 'New' },
-        { id: 2, name: 'Dan Moreau', phone: '(555) 318-0092', ask: 'Leaking kitchen sink', source: 'Call button', when: 'Yesterday', status: 'New' },
-        { id: 3, name: 'Priya Rao', phone: '(555) 774-2310', ask: 'Bathroom remodel estimate', source: 'Contact form', when: 'Oct 21', status: 'Contacted' },
-        { id: 4, name: 'Tom Becker', phone: '(555) 640-1187', ask: 'Emergency drain cleaning', source: 'Online booking', when: 'Oct 19', status: 'Contacted' },
-        { id: 5, name: 'Lena Fischer', phone: '(555) 902-5561', ask: 'Sump pump install', source: 'Contact form', when: 'Oct 16', status: 'Contacted' },
-        { id: 6, name: 'Marcus Lee', phone: '(555) 233-7804', ask: 'Annual boiler service', source: 'Google Maps', when: 'Oct 12', status: 'Contacted' }
-      ],
       requests: [
         { id: 1, title: 'Change holiday hours banner', meta: 'Opened Oct 18 · Ready for you to check', status: 'Review' },
         { id: 2, title: 'Add team photo to About page', meta: 'Opened Oct 20 · Waiting on your photo', status: 'In progress' },
-        { id: 3, title: 'Update prices on Drain Cleaning page', meta: 'Opened Oct 8 · Finished Oct 9', status: 'Done' }
+        { id: 3, title: 'Update prices on Services page', meta: 'Opened Oct 8 · Finished Oct 9', status: 'Done' }
       ],
       files: [
-        { id: 1, kind: 'PNG', name: 'Homepage reviews section — design v2', meta: 'Shared by Alex · Oct 23', state: 'pending' },
+        { id: 1, kind: 'PNG', name: 'Homepage reviews section — design v2', meta: 'Shared by [Account manager] · Oct 23', state: 'pending' },
         { id: 2, kind: 'PDF', name: 'Website care agreement', meta: 'Signed Apr 2 · 2 pages', state: 'approved' },
-        { id: 3, kind: 'JPG', name: 'Van photo for homepage', meta: 'Uploaded by you · Oct 6', state: 'none' },
-        { id: 4, kind: 'PDF', name: 'Brand colors and logo files', meta: 'Shared by Alex · Mar 28', state: 'none' }
+        { id: 3, kind: 'JPG', name: 'New photos for homepage', meta: 'Uploaded by you · Oct 6', state: 'none' },
+        { id: 4, kind: 'PDF', name: 'Brand colors and logo files', meta: 'Shared by [Account manager] · Mar 28', state: 'none' }
       ],
       messages: [
-        { id: 1, from: 'agency', name: 'Alex', time: 'Oct 20, 10:02 AM', text: 'Hi Mike! The new service area page is live. Have a look when you get a minute.' },
+        { id: 1, from: 'agency', name: '[Account manager]', time: 'Oct 20, 10:02 AM', text: 'Hi! The new services page is live. Have a look when you get a minute.' },
         { id: 2, from: 'client', name: 'You', time: 'Oct 20, 11:40 AM', text: 'Looks great. Can we add a team photo to the About page? I will send it over this week.' },
-        { id: 3, from: 'agency', name: 'Alex', time: 'Oct 20, 11:52 AM', text: 'Perfect, I opened a request for it. Upload the photo under Files whenever you are ready.' }
+        { id: 3, from: 'agency', name: '[Account manager]', time: 'Oct 20, 11:52 AM', text: 'Perfect, I opened a request for it. Upload the photo under Files whenever you are ready.' }
       ]
     };
   }
 
   pill(status) {
     const map = {
-      'New': ['#EEF0FD', '#3B48C4'],
-      'Contacted': ['#F1F1F4', '#55555F'],
       'Review': ['#FEF3E2', '#9A4B06'],
       'In progress': ['#EEF0FD', '#3B48C4'],
       'Received': ['#EEF0FD', '#3B48C4'],
@@ -529,7 +491,7 @@ class Component extends DCLogic {
   renderVals() {
     const s = this.state;
     const accent = this.props.accent ?? '#5160E0';
-    const screens = ['home', 'leads', 'performance', 'requests', 'messages', 'files', 'billing', 'health'];
+    const screens = ['home', 'requests', 'messages', 'files', 'performance', 'health', 'billing'];
     const is = {}, nav = {}, go = {};
     screens.forEach((k) => {
       const on = s.screen === k;
@@ -539,15 +501,6 @@ class Component extends DCLogic {
       nav[k + 'W'] = on ? '600' : '500';
       go[k] = () => this.setState({ screen: k });
     });
-
-    const initials = (n) => n.split(' ').map((x) => x[0]).join('');
-    const leadsView = s.leads.map((l) => ({
-      ...l,
-      ...this.pill(l.status),
-      initials: initials(l.name),
-      toggleLabel: l.status === 'New' ? 'Mark ' + l.name + ' as contacted' : 'Mark ' + l.name + ' as new',
-      toggle: () => this.setState({ leads: this.state.leads.map((x) => x.id === l.id ? { ...x, status: x.status === 'New' ? 'Contacted' : 'New' } : x) })
-    }));
 
     const requestsView = s.requests.map((r) => ({
       ...r,
@@ -563,12 +516,16 @@ class Component extends DCLogic {
       approved: f.state === 'approved',
       approve: () => this.setState({ files: this.state.files.map((x) => x.id === f.id ? { ...x, state: 'approved' } : x) })
     }));
+    const pendingFileCount = s.files.filter((f) => f.state === 'pending').length;
 
     const messagesView = s.messages.map((m) => ({
       ...m,
       align: m.from === 'client' ? 'flex-end' : 'flex-start',
       bg: m.from === 'client' ? accent : '#F1F1F4',
-      fg: m.from === 'client' ? '#FFFFFF' : '#1C1C24'
+      fg: m.from === 'client' ? '#FFFFFF' : '#1C1C24',
+      initials: m.from === 'client' ? 'You' : 'AM',
+      avatarBg: m.from === 'client' ? '#F1F1F4' : accent + '1A',
+      avatarFg: m.from === 'client' ? '#3A3A44' : accent
     }));
     const sendMessage = () => {
       const text = this.state.msgDraft.trim();
@@ -576,37 +533,40 @@ class Component extends DCLogic {
       this.setState({ msgDraft: '', messages: [...this.state.messages, { id: Date.now(), from: 'client', name: 'You', time: 'Just now', text }] });
     };
 
-    const monthVals = [['Apr', 4], ['May', 6], ['Jun', 7], ['Jul', 9], ['Aug', 12], ['Sep', 9], ['Oct', 14]];
-    const months = monthVals.map(([label, v], i) => ({ label, h: Math.round((v / 14) * 72), bg: i === monthVals.length - 1 ? accent : accent + '40' }));
-
     const dailyVals = [28, 31, 25, 34, 38, 22, 19, 33, 36, 39, 35, 41, 27, 24, 40, 44, 38, 42, 47, 30, 26, 45, 49, 43, 51, 48, 33, 29, 52, 56];
     const daily = dailyVals.map((v, i) => ({ h: Math.round((v / 56) * 150), bg: i === dailyVals.length - 1 ? accent : accent + '59' }));
+
+    const submissions = [
+      { name: '[Visitor name]', message: 'Asking for a quote', when: 'Today' },
+      { name: '[Visitor name]', message: 'Question about availability', when: 'Oct 21' },
+      { name: '[Visitor name]', message: 'Asking for a quote', when: 'Oct 16' },
+      { name: '[Visitor name]', message: 'General question', when: 'Oct 12' }
+    ];
 
     return {
       accent,
       accentSoft: accent + '1A',
       is, nav, go,
-      newLeadCount: s.leads.filter((l) => l.status === 'New').length,
       openRequestCount: s.requests.filter((r) => r.status !== 'Done').length,
       reviewText: reviewCount ? reviewCount + ' waiting for your approval' : 'Nothing waiting on you',
-      months,
-      recentLeads: leadsView.slice(0, 4),
-      leadsView,
+      pendingFileCount,
+      pendingFileText: pendingFileCount ? 'A new design is ready for you' : 'You are all caught up',
+      submissionCount: 9,
       requestsView,
       filesView,
       messagesView,
+      latestMessages: messagesView.slice(-2),
       worklog: [
-        { text: 'Added 3 new neighborhoods to your service area page', date: 'Oct 22', tag: 'Content' },
-        { text: 'Fixed the contact form not sending on iPhone Safari', date: 'Oct 18', tag: 'Fix' },
+        { text: 'New services page went live', date: 'Oct 22', tag: 'Content' },
+        { text: 'Fixed the contact form on mobile', date: 'Oct 18', tag: 'Fix' },
         { text: 'Security and software updates', date: 'Oct 14', tag: 'Maintenance' },
-        { text: 'New homepage photo of your van (your request)', date: 'Oct 9', tag: 'Request' },
+        { text: 'New homepage photos (your request)', date: 'Oct 9', tag: 'Request' },
         { text: 'Monthly backup restore test passed', date: 'Oct 1', tag: 'Maintenance' }
       ],
       perfStats: [
         { label: 'Visitors', value: '1,284', delta: '↑ 18% vs last month' },
-        { label: 'Leads', value: '14', delta: '↑ 5 vs last month' },
-        { label: 'Calls from site', value: '23', delta: '↑ 4 vs last month' },
-        { label: 'Visitors who became leads', value: '1.1%', delta: '↑ 0.2 pts' }
+        { label: 'Form submissions', value: '9', delta: '↑ 3 vs last month' },
+        { label: 'Pages viewed', value: '3,410', delta: '↑ 12% vs last month' }
       ],
       daily,
       sources: [
@@ -617,11 +577,12 @@ class Component extends DCLogic {
       ],
       pages: [
         { path: 'Home', views: '842' },
-        { path: 'Emergency plumbing', views: '311' },
-        { path: 'Service areas', views: '268' },
-        { path: 'Water heaters', views: '190' },
+        { path: 'Services', views: '311' },
+        { path: 'About', views: '268' },
+        { path: 'Gallery', views: '190' },
         { path: 'Contact', views: '154' }
       ],
+      submissions,
       invoices: [
         { num: 'INV-0011', date: 'Nov 1, 2026', status: 'Upcoming', ...this.pill('Upcoming') },
         { num: 'INV-0010', date: 'Oct 1, 2026', status: 'Paid', ...this.pill('Paid') },

@@ -2,7 +2,9 @@
 
 ## What it is
 
-A branded portal where each client logs in and sees their whole relationship with the agency in one place: results, leads, requests, messages, files and invoices. It replaces monthly PDF reports and email threads.
+A branded portal where each client logs in and sees their whole relationship with the agency in one place: monthly updates, requests, messages, files, their website's results and health, and invoices. It replaces monthly PDF reports and email threads.
+
+**Focus: the agency ↔ client relationship.** Tools for our clients to manage *their own* customers (lead inboxes, CRM) are not a priority.
 
 Three roles for the business:
 
@@ -24,9 +26,8 @@ Each client only sees modules for services they buy.
 
 | Module | Client sees | Data source |
 |---|---|---|
-| Home | Monthly note from the agency (wins / working on / next month) + key numbers since joining | Agency writes it (~10 min/client/month) |
-| Leads inbox | Every form submission/call from their site, status New/Contacted | Site forms POST to portal API; embeddable snippet + webhook for non-custom sites |
-| Performance | Visitors, top pages, traffic sources, leads trend | Privacy-friendly analytics with an API (Umami / Plausible) |
+| Home | Monthly update from the agency (done / working on / next month) + key numbers, open requests, files to approve, latest messages, next invoice | Agency writes the update (~10 min/client/month) |
+| Performance | Visitors, top pages, traffic sources, website form submissions | Privacy-friendly analytics with an API (Umami / Plausible); the client's own site forms POST to the portal API |
 | Site health | Uptime, SSL, speed score, last backup | Uptime cron + PageSpeed API + deploy hooks |
 | Work log | "What we did for you" feed | Git commits tagged client-visible (optional integration) + manual entries |
 | Requests | Change requests with status + comment thread | Built in |
@@ -40,9 +41,9 @@ Each client only sees modules for services they buy.
 | Phase | Scope | Users |
 |---|---|---|
 | 1. MVP (2–3 wks) | Multi-tenant base, magic-link auth, Home + monthly note, Requests, Messages, Files/approvals, manual invoices, admin panel | Our clients |
-| 2. Automation | Leads inbox, site health, analytics, git work log | Our clients |
+| 2. Automation | Site health, analytics + form submissions, git work log | Our clients |
 | 3. Agencies beta | Agency signup, branding (logo/colors + "Powered by"), Stripe subscriptions, super-admin, landing page + waitlist | 1 partner agency, then a few more |
-| 4. Grow | Stripe client payments, notifications, SEO/Ads modules, custom domains, full white-label plan, premium client tier | Paying agencies |
+| 4. Grow | Stripe client payments, SEO/Ads modules, custom domains, full white-label plan, premium client tier | Paying agencies |
 
 Strategy: dogfood with our own clients for 2–3 months before opening to other agencies, but build multi-tenant from day one.
 
@@ -54,25 +55,29 @@ Agencies get their logo and accent color with a "Powered by [Portal]" badge. Ful
 
 - Next.js (App Router) + TypeScript + Tailwind + shadcn/ui, hosted on Vercel
 - Supabase: Postgres + row-level security, magic-link auth, storage, realtime
-- Resend for notification emails
 - Stripe for billing (agency subscriptions, later client payments)
 
 ## Core data model
 
-`agencies` · `clients` · `users` (role: super_admin / agency_admin / client) · `client_services` (enabled modules) · `requests` + `request_comments` · `messages` · `files` · `invoices` · `work_log` · `leads` · `monthly_notes` · `site_metrics`
+`agencies` · `clients` · `users` (role: super_admin / agency_admin / client) · `client_services` (enabled modules) · `requests` + `request_comments` · `messages` · `files` · `invoices` · `work_log` · `form_submissions` · `monthly_notes` · `site_metrics`
+
+## Not doing for now
+
+- Email integrations (no inbox syncing, no notification emails)
+- Lead management / CRM for our clients' customers
+- Calls, bookings or other lead sources besides the client's own website forms
 
 ## Design direction
 
-Mercury-style: light, calm, premium. Thin white sidebar, one big headline number (leads this month), soft gray bordered cards, single accent color (swappable per agency), Inter. Performance pages follow Plausible's one-page clarity.
+Mercury-style: light, calm, premium. Thin white sidebar, the agency's monthly update as the hero with website visitors as the headline number, soft gray bordered cards, single accent color (swappable per agency), Inter. Performance pages follow Plausible's one-page clarity.
 
 Mockup: `design/client-portal-mockup.dc.html`.
 
 ## Key risk
 
-The portal only feels premium if it stays fresh. Automate everything possible (leads, health, work log) so the only manual task is the monthly note.
+The portal only feels premium if it stays fresh. Automate everything possible (analytics, health, work log) so the only manual task is the monthly note.
 
 ## Open questions
 
 - Agency name, portal product name, domain
 - Pricing for agencies; premium client tier
-- Email notifications vs portal-only updates (recommend email notifications linking into the portal)
