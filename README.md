@@ -4,6 +4,7 @@ Client portal for web and marketing agencies. Clients log in to see monthly upda
 
 Built first for our own clients, designed multi-tenant so it can be sold to other agencies.
 
+- **Pending task:** [DEPLOY_TASK.md](DEPLOY_TASK.md), a one-time deployment task for a Claude session (deleted when done)
 - Product spec: [docs/spec.md](docs/spec.md)
 - Deploying to the home server: [docs/deploy-home-server.md](docs/deploy-home-server.md)
 - Design mockup: [design/client-portal-mockup.dc.html](design/client-portal-mockup.dc.html)
