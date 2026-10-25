@@ -1,5 +1,18 @@
 # One-time task: deploy the portal
 
+## Status (2026-10-25)
+
+Deployed and live at https://portal.londonmarketingsolutions.ca. Everything in "Done means"
+is verified except the browser login: Lucca still has to open his set-password link (printed
+by `create-admin` on 2026-10-25, valid 14 days) and confirm he can log in and sees the
+sign-up link under Admin → Sign-ups. Once he has, delete this file as described at the bottom.
+
+One change from the plan: londonmarketingsolutions.ca is on the LMS Cloudflare account and the
+existing tunnel is on the personal one, so the portal runs through its own tunnel `lms` and a
+`cloudflared-lms` unit (see docs/deploy-home-server.md step 8). The rate limit answers 429, not
+503 (the server's `limit_req_status`). The end-to-end check ran against the live database and
+R2 through the app's data layer, not through the browser forms.
+
 > **This file is temporary.** It's a task for one Claude session. When the deployment is
 > finished and verified, that session deletes this file (see "Last step" at the bottom).
 > If you are a Claude session and Lucca pointed you here: this is your task.
