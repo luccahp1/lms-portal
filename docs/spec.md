@@ -58,7 +58,7 @@ For now everything runs on the **home server** to keep costs at zero while the c
 
 - Next.js 15 (App Router, server actions) + TypeScript + Tailwind, run as a systemd service
 - Postgres 16 (the server's existing instance) via Drizzle ORM; tenant isolation enforced in the data layer (`src/lib/data`)
-- Email + password login. Clients **sign up themselves** via the agency's sign-up link; accounts stay pending until an admin connects them to a client. No email sending yet: admins can make one-time password reset links. Email (welcome, forgot password) comes once the agency domain is on Cloudflare.
+- Email + password login. Clients **sign up themselves** via the agency's sign-up link; accounts stay pending until an admin connects them to a client. No email sending yet: admins can make one-time password reset links. Email (welcome, forgot password) is a follow-up; the agency domain londonmarketingsolutions.ca is on Cloudflare, so a sending domain can be set up there.
 - Uploaded files in **Cloudflare R2** (free tier, off the home server); downloads are 5-minute signed links
 - Messages refresh by polling every 15s (no realtime service)
 

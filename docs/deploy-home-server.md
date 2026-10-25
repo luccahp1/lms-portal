@@ -91,7 +91,7 @@ R2_ACCOUNT_ID=<account id>
 R2_ACCESS_KEY_ID=<access key id>
 R2_SECRET_ACCESS_KEY=<secret access key>
 R2_BUCKET=lms-portal-files
-APP_URL=https://<portal domain>
+APP_URL=https://portal.londonmarketingsolutions.ca
 COOKIE_SECURE=true
 EOF
 chmod 600 /srv/apps/lms-portal/.env
@@ -107,7 +107,7 @@ cp ../.env .env
 npm ci
 npm run build
 npm run db:migrate
-npm run create-admin -- "<Agency name>" "<Lucca's name>" <lucca's email>
+npm run create-admin -- "London Marketing Solutions" "<Lucca's name>" <Lucca's email>
 # prints a one-time link: open it to set the admin password
 
 # assemble the runnable bundle
@@ -156,36 +156,67 @@ curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:3010/login   # expect 
 
 Check `which node` and adjust `ExecStart` if Node isn't at `/usr/bin/node`.
 
-### 8. Make it reachable (ask Lucca first: this exposes a service publicly)
+### 8. Make it reachable at portal.londonmarketingsolutions.ca (ask Lucca first: this exposes a service publicly)
 
-Recommended: a new hostname on the existing **Cloudflare Tunnel** (like pawsit.ca), e.g.
-`portal.<agency domain>`, pointing at nginx, with an nginx server block that proxies to
-127.0.0.1:3010.
+The agency domain `londonmarketingsolutions.ca` is on Cloudflare. The portal gets the
+subdomain **`portal.londonmarketingsolutions.ca`**, routed through the server's **existing
+Cloudflare Tunnel** (the same one pawsit.ca uses) to nginx :80, and nginx proxies to
+127.0.0.1:3010. No new UFW ports.
+
+**Tunnel:** check how the existing tunnel is managed (glossary; `/etc/cloudflared/`).
+- Token-based (dashboard-managed): add a **Public Hostname** in Cloudflare Zero Trust →
+  Networks → Tunnels → (the tunnel) → `portal.londonmarketingsolutions.ca` → `http://localhost:80`.
+  Lucca may need to click this himself.
+- Config-file based: add an ingress rule for the hostname **above** the catch-all rule,
+  back up the config first, run `cloudflared tunnel route dns <tunnel> portal.londonmarketingsolutions.ca`,
+  then restart cloudflared and confirm pawsit.ca still loads.
 
 **Hard constraints when touching nginx:**
 - Back up first: `S cp -r /etc/nginx /srv/backups/nginx.$(date +%Y%m%d-%H%M%S).bak`
-- Add a **new** server block; don't edit or trim the existing ones.
+- Add a **new** server block in its own file; don't edit or trim the existing ones.
 - `/atrio-bridge/` (the phone line) and `/co-skip` must keep working. Verify both with a
   real curl afterwards.
 - Test with `S nginx -t 2>&1 | grep -v '^\[sudo'` before reloading.
 
+Rate-limit login and sign-up before the hostname goes live. Behind the tunnel every request
+comes from 127.0.0.1, so key the limit on Cloudflare's `CF-Connecting-IP` header. The
+`limit_req_zone` line belongs in the `http` context; a file in `/etc/nginx/conf.d/` works if
+`nginx.conf` includes it, otherwise put it at the top of the site file (outside `server`).
+
 ```nginx
+limit_req_zone $http_cf_connecting_ip zone=lms_portal_auth:10m rate=10r/m;
+
 server {
     listen 80;
-    server_name portal.<agency domain>;
+    server_name portal.londonmarketingsolutions.ca;
     client_max_body_size 26m;   # uploads are capped at 25 MB in the app
+
+    location ~ ^/(login|join/|reset/) {
+        limit_req zone=lms_portal_auth burst=20 nodelay;
+        proxy_pass http://127.0.0.1:3010;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $http_cf_connecting_ip;
+        proxy_set_header X-Forwarded-Proto https;
+    }
 
     location / {
         proxy_pass http://127.0.0.1:3010;
         proxy_set_header Host $host;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-For $http_cf_connecting_ip;
         proxy_set_header X-Forwarded-Proto https;
     }
 }
 ```
 
-For LAN/Tailscale-only testing first, skip the tunnel and reach it via an SSH port
-forward or a LAN-only nginx listen. Don't open a new UFW port without asking.
+`APP_URL` in `.env` must be `https://portal.londonmarketingsolutions.ca` (sign-up and reset
+links are built from it) and `COOKIE_SECURE=true`.
+
+Check from outside: `curl -sI https://portal.londonmarketingsolutions.ca/login` → 200.
+Twenty-odd fast requests to `/login` should start returning 503 (the rate limit).
+
+For LAN/Tailscale-only testing first, use an SSH port forward to 127.0.0.1:3010
+(`ssh -L 3010:127.0.0.1:3010 lucca@10.0.0.78`, run by Lucca in a real terminal) with
+`COOKIE_SECURE=false` temporarily. Don't open a new UFW port without asking.
 
 ### 9. Backups
 
