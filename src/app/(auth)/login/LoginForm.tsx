@@ -15,6 +15,10 @@ export function LoginForm() {
       <Field label="Password">
         <Input name="password" type="password" autoComplete="current-password" required />
       </Field>
+      <label className="flex items-center gap-2">
+        <input type="checkbox" name="remember" className="size-4 accent-[var(--accent)]" />
+        Remember me for 30 days
+      </label>
       <Button type="submit" disabled={pending}>
         {pending ? "Logging in…" : "Log in"}
       </Button>

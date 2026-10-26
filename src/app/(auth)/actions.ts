@@ -16,7 +16,7 @@ export async function login(_prev: FormState, formData: FormData): Promise<FormS
   if (!parsed.success) return { error: "Enter your email and password." };
   const userId = await checkCredentials(parsed.data.email, parsed.data.password);
   if (!userId) return { error: "That email and password don’t match." };
-  await startSession(userId);
+  await startSession(userId, formData.get("remember") === "on");
   redirect("/");
 }
 

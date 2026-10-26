@@ -9,23 +9,26 @@ import { randomToken, sha256, verifyPassword } from "./crypto";
 import type { Viewer } from "@/lib/data/viewer";
 
 const COOKIE = "lms_session";
-const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+const REMEMBERED_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+// Without "remember me" the cookie dies with the browser, and the server
+// drops the session after this long even if the browser stays open.
+const BROWSER_SESSION_TTL_MS = 12 * 60 * 60 * 1000;
 
-function cookieOptions(expires: Date) {
+function cookieOptions(expires?: Date) {
   return {
     httpOnly: true,
     sameSite: "lax" as const,
     secure: process.env.COOKIE_SECURE !== "false",
     path: "/",
-    expires,
+    ...(expires && { expires }),
   };
 }
 
-export async function startSession(userId: string) {
+export async function startSession(userId: string, remember = true) {
   const token = randomToken();
-  const expiresAt = new Date(Date.now() + SESSION_TTL_MS);
+  const expiresAt = new Date(Date.now() + (remember ? REMEMBERED_TTL_MS : BROWSER_SESSION_TTL_MS));
   await db.insert(sessions).values({ id: sha256(token), userId, expiresAt });
-  (await cookies()).set(COOKIE, token, cookieOptions(expiresAt));
+  (await cookies()).set(COOKIE, token, cookieOptions(remember ? expiresAt : undefined));
 }
 
 export async function endSession() {
