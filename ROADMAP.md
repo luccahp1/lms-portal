@@ -31,7 +31,7 @@ for files, its own Cloudflare Tunnel.
 
 Quick wins that protect what's live.
 
-- [ ] **Merge PR #1 into `main`.** Production runs from `phase-1-mvp` today.
+- [x] **Merge PR #1 into `main`.** Production runs from `main` since 2026-10-27.
 - [ ] **Off-box database backups.** Nightly `pg_dump` of `lms_portal` copied to R2 (the
       server has one disk). Client data is the one thing we can't lose.
 - [ ] **Uptime check** for `/login` (the server's health-check timer, or a free external
