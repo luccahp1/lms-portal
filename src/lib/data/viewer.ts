@@ -11,6 +11,8 @@ export type Viewer = {
   clientId: string | null;
   name: string;
   email: string;
+  /** Set when an admin is looking at the client portal through "View as client". */
+  previewBy?: string;
 };
 
 export class NotFoundError extends Error {

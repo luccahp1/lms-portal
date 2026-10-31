@@ -9,6 +9,7 @@ Built first for our own clients, designed multi-tenant so it can be sold to othe
 - Deploying to the home server: [docs/deploy-home-server.md](docs/deploy-home-server.md)
 - Design mockup: [design/client-portal-mockup.dc.html](design/client-portal-mockup.dc.html)
 - MCP endpoint for AI clients: [docs/mcp.md](docs/mcp.md)
+- Adding a client and checking it with **View as client**: [docs/adding-a-client.md](docs/adding-a-client.md)
 
 ## Status
 

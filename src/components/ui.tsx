@@ -52,6 +52,11 @@ const buttonVariant = {
 
 type Variant = keyof typeof buttonVariant;
 
+/** Button look for plain <a> tags, e.g. links that open a new tab or hit a route handler. */
+export function buttonClass(variant: Variant = "primary") {
+  return `${buttonBase} ${buttonVariant[variant]}`;
+}
+
 export function Button({
   variant = "primary",
   className = "",

@@ -5,6 +5,7 @@ import { getClient } from "@/lib/data/clients";
 import { listRequests } from "@/lib/data/requests";
 import { orNotFound } from "@/lib/page";
 import { Tabs } from "@/components/Tabs";
+import { buttonClass } from "@/components/ui";
 
 export default async function ClientLayout({ children, params }: { children: React.ReactNode; params: Promise<{ id: string }> }) {
   const viewer = await requireAdmin();
@@ -20,8 +21,15 @@ export default async function ClientLayout({ children, params }: { children: Rea
         <Link href="/admin" className="text-accent hover:underline">
           ← Clients
         </Link>
-        <h1 className="mt-2 text-[28px] font-semibold tracking-tight">{client.name}</h1>
-        <p className="text-[15px] text-muted">{[client.planName, client.websiteUrl].filter(Boolean).join(" · ") || "No plan set"}</p>
+        <div className="mt-2 flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h1 className="text-[28px] font-semibold tracking-tight">{client.name}</h1>
+            <p className="text-[15px] text-muted">{[client.planName, client.websiteUrl].filter(Boolean).join(" · ") || "No plan set"}</p>
+          </div>
+          <a href={`${base}/preview`} target="_blank" rel="noopener" className={buttonClass("secondary")}>
+            View as client
+          </a>
+        </div>
       </div>
       <Tabs
         items={[

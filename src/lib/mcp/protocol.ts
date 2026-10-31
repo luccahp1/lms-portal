@@ -10,7 +10,7 @@ const SERVER_INFO = { name: "lms-portal", version: "1.0.0" };
 
 const INSTRUCTIONS =
   "Acts in the London Marketing Solutions client portal as the agency admin who owns the token. " +
-  "Call get_overview first to find client ids. Messages, comments, files and non-draft invoices are visible to the client, " +
+  "Call get_overview first to find client ids. To onboard a new client, call new_client_guide and follow it. Messages, comments, files and non-draft invoices are visible to the client, " +
   "so confirm wording with the user before sending.";
 
 type JsonRpcId = string | number | null;

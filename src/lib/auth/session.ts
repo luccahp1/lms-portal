@@ -6,9 +6,12 @@ import { and, eq, gt } from "drizzle-orm";
 import { db } from "@/db";
 import { sessions, users } from "@/db/schema";
 import { randomToken, sha256, verifyPassword } from "./crypto";
-import type { Viewer } from "@/lib/data/viewer";
+import { NotFoundError, type Viewer } from "@/lib/data/viewer";
+import { previewViewer } from "@/lib/data/preview";
 
 const COOKIE = "lms_session";
+const PREVIEW_COOKIE = "lms_preview";
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const REMEMBERED_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 // Without "remember me" the cookie dies with the browser, and the server
 // drops the session after this long even if the browser stays open.
@@ -86,8 +89,39 @@ export async function requireAdmin(): Promise<Viewer> {
   return viewer;
 }
 
+/** Real clients, or an admin who opened "View as client". */
 export async function requireClient(): Promise<Viewer> {
   const viewer = await requireViewer();
-  if (viewer.role !== "client") redirect("/admin");
-  return viewer;
+  if (viewer.role === "client") return viewer;
+  const preview = await getPreview(viewer);
+  if (!preview) redirect("/admin");
+  return preview;
 }
+
+// ---- "View as client" ----
+// A second cookie holding "clientId" or "clientId:userId". It only changes how
+// /portal pages render for an admin; admin pages and server actions ignore it.
+
+export async function startPreview(clientId: string, userId?: string) {
+  (await cookies()).set(PREVIEW_COOKIE, userId ? `${clientId}:${userId}` : clientId, cookieOptions());
+}
+
+/** Ends the preview and returns the client id it was showing, if any. */
+export async function endPreview(): Promise<string | undefined> {
+  const jar = await cookies();
+  const clientId = jar.get(PREVIEW_COOKIE)?.value.split(":")[0];
+  jar.delete(PREVIEW_COOKIE);
+  return clientId;
+}
+
+const getPreview = cache(async (admin: Viewer): Promise<Viewer | null> => {
+  if (admin.role !== "agency_admin") return null;
+  const [clientId, userId] = (await cookies()).get(PREVIEW_COOKIE)?.value.split(":") ?? [];
+  if (!clientId || !UUID.test(clientId) || (userId && !UUID.test(userId))) return null;
+  try {
+    return await previewViewer(admin, clientId, userId);
+  } catch (err) {
+    if (err instanceof NotFoundError) return null;
+    throw err;
+  }
+});

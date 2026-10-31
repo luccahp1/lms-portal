@@ -48,6 +48,22 @@ function appUrl() {
 
 const noInput = z.object({});
 
+/** Opens the portal as this client sees it. Works in a browser logged in as an admin, not over MCP. */
+function previewUrl(clientId: string) {
+  return `${appUrl()}/admin/clients/${clientId}/preview`;
+}
+
+// Returned by new_client_guide. docs/adding-a-client.md is the long version.
+const NEW_CLIENT_STEPS = [
+  "1. Check get_overview first so you don't add the client twice.",
+  "2. create_client with the business name, website and plan.",
+  "3. Send the owner the agency sign-up link yourself (nothing is emailed). They sign up with their own email and password.",
+  "4. list_pending_signups, then approve_signup with the clientId from step 2. Don't use newClientName here or you get a duplicate client.",
+  "5. Fill the portal so it isn't empty on their first login: upsert_monthly_note for this month, add_work_log for work already done, create_invoice for real invoices (draft stays hidden from the client).",
+  "6. Give the user the previewUrl so they can check the portal as the client sees it, before telling the client it's ready.",
+  "Messages, comments, files and non-draft invoices are visible to the client, so confirm wording with the user first. Someone locked out: create_password_reset_link.",
+];
+
 export const tools: Tool[] = [
   // ---- Overview ----
   tool({
@@ -66,7 +82,7 @@ export const tools: Tool[] = [
       return {
         actingAs: { name: viewer.name, email: viewer.email, role: viewer.role },
         agency: { id: agency.id, name: agency.name, signUpLink: `${appUrl()}/join/${agency.joinCode}` },
-        clients: clients.map((c) => ({ id: c.id, name: c.name, websiteUrl: c.websiteUrl, planName: c.planName })),
+        clients: clients.map((c) => ({ id: c.id, name: c.name, websiteUrl: c.websiteUrl, planName: c.planName, previewUrl: previewUrl(c.id) })),
         pendingSignups,
         openRequests,
       };
@@ -90,7 +106,18 @@ export const tools: Tool[] = [
       client: await clientsData.getClient(viewer, clientId),
       users: await clientsData.listClientUsers(viewer, clientId),
       latestNote: await updatesData.getLatestNote(viewer, clientId),
+      previewUrl: previewUrl(clientId),
     }),
+  }),
+  tool({
+    name: "new_client_guide",
+    description: "Read this before onboarding a new client: the steps in order, with the live sign-up link.",
+    input: noInput,
+    readOnly: true,
+    run: async (viewer) => {
+      const agency = await clientsData.getAgency(viewer);
+      return { signUpLink: `${appUrl()}/join/${agency.joinCode}`, steps: NEW_CLIENT_STEPS };
+    },
   }),
   tool({
     name: "create_client",
@@ -100,7 +127,10 @@ export const tools: Tool[] = [
       websiteUrl: z.string().trim().max(500).optional(),
       planName: z.string().trim().max(200).optional(),
     }),
-    run: (viewer, input) => clientsData.createClient(viewer, input),
+    run: async (viewer, input) => {
+      const client = await clientsData.createClient(viewer, input);
+      return { ...client, previewUrl: previewUrl(client.id) };
+    },
   }),
   tool({
     name: "update_client",

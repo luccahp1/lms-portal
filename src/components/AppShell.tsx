@@ -9,6 +9,7 @@ export function AppShell({
   subtitle,
   identity,
   nav,
+  banner,
   children,
 }: {
   agencyName: string;
@@ -16,6 +17,8 @@ export function AppShell({
   subtitle: string;
   identity: { title: string; detail: string };
   nav: NavItem[];
+  /** Shown above the page, e.g. the "View as client" notice. */
+  banner?: React.ReactNode;
   children: React.ReactNode;
 }) {
   return (
@@ -54,7 +57,10 @@ export function AppShell({
         </form>
       </nav>
       <main className="min-w-0 flex-[999_1_560px] px-4 pt-8 pb-12 sm:px-8 lg:px-12">
-        <div className="mx-auto flex max-w-[1120px] flex-col gap-6">{children}</div>
+        <div className="mx-auto flex max-w-[1120px] flex-col gap-6">
+          {banner}
+          {children}
+        </div>
       </main>
     </div>
   );

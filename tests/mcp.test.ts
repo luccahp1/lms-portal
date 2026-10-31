@@ -73,6 +73,11 @@ describe("MCP tools", () => {
 
     const created = await call(admin, "create_client", { name: "New Co", websiteUrl: "https://new.co" });
     expect(created.data.name).toBe("New Co");
+    expect(created.data.previewUrl).toMatch(new RegExp(`/admin/clients/${created.data.id}/preview$`));
+
+    const guide = await call(admin, "new_client_guide");
+    expect(guide.data.signUpLink).toMatch(/\/join\//);
+    expect(guide.data.steps.join(" ")).toMatch(/approve_signup/);
 
     const cid = clientA.client.id;
     await call(admin, "send_message", { clientId: cid, body: "Hello from the agency" });

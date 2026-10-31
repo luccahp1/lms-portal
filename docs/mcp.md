@@ -19,6 +19,13 @@ its owner is an active `agency_admin`, and it can only reach that admin's agency
 Tools that change data refresh the portal's pages afterwards. Tools are annotated `readOnlyHint`
 or `destructiveHint` so clients can ask before deleting.
 
+## Onboarding clients
+
+`new_client_guide` returns the onboarding steps in order with the live sign-up link, and the
+server's `instructions` tell clients to call it first. `get_overview`, `get_client` and
+`create_client` include a `previewUrl` per client: the **View as client** page, which works in a
+browser logged in as an admin. Full walkthrough: [adding-a-client.md](adding-a-client.md).
+
 ## Tokens
 
 Run these on the server from `/srv/apps/lms-portal/src` (they read `.env`). Live since 2026-10-31; Claude Code on lucca-mainpc is connected as `lms-portal`.

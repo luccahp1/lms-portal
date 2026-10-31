@@ -3,7 +3,7 @@ import { requireAdmin } from "@/lib/auth/session";
 import { getClient, listClientUsers } from "@/lib/data/clients";
 import { removeClientUserAction, updateClientAction } from "@/app/actions";
 import { formatDate } from "@/lib/format";
-import { Button, Card, CardTitle, Field, Input } from "@/components/ui";
+import { Button, buttonClass, Card, CardTitle, Field, Input } from "@/components/ui";
 import { ResetLinkButton } from "./ResetLinkButton";
 
 export default async function ClientSettings({ params }: { params: Promise<{ id: string }> }) {
@@ -53,6 +53,9 @@ export default async function ClientSettings({ params }: { params: Promise<{ id:
                 </span>
               </div>
               <div className="flex flex-wrap items-center gap-2">
+                <a href={`/admin/clients/${id}/preview?user=${u.id}`} target="_blank" rel="noopener" className={buttonClass("secondary")}>
+                  View as {u.name.split(" ")[0]}
+                </a>
                 <ResetLinkButton userId={u.id} />
                 <form action={removeClientUserAction}>
                   <input type="hidden" name="userId" value={u.id} />
