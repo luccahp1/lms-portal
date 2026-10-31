@@ -24,6 +24,7 @@ for files, its own Cloudflare Tunnel.
 - [x] Billing: manual invoices (draft → sent → paid)
 - [x] Admin: clients, request inbox, sign-ups, per-client tabs
 - [x] Rate limits on login / sign-up / reset
+- [x] MCP endpoint (`/api/mcp`) so Claude can do any admin task, with admin API tokens ([docs/mcp.md](docs/mcp.md))
 
 ---
 

@@ -4,7 +4,7 @@ import { agencies, clients, users } from "@/db/schema";
 import type { Viewer } from "@/lib/data/viewer";
 
 export async function resetDb() {
-  await db.execute(sql`truncate agencies, users, sessions, invites cascade`);
+  await db.execute(sql`truncate agencies, users, sessions, invites, api_tokens cascade`);
 }
 
 let n = 0;

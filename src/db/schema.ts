@@ -84,6 +84,16 @@ export const invites = pgTable("invites", {
   createdAt: createdAt(),
 });
 
+// Bearer tokens for the MCP endpoint (/api/mcp). Agency admins only.
+export const apiTokens = pgTable("api_tokens", {
+  // sha256 of the raw token; the raw token is shown once when created.
+  tokenHash: text("token_hash").primaryKey(),
+  userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  label: text("label").notNull(),
+  lastUsedAt: timestamp("last_used_at", { withTimezone: true }),
+  createdAt: createdAt(),
+});
+
 export const monthlyNotes = pgTable(
   "monthly_notes",
   {

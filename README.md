@@ -8,6 +8,7 @@ Built first for our own clients, designed multi-tenant so it can be sold to othe
 - Product spec: [docs/spec.md](docs/spec.md)
 - Deploying to the home server: [docs/deploy-home-server.md](docs/deploy-home-server.md)
 - Design mockup: [design/client-portal-mockup.dc.html](design/client-portal-mockup.dc.html)
+- MCP endpoint for AI clients: [docs/mcp.md](docs/mcp.md)
 
 ## Status
 
@@ -26,7 +27,9 @@ Runs on a single small server: one Node process, the existing Postgres, no Docke
 ```
 src/db/schema.ts        tables (every row carries agency_id; client rows carry client_id)
 src/lib/data/           all reads/writes, scoped to the logged-in viewer (tenant isolation lives here)
-src/lib/auth/           password hashing (scrypt), sessions, role guards
+src/lib/auth/           password hashing (scrypt), sessions, role guards, API tokens
+src/lib/mcp/            MCP server: protocol + tools over src/lib/data
+src/app/api/mcp/        MCP endpoint (bearer token auth)
 src/app/actions.ts      server actions shared by both sides
 src/app/portal/         client portal
 src/app/admin/          agency admin

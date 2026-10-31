@@ -70,6 +70,16 @@ export async function readStoredFile(key: string): Promise<Buffer> {
   return readFile(diskPath(key));
 }
 
+/** The file's bytes from whichever backend holds it. For the MCP read_file tool. */
+export async function fetchStoredFile(key: string): Promise<Buffer> {
+  checkKey(key);
+  const remote = r2();
+  if (!remote) return readStoredFile(key);
+  const res = await remote.client.fetch(`${remote.base}/${key}`);
+  if (!res.ok) throw new Error(`R2 download failed: ${res.status}`);
+  return Buffer.from(await res.arrayBuffer());
+}
+
 function contentDisposition(filename: string) {
   const ascii = filename.replace(/[^\x20-\x7e]/g, "_").replace(/["\\]/g, "_");
   return `attachment; filename="${ascii}"; filename*=UTF-8''${encodeURIComponent(filename)}`;
