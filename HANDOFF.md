@@ -5,14 +5,16 @@
 - Live at https://portal.londonmarketingsolutions.ca, running `main` on luccaserver
   (`/srv/apps/lms-portal`, systemd `lms-portal`, 127.0.0.1:3010). Deploy steps: docs/deploy-home-server.md.
 - Admin account: lucca.marketingsolutions@gmail.com.
-- New: MCP endpoint at `/api/mcp` with admin API tokens (docs/mcp.md). Built and tested locally
-  (35 tests, plus an end-to-end run with the MCP Inspector against a local build). Needs deploy +
-  `npm run db:migrate` (migration 0002_api_tokens) before it works in production.
+- MCP endpoint `/api/mcp` with admin API tokens (docs/mcp.md) is live since 2026-10-31 (0ec13ef).
+  Claude Code on lucca-mainpc has it as user-scope MCP server `lms-portal`, token label
+  "Claude Code (lucca-mainpc)". Lost or leaked token: revoke it on the server and add a new one.
+- The live portal has no clients yet.
 
 ## Next
 
-- Deploy the MCP endpoint, create a token, register it in Claude Code.
 - Housekeeping and email from ROADMAP.md.
+- 8 old commits carry AI-authorship trailers (repo_hygiene.py blocker). Removing them needs a
+  history rewrite + force push; left alone until Lucca decides.
 
 ## Gotchas
 

@@ -21,7 +21,8 @@ or `destructiveHint` so clients can ask before deleting.
 
 ## Tokens
 
-Run these on the server from `/srv/apps/lms-portal/src` (they read `.env`):
+Run these on the server from `/srv/apps/lms-portal/src` (they read `.env`). Live since 2026-10-31; Claude Code on lucca-mainpc is connected as `lms-portal`.
+
 
 ```bash
 npm run api-token -- create you@example.com "Claude Code"   # prints the token once
