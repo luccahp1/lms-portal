@@ -1,5 +1,29 @@
 # Handoff
 
+## State (2026-11-04, latest): same look and one login with LMS Dash (not deployed)
+
+Committed to main, **not deployed**.
+
+- **Design kit** in `src/kit/` is a copy of LMS Dash's `app/static/kit/` (edit it there, run its
+  `scripts/sync_kit.py`; `tests/sso.test.ts` checks they match). Tailwind's colours map onto the
+  kit tokens in `src/app/globals.css`; light by default, dark via the band's toggle (`lms_theme`
+  cookie read in `src/app/layout.tsx`, no flash). Pieces: `src/components/kit.tsx`
+  (KitCard, KitTile, KitHead, Count, Svg), `src/lib/charts.ts`, `src/components/KitClient.tsx`
+  (motion on each page, theme toggle, phone drawer).
+- **Shell** (`AppShell.tsx`, `NavLinks.tsx`) is Dash's: brand band, Live pill (follows the SSE
+  stream), account chip, left nav. Nav names match Dash's client nav: Overview, To-dos, Monthly
+  reports, Rankings, Requests, Messages, Files & approvals, Brand, Billing.
+- **Overview** (`src/app/portal/page.tsx`) is the same section cards as the client Overview in
+  Dash. Reports and Rankings use the kit tiles and charts.
+- **One login** ([docs/sso.md](docs/sso.md)): one Sign in page, no role choice. Admins go on to
+  Dash through `/sso/dash` (table `sso_links`, migration `0006_sso_links`, MCP tool
+  `redeem_sso_link`) once `DASH_URL` is set; clients go to `/portal`. `/logout` (GET) is what
+  Dash's sign out calls.
+- Checks: typecheck, lint (one old warning in tests/dash-admin.test.ts), 71 tests, build (103 kB
+  shared first load, unchanged). End to end with Dash locally, at 1440 and 375 px.
+- To ship: deploy (docs/deploy-home-server.md, runs the migration), set `DASH_URL` in the server
+  .env, restart. Ask Lucca first.
+
 ## State (2026-11-04, latest): performance pass
 
 - Deployed 2d9d3fe + 088284c. Details, measurements and sources: docs/performance.md. Backups

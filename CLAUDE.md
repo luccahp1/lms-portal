@@ -40,3 +40,6 @@ Tests need a real Postgres: see the Gotchas in HANDOFF.md for the embedded-postg
   or restarts hang until systemd's 90 s stop timeout.
 - LMS Dash is the source for rankings, AI answers and invoices; it pushes them here. Don't edit those
   by hand in the portal or the next Dash sync overwrites them. docs/live-updates-and-dash-sync.md.
+- `src/kit/` is a copy of LMS Dash's `app/static/kit/`. Never edit it here: change it in lms-dash and run its `scripts/sync_kit.py`. Kit classes start with `k-`.
+- `src/lib/auth/session.ts` imports `server-only`, so tests can't import it; pure helpers (homePath, dashUrl) live in `src/lib/auth/home.ts`.
+- `next build` fails with "Unexpected end of JSON input" while `next dev` is running in the same folder (shared `.next`). Stop dev first.

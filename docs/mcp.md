@@ -36,6 +36,12 @@ or `destructiveHint` so clients can ask before deleting.
 
 How LMS Dash uses them: [live-updates-and-dash-sync.md](live-updates-and-dash-sync.md).
 
+## One login (2026-11-04)
+
+| Tool | Does |
+|---|---|
+| `redeem_sso_link {token}` | Swaps the one-time token an admin got at sign-in for their email and name. LMS Dash calls it from `/sso`. [sso.md](sso.md) |
+
 ## Onboarding clients
 
 `new_client_guide` returns the onboarding steps in order with the live sign-up link, and the
