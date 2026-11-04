@@ -1,5 +1,15 @@
 # Handoff
 
+## State (2026-11-04, later): agency side moved to LMS Dash
+
+- The admin pages now live in LMS Dash (https://lms-dev.pawsit.ca): each client's **Portal** tab and a
+  **Sign-ups** page. `/admin` here redirects to `ADMIN_HOME_URL` (set in the server .env). Unset it to
+  bring the old admin pages back. Deployed 07f237b with Dash 0ec6b6e; backups `*20261104-072841*`.
+- View as client from Dash: `create_preview_link`, then `/preview/<token>`: one use, 2 minutes,
+  opening a read-only one-hour preview of that one client (tables `preview_links`, `preview_sessions`).
+- Restarting `lms-portal` takes about 90 s: Node waits for open `/api/live` streams. Fix: `TimeoutStopSec=10`
+  in the unit (needs Lucca's OK) or close streams on SIGTERM.
+
 ## State (2026-11-04)
 
 - **Results release live** (e3ae9d3, R2 upload fix c1dc47d): Monthly reports, Rankings forecast,
