@@ -105,6 +105,15 @@ export const previewSessions = pgTable("preview_sessions", {
   expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
 });
 
+// One login for LMS Dash: an agency admin who signs in here is sent to Dash with a one-time
+// token (2 minutes). Dash redeems it over MCP (redeem_sso_link). Only sha256 of the token is kept.
+export const ssoLinks = pgTable("sso_links", {
+  tokenHash: text("token_hash").primaryKey(),
+  userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  usedAt: timestamp("used_at", { withTimezone: true }),
+});
+
 export const invites = pgTable("invites", {
   tokenHash: text("token_hash").primaryKey(),
   userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),

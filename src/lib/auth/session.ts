@@ -80,10 +80,7 @@ export async function requireViewer(): Promise<Viewer> {
   return viewer;
 }
 
-export function homePath(viewer: Viewer) {
-  if (viewer.status !== "active") return "/pending";
-  return viewer.role === "agency_admin" ? "/admin" : "/portal";
-}
+export { dashUrl, homePath } from "./home";
 
 export async function requireAdmin(): Promise<Viewer> {
   const viewer = await requireViewer();

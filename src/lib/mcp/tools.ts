@@ -13,6 +13,7 @@ import * as rankingsData from "@/lib/data/rankings";
 import * as todosData from "@/lib/data/todos";
 import { fetchStoredFile, signedDownloadUrl } from "@/lib/storage";
 import { createPreviewLink } from "@/lib/data/preview";
+import { redeemSsoLink } from "@/lib/data/sso";
 
 // Everything an agency admin can do in the portal, as MCP tools.
 // Each tool calls the same data-layer function the admin pages use, so tenant
@@ -570,6 +571,17 @@ export const tools: Tool[] = [
       "A one-time link (2 minutes) that opens this client's portal read-only, as they see it, for an hour. For View as client from LMS Dash. Optional userId picks which of their logins.",
     input: z.object({ clientId, userId: uuid.optional() }),
     run: async (viewer, { clientId, userId }) => ({ url: `${appUrl()}/preview/${await createPreviewLink(viewer, clientId, userId)}` }),
+  }),
+  tool({
+    name: "redeem_sso_link",
+    description:
+      "For LMS Dash's one login: swaps the one-time token the portal handed an agency admin at sign-in (2 minutes, works once) for that admin's email and name. Fails for anything else.",
+    input: z.object({ token: z.string().regex(/^[A-Za-z0-9_-]{20,100}$/) }),
+    run: async (viewer, { token }) => {
+      const who = await redeemSsoLink(viewer, token);
+      if (!who) throw new Error("That sign-in link has expired or was already used.");
+      return who;
+    },
   }),
   tool({
     name: "file_download_url",
