@@ -4,7 +4,16 @@ import { useActionState, useEffect, useRef } from "react";
 import { uploadFileAction } from "@/app/actions";
 import { Button, FormError } from "@/components/ui";
 
-export function UploadForm({ clientId, allowApproval = false }: { clientId?: string; allowApproval?: boolean }) {
+export function UploadForm({
+  clientId,
+  allowApproval = false,
+  allowBrand = false,
+}: {
+  clientId?: string;
+  allowApproval?: boolean;
+  /** Admin only: file it into the client's Brand page instead of Files. */
+  allowBrand?: boolean;
+}) {
   const [state, action, pending] = useActionState(uploadFileAction, undefined);
   const ref = useRef<HTMLFormElement>(null);
   useEffect(() => {
@@ -22,6 +31,12 @@ export function UploadForm({ clientId, allowApproval = false }: { clientId?: str
         <label className="flex items-center gap-2">
           <input type="checkbox" name="needsApproval" className="size-4 accent-[var(--accent)]" />
           Ask the client to approve
+        </label>
+      )}
+      {allowBrand && (
+        <label className="flex items-center gap-2">
+          <input type="checkbox" name="folder" value="brand" className="size-4 accent-[var(--accent)]" />
+          Brand kit (business card, logos)
         </label>
       )}
       <Button type="submit" disabled={pending}>

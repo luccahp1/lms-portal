@@ -27,6 +27,10 @@ on a waiting page.
 Approve into the existing client. Choosing "new client" (or `newClientName`) creates a second,
 empty client with the same name.
 
+**Or skip the sign-up link** and create the login yourself: client Settings → Add a login directly, or
+`create_client_user { clientId, email, name }`. You get a one-time link (14 days) where they choose
+their own password. Send it to them; nothing is emailed.
+
 If someone can't get in later, make them a one-time password link (client Settings → Reset link,
 or `create_password_reset_link`) and send it to them.
 
@@ -36,7 +40,12 @@ An empty portal makes a poor first impression. At minimum:
 
 - This month's update: wins, what we're working on, what's next (`upsert_monthly_note`).
 - Work already done, one entry per item (`add_work_log`).
-- Real invoices (`create_invoice`). Drafts stay hidden from the client until marked sent.
+- Real invoices (`create_invoice`, or `upsert_invoice` by number). Drafts stay hidden from the client until marked sent.
+- Website analytics: client Settings → Website analytics, or `set_stats_source` ([analytics.md](analytics.md)).
+- Rankings and AI answers: pushed from LMS Dash (`sync_rankings`, `sync_ai_answers`).
+- To-dos for anything only the client can do, with steps (client → To-dos tab, or `save_todo`).
+- Brand kit: business card and logo files uploaded with **Brand kit** ticked (or `upload_file` with
+  `folder: "brand"`). PNG/JPEG previews show on their Your brand page; PDFs are downloads.
 
 Messages, request comments, files and non-draft invoices show up for the client straight away, so
 agree on wording before sending them.

@@ -36,6 +36,15 @@ export function formatMonth(value: string) {
   return new Date(`${value}T12:00:00`).toLocaleDateString("en-CA", { month: "long", year: "numeric" });
 }
 
+/** Today's date (YYYY-MM-DD) where the agency and its clients are. */
+export function today(timeZone = "America/Toronto") {
+  return new Date().toLocaleDateString("en-CA", { timeZone });
+}
+
+export function formatMonthKey(month: string) {
+  return formatMonth(`${month}-01`);
+}
+
 export function formatMoney(cents: number) {
   return (cents / 100).toLocaleString("en-CA", { style: "currency", currency: "CAD" });
 }

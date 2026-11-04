@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { requireAdmin } from "@/lib/auth/session";
 import { getClient } from "@/lib/data/clients";
 import { listRequests } from "@/lib/data/requests";
+import { countOpenTodos } from "@/lib/data/todos";
 import { orNotFound } from "@/lib/page";
 import { Tabs } from "@/components/Tabs";
 import { buttonClass } from "@/components/ui";
@@ -12,7 +13,7 @@ export default async function ClientLayout({ children, params }: { children: Rea
   const { id } = await params;
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
   const client = await orNotFound(getClient(viewer, id));
-  const requests = await listRequests(viewer, id);
+  const [requests, todoCount] = await Promise.all([listRequests(viewer, id), countOpenTodos(viewer, id)]);
   const base = `/admin/clients/${id}`;
 
   return (
@@ -35,6 +36,7 @@ export default async function ClientLayout({ children, params }: { children: Rea
         items={[
           { href: base, label: "Updates", exact: true },
           { href: `${base}/requests`, label: "Requests", badge: requests.filter((r) => r.status === "received").length },
+          { href: `${base}/todos`, label: "To-dos", badge: todoCount },
           { href: `${base}/messages`, label: "Messages" },
           { href: `${base}/files`, label: "Files" },
           { href: `${base}/billing`, label: "Billing" },

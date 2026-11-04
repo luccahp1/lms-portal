@@ -8,6 +8,9 @@ import * as filesData from "@/lib/data/files";
 import * as updatesData from "@/lib/data/updates";
 import * as invoicesData from "@/lib/data/invoices";
 import * as signupsData from "@/lib/data/signups";
+import * as statsData from "@/lib/data/stats";
+import * as rankingsData from "@/lib/data/rankings";
+import * as todosData from "@/lib/data/todos";
 import { fetchStoredFile } from "@/lib/storage";
 
 // Everything an agency admin can do in the portal, as MCP tools.
@@ -356,11 +359,12 @@ export const tools: Tool[] = [
         text: z.string().optional(),
         contentBase64: z.string().optional(),
         needsApproval: z.boolean().default(false),
+        folder: z.enum(filesData.FOLDERS).default("").describe("'brand' puts it in the client's Brand kit (business card, logos)"),
       })
       .refine((v) => (v.text === undefined) !== (v.contentBase64 === undefined), "Give either text or contentBase64"),
-    run: async (viewer, { clientId, name, mimeType, text, contentBase64, needsApproval }) => {
+    run: async (viewer, { clientId, name, mimeType, text, contentBase64, needsApproval, folder }) => {
       const data = text !== undefined ? Buffer.from(text, "utf-8") : Buffer.from(contentBase64!, "base64");
-      await filesData.uploadFile(viewer, { name, mimeType, data, needsApproval }, clientId);
+      await filesData.uploadFile(viewer, { name, mimeType, data, needsApproval, folder }, clientId);
       return { uploaded: name, sizeBytes: data.length };
     },
   }),
@@ -407,6 +411,169 @@ export const tools: Tool[] = [
     run: async (viewer, { invoiceId, status }) => {
       await invoicesData.setInvoiceStatus(viewer, invoiceId, status);
       return { invoiceId, status };
+    },
+  }),
+  tool({
+    name: "upsert_invoice",
+    description:
+      "Create or update an invoice by its number (LMS Dash uses this to keep the portal in step). Drafts are hidden from the client; only 'sent' counts toward the balance they owe. amountCents is in cents.",
+    input: z.object({
+      clientId,
+      number: z.string().trim().min(1).max(50),
+      description: z.string().trim().max(500).default(""),
+      amountCents: z.number().int().min(0),
+      issuedOn: isoDate,
+      dueOn: isoDate,
+      status: z.enum(invoiceStatus.enumValues),
+    }),
+    run: async (viewer, { clientId, ...input }) => invoicesData.upsertInvoice(viewer, clientId, input),
+  }),
+  tool({
+    name: "set_payment_instructions",
+    description: "How clients pay, shown on every client's Billing page (e.g. the e-Transfer address).",
+    input: z.object({ text: z.string().trim().max(1000) }),
+    run: async (viewer, { text }) => {
+      await clientsData.setPaymentInstructions(viewer, text);
+      return { paymentInstructions: text };
+    },
+  }),
+
+  // ---- Logins ----
+  tool({
+    name: "create_client_user",
+    description:
+      "Give someone a login to a client's portal without the sign-up step. Returns a one-time link (14 days) where they choose their own password. Nothing is emailed: send the link yourself.",
+    input: z.object({ clientId, email: z.string().trim().email().max(320), name: z.string().trim().min(1).max(200) }),
+    run: async (viewer, { clientId, ...input }) => {
+      const { userId, token } = await clientsData.createClientUser(viewer, clientId, input);
+      return { userId, setPasswordUrl: `${appUrl()}/reset/${token}` };
+    },
+  }),
+
+  // ---- Requests: sync and clean-up ----
+  tool({
+    name: "list_request_activity",
+    description:
+      "Requests across all clients that changed after `since` (ISO time; omit for all), newest first, with client name, details and the comment thread. LMS Dash resyncs tickets with this.",
+    input: z.object({ since: z.string().datetime({ offset: true }).optional(), limit: z.number().int().min(1).max(500).default(200) }),
+    readOnly: true,
+    run: (viewer, { since, limit }) => requestsData.listRequestActivity(viewer, since ? new Date(since) : undefined, limit),
+  }),
+  tool({
+    name: "delete_request",
+    description: "Delete a request and its comments. For test tickets and spam; close real ones with set_request_status done.",
+    input: z.object({ requestId: uuid }),
+    destructive: true,
+    run: async (viewer, { requestId }) => {
+      await requestsData.deleteRequest(viewer, requestId);
+      return { deleted: requestId };
+    },
+  }),
+
+  // ---- Results: site stats, rankings, AI answers ----
+  tool({
+    name: "set_stats_source",
+    description:
+      "Connect a client's website analytics: the site's stats URL (https://<domain>/api/stats) and its bearer token. Fetched right away, then hourly. Pass an empty statsUrl to disconnect. Omit statsToken to keep the stored one.",
+    input: z.object({ clientId, statsUrl: z.string().trim().max(500), statsToken: z.string().trim().max(500).optional() }),
+    run: async (viewer, { clientId, ...input }) => {
+      await statsData.setStatsSource(viewer, clientId, input);
+      const stats = await statsData.getSiteStats(viewer, clientId);
+      return { connected: stats.connected, rows: stats.rows.length, since: stats.since, fetchedAt: stats.fetchedAt, error: stats.error };
+    },
+  }),
+  tool({
+    name: "get_site_stats",
+    description: "The stored copy of a client's site counts (refreshed hourly): raw rows plus when it was fetched and any error.",
+    input: z.object({ clientId }),
+    readOnly: true,
+    run: (viewer, { clientId }) => statsData.getSiteStats(viewer, clientId),
+  }),
+  tool({
+    name: "sync_rankings",
+    description:
+      "Replace a client's tracked Google searches and monthly positions with this set (searches not listed are removed). positions maps YYYY-MM to a position, 0 = not found in the first 3 pages.",
+    input: z.object({
+      clientId,
+      keywords: z
+        .array(
+          z.object({
+            keyword: z.string().trim().min(1).max(200),
+            priority: z.string().trim().max(40).optional(),
+            positions: z.record(z.string().regex(/^\d{4}-\d{2}$/), z.number().int().min(0).max(100)),
+          }),
+        )
+        .max(300),
+    }),
+    run: async (viewer, { clientId, keywords }) => ({ keywords: (await rankingsData.syncRankings(viewer, clientId, keywords)).length }),
+  }),
+  tool({
+    name: "list_rankings",
+    description: "A client's tracked searches with their monthly positions (0 = not found).",
+    input: z.object({ clientId }),
+    readOnly: true,
+    run: (viewer, { clientId }) => rankingsData.listRankings(viewer, clientId),
+  }),
+  tool({
+    name: "sync_ai_answers",
+    description:
+      "Replace a client's AI answer checks with this set. results maps YYYY-MM to { engine: 'yes' (named) | 'cited' (site cited) | 'no' (not named) }, engines like ChatGPT, Gemini, Perplexity, Google AI, Copilot, Claude.",
+    input: z.object({
+      clientId,
+      questions: z
+        .array(
+          z.object({
+            question: z.string().trim().min(1).max(500),
+            results: z.record(z.string().regex(/^\d{4}-\d{2}$/), z.record(z.string().max(40), z.enum(rankingsData.AI_RESULTS))),
+          }),
+        )
+        .max(200),
+    }),
+    run: async (viewer, { clientId, questions }) => ({ questions: (await rankingsData.syncAiAnswers(viewer, clientId, questions)).length }),
+  }),
+
+  // ---- To-dos for the client ----
+  tool({
+    name: "list_todos",
+    description: "The things a client has to do themselves (open first), with their steps.",
+    input: z.object({ clientId }),
+    readOnly: true,
+    run: (viewer, { clientId }) => todosData.listTodos(viewer, clientId),
+  }),
+  tool({
+    name: "save_todo",
+    description:
+      "Add a to-do for the client, or edit one (pass todoId). steps: one step per line. The client sees it on their To-dos page, so confirm the wording first.",
+    input: z.object({
+      clientId,
+      todoId: uuid.optional(),
+      title: z.string().trim().min(1).max(200),
+      why: z.string().trim().max(2000).default(""),
+      steps: z.string().trim().max(8000).default(""),
+      linkUrl: z.string().trim().max(500).optional(),
+      linkLabel: z.string().trim().max(60).optional(),
+      dueOn: isoDate.optional(),
+      sort: z.number().int().min(0).max(1000).default(0),
+    }),
+    run: async (viewer, { clientId, todoId, ...input }) => ({ todoId: await todosData.saveTodo(viewer, clientId, input, todoId) }),
+  }),
+  tool({
+    name: "set_todo_status",
+    description: "Mark a client's to-do done, or reopen it.",
+    input: z.object({ todoId: uuid, status: z.enum(["open", "done"]) }),
+    run: async (viewer, { todoId, status }) => {
+      await todosData.setTodoStatus(viewer, todoId, status);
+      return { todoId, status };
+    },
+  }),
+  tool({
+    name: "delete_todo",
+    description: "Delete a client's to-do.",
+    input: z.object({ todoId: uuid }),
+    destructive: true,
+    run: async (viewer, { todoId }) => {
+      await todosData.deleteTodo(viewer, todoId);
+      return { deleted: todoId };
     },
   }),
 ];

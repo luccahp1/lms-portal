@@ -80,33 +80,36 @@ export async function fetchStoredFile(key: string): Promise<Buffer> {
   return Buffer.from(await res.arrayBuffer());
 }
 
-function contentDisposition(filename: string) {
+function contentDisposition(filename: string, kind: "attachment" | "inline" = "attachment") {
   const ascii = filename.replace(/[^\x20-\x7e]/g, "_").replace(/["\\]/g, "_");
-  return `attachment; filename="${ascii}"; filename*=UTF-8''${encodeURIComponent(filename)}`;
+  return `${kind}; filename="${ascii}"; filename*=UTF-8''${encodeURIComponent(filename)}`;
 }
 
 /**
  * The response for an authorised download. With R2 this is a redirect to a
  * short-lived signed URL, so the bytes come from Cloudflare, not the home
- * server's upload bandwidth. Always forces a download (never renders inline).
+ * server's upload bandwidth. Forces a download, except `inlineImage` (a raster image
+ * mime type the caller has checked) which is shown in the page, e.g. the brand kit.
  */
-export async function downloadResponse(key: string, filename: string): Promise<Response> {
+export async function downloadResponse(key: string, filename: string, inlineImage?: string): Promise<Response> {
   checkKey(key);
+  const disposition = contentDisposition(filename, inlineImage ? "inline" : "attachment");
+  const type = inlineImage ?? "application/octet-stream";
   const remote = r2();
   if (remote) {
     const url = new URL(`${remote.base}/${key}`);
     url.searchParams.set("X-Amz-Expires", String(DOWNLOAD_LINK_SECONDS));
-    url.searchParams.set("response-content-disposition", contentDisposition(filename));
-    url.searchParams.set("response-content-type", "application/octet-stream");
+    url.searchParams.set("response-content-disposition", disposition);
+    url.searchParams.set("response-content-type", type);
     const signed = await remote.client.sign(url.toString(), { method: "GET", aws: { signQuery: true } });
     return new Response(null, { status: 302, headers: { Location: signed.url, "Cache-Control": "private, no-store" } });
   }
   const data = await readStoredFile(key);
   return new Response(new Uint8Array(data), {
     headers: {
-      "Content-Type": "application/octet-stream",
+      "Content-Type": type,
       "Content-Length": String(data.length),
-      "Content-Disposition": contentDisposition(filename),
+      "Content-Disposition": disposition,
       "X-Content-Type-Options": "nosniff",
       "Cache-Control": "private, no-store",
     },

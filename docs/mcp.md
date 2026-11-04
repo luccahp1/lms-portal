@@ -19,6 +19,23 @@ its owner is an active `agency_admin`, and it can only reach that admin's agency
 Tools that change data refresh the portal's pages afterwards. Tools are annotated `readOnlyHint`
 or `destructiveHint` so clients can ask before deleting.
 
+## Tools added for results and LMS Dash (2026-11-03)
+
+| Tool | Does |
+|---|---|
+| `create_client_user` | Login for a client without the sign-up step; returns a set-password link |
+| `set_stats_source`, `get_site_stats` | Connect a client site's analytics; read the stored copy |
+| `sync_rankings`, `list_rankings` | Replace / read tracked Google searches and monthly positions |
+| `sync_ai_answers` | Replace the AI answer checks |
+| `upsert_invoice` | Create or update an invoice by number |
+| `set_payment_instructions` | How clients pay, shown on Billing |
+| `list_request_activity` | Requests changed since a time, with comments (Dash resync) |
+| `delete_request` | Remove a test or spam ticket |
+| `list_todos`, `save_todo`, `set_todo_status`, `delete_todo` | The client's To-dos |
+| `upload_file` `folder: "brand"` | File into the client's Brand kit |
+
+How LMS Dash uses them: [live-updates-and-dash-sync.md](live-updates-and-dash-sync.md).
+
 ## Onboarding clients
 
 `new_client_guide` returns the onboarding steps in order with the live sign-up link, and the

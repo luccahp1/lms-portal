@@ -8,6 +8,8 @@ import {
   date,
   index,
   uniqueIndex,
+  jsonb,
+  primaryKey,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 
@@ -20,6 +22,7 @@ export const userStatus = pgEnum("user_status", ["pending", "active"]);
 export const requestStatus = pgEnum("request_status", ["received", "in_progress", "review", "done"]);
 export const fileApproval = pgEnum("file_approval", ["none", "pending", "approved", "changes_requested"]);
 export const invoiceStatus = pgEnum("invoice_status", ["draft", "sent", "paid"]);
+export const actionStatus = pgEnum("action_status", ["open", "done"]);
 
 const id = () => uuid("id").primaryKey().defaultRandom();
 const createdAt = () => timestamp("created_at", { withTimezone: true }).notNull().defaultNow();
@@ -29,6 +32,8 @@ export const agencies = pgTable("agencies", {
   name: text("name").notNull(),
   accentColor: text("accent_color").notNull().default("#5160E0"),
   // Secret part of the agency's public sign-up link: /join/<joinCode>
+  // Shown on the client's Billing page, e.g. "Pay by e-Transfer to ...".
+  paymentInstructions: text("payment_instructions").notNull().default(""),
   joinCode: text("join_code")
     .notNull()
     .unique()
@@ -44,6 +49,10 @@ export const clients = pgTable(
     name: text("name").notNull(),
     websiteUrl: text("website_url"),
     planName: text("plan_name"),
+    // The client's own site answers GET <statsUrl>?from=&to= with anonymous visit counts
+    // (see docs/analytics.md). The token is a secret: never send it to a client page.
+    statsUrl: text("stats_url"),
+    statsToken: text("stats_token"),
     createdAt: createdAt(),
   },
   (t) => [index("clients_agency_idx").on(t.agencyId)],
@@ -179,6 +188,8 @@ export const files = pgTable(
     mimeType: text("mime_type").notNull(),
     sizeBytes: integer("size_bytes").notNull(),
     approval: fileApproval("approval").notNull().default("none"),
+    // "" for ordinary files, "brand" for the client's brand kit (business card, logos).
+    folder: text("folder").notNull().default(""),
     createdAt: createdAt(),
   },
   (t) => [index("files_client_idx").on(t.clientId, t.createdAt)],
@@ -204,9 +215,102 @@ export const invoices = pgTable(
   ],
 );
 
+// Last answer from the client's site stats endpoint, refreshed hourly (src/lib/stats).
+export const siteStats = pgTable("site_stats", {
+  clientId: uuid("client_id")
+    .primaryKey()
+    .references(() => clients.id, { onDelete: "cascade" }),
+  agencyId: uuid("agency_id").notNull().references(() => agencies.id, { onDelete: "cascade" }),
+  // Raw counter rows: { day, kind, page, source, detail, n }
+  rows: jsonb("rows").$type<StatRow[]>().notNull().default([]),
+  // First day the site has counts for.
+  since: date("since"),
+  fetchedAt: timestamp("fetched_at", { withTimezone: true }),
+  error: text("error"),
+});
+
+export type StatRow = { day: string; kind: string; page: string; source: string; detail: string; n: number };
+
+// Google rankings, kept in LMS Dash and pushed here with the sync_rankings tool.
+export const keywords = pgTable(
+  "keywords",
+  {
+    id: id(),
+    agencyId: uuid("agency_id").notNull().references(() => agencies.id, { onDelete: "cascade" }),
+    clientId: uuid("client_id").notNull().references(() => clients.id, { onDelete: "cascade" }),
+    keyword: text("keyword").notNull(),
+    priority: text("priority").notNull().default(""),
+    sort: integer("sort").notNull().default(0),
+  },
+  (t) => [uniqueIndex("keywords_client_keyword_idx").on(t.clientId, t.keyword)],
+);
+
+export const keywordRanks = pgTable(
+  "keyword_ranks",
+  {
+    keywordId: uuid("keyword_id").notNull().references(() => keywords.id, { onDelete: "cascade" }),
+    // YYYY-MM
+    month: text("month").notNull(),
+    // 1..30, or 0 when not found in the first three pages.
+    position: integer("position").notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.keywordId, t.month] })],
+);
+
+// Whether AI assistants name the client, per question, engine and month. Pushed from LMS Dash.
+export const aiQuestions = pgTable(
+  "ai_questions",
+  {
+    id: id(),
+    agencyId: uuid("agency_id").notNull().references(() => agencies.id, { onDelete: "cascade" }),
+    clientId: uuid("client_id").notNull().references(() => clients.id, { onDelete: "cascade" }),
+    question: text("question").notNull(),
+    sort: integer("sort").notNull().default(0),
+  },
+  (t) => [uniqueIndex("ai_questions_client_question_idx").on(t.clientId, t.question)],
+);
+
+export const aiAnswers = pgTable(
+  "ai_answers",
+  {
+    questionId: uuid("question_id").notNull().references(() => aiQuestions.id, { onDelete: "cascade" }),
+    month: text("month").notNull(),
+    engine: text("engine").notNull(),
+    // yes = named, cited = site cited, no = not named
+    result: text("result").notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.questionId, t.month, t.engine] })],
+);
+
+// Things the client has to do themselves (verify Google, sign something), with steps.
+export const actionItems = pgTable(
+  "action_items",
+  {
+    id: id(),
+    agencyId: uuid("agency_id").notNull().references(() => agencies.id, { onDelete: "cascade" }),
+    clientId: uuid("client_id").notNull().references(() => clients.id, { onDelete: "cascade" }),
+    title: text("title").notNull(),
+    why: text("why").notNull().default(""),
+    // One step per line.
+    steps: text("steps").notNull().default(""),
+    linkUrl: text("link_url"),
+    linkLabel: text("link_label"),
+    dueOn: date("due_on"),
+    status: actionStatus("status").notNull().default("open"),
+    doneAt: timestamp("done_at", { withTimezone: true }),
+    doneById: uuid("done_by_id").references(() => users.id, { onDelete: "set null" }),
+    sort: integer("sort").notNull().default(0),
+    createdAt: createdAt(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("action_items_client_idx").on(t.clientId, t.status)],
+);
+
 export type User = typeof users.$inferSelect;
 export type Client = typeof clients.$inferSelect;
 export type Agency = typeof agencies.$inferSelect;
 export type RequestStatus = (typeof requestStatus.enumValues)[number];
 export type FileApproval = (typeof fileApproval.enumValues)[number];
 export type InvoiceStatus = (typeof invoiceStatus.enumValues)[number];
+export type ActionStatus = (typeof actionStatus.enumValues)[number];
+export type ActionItem = typeof actionItems.$inferSelect;

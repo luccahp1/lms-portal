@@ -27,3 +27,12 @@ Tests need a real Postgres: see the Gotchas in HANDOFF.md for the embedded-postg
 - "View as client" is a second cookie (`lms_preview`) read only by `requireClient()`. Server
   actions still use the real admin viewer; the portal wraps preview pages in a disabled fieldset.
 - `.claude/` is gitignored; never commit it.
+- Live updates: Postgres triggers (`drizzle/0004_live_notify.sql`) NOTIFY on every client table; a new
+  client-visible table needs adding to that trigger list (new migration) or its pages won't refresh live.
+- `clients.stats_token` is secret: `getClient`/`listClients` select explicit columns without it. Keep it that way.
+- `src/instrumentation.ts` only imports `instrumentation-node.ts` under `NEXT_RUNTIME === "nodejs"`;
+  importing db code directly there breaks the Edge build (`Can't resolve 'fs'`).
+- Bash heredocs with long inline Python sometimes fail to parse ("unexpected EOF"); write the script to the
+  scratchpad and run it instead.
+- LMS Dash is the source for rankings, AI answers and invoices; it pushes them here. Don't edit those
+  by hand in the portal or the next Dash sync overwrites them. docs/live-updates-and-dash-sync.md.

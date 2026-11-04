@@ -16,6 +16,8 @@ import * as filesData from "@/lib/data/files";
 import * as updatesData from "@/lib/data/updates";
 import * as invoicesData from "@/lib/data/invoices";
 import * as signupsData from "@/lib/data/signups";
+import * as statsData from "@/lib/data/stats";
+import * as todosData from "@/lib/data/todos";
 import { requestStatus, invoiceStatus } from "@/db/schema";
 
 export type ActionState = { error?: string; resetUrl?: string; ok?: boolean } | undefined;
@@ -105,6 +107,7 @@ export async function uploadFileAction(_prev: ActionState, formData: FormData): 
         mimeType: file.type,
         data: Buffer.from(await file.arrayBuffer()),
         needsApproval: formData.get("needsApproval") === "on",
+        folder: formData.get("folder") === "brand" ? "brand" : "",
       },
       clientId,
     );
@@ -267,4 +270,93 @@ export async function setInvoiceStatusAction(formData: FormData) {
   const input = parse(z.object({ invoiceId: z.string().uuid(), status: z.enum(invoiceStatus.enumValues) }), formData);
   await invoicesData.setInvoiceStatus(viewer, input.invoiceId, input.status);
   refresh();
+}
+
+export async function setPaymentInstructionsAction(formData: FormData) {
+  const viewer = await requireAdmin();
+  const input = parse(z.object({ text: z.string().trim().max(1000).default("") }), formData);
+  await clientsData.setPaymentInstructions(viewer, input.text);
+  refresh();
+}
+
+// ---- To-dos ----
+
+export async function setTodoStatusAction(formData: FormData) {
+  const viewer = await requireViewer();
+  const input = parse(z.object({ todoId: z.string().uuid(), status: z.enum(["open", "done"]) }), formData);
+  await todosData.setTodoStatus(viewer, input.todoId, input.status);
+  refresh();
+}
+
+export async function saveTodoAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  const viewer = await requireAdmin();
+  const parsed = z
+    .object({
+      clientId: z.string().uuid(),
+      todoId: optionalId,
+      title: z.string().trim().min(1, "Give it a title.").max(200),
+      why: z.string().trim().max(2000).default(""),
+      steps: z.string().trim().max(8000).default(""),
+      linkUrl: z.string().trim().max(500).default(""),
+      linkLabel: z.string().trim().max(60).default(""),
+      dueOn: z.string().regex(/^(\d{4}-\d{2}-\d{2})?$/).default(""),
+      sort: z.coerce.number().int().min(0).max(1000).default(0),
+    })
+    .safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message };
+  const { clientId, todoId, dueOn, ...rest } = parsed.data;
+  try {
+    await todosData.saveTodo(viewer, clientId, { ...rest, dueOn: dueOn || null }, todoId);
+  } catch (err) {
+    if (err instanceof Error && err.message.startsWith("Links must")) return { error: err.message };
+    throw err;
+  }
+  refresh();
+  return { ok: true };
+}
+
+export async function deleteTodoAction(formData: FormData) {
+  const viewer = await requireAdmin();
+  const input = parse(z.object({ todoId: z.string().uuid() }), formData);
+  await todosData.deleteTodo(viewer, input.todoId);
+  refresh();
+}
+
+// ---- Admin: analytics source and logins ----
+
+export async function setStatsSourceAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  const viewer = await requireAdmin();
+  const input = parse(
+    z.object({ clientId: z.string().uuid(), statsUrl: z.string().trim().max(500).default(""), statsToken: z.string().trim().max(500).default("") }),
+    formData,
+  );
+  try {
+    await statsData.setStatsSource(viewer, input.clientId, input);
+  } catch (err) {
+    if (err instanceof Error && err.message.startsWith("Stats URL")) return { error: err.message };
+    throw err;
+  }
+  refresh();
+  return { ok: true };
+}
+
+export async function createClientUserAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  const viewer = await requireAdmin();
+  const parsed = z
+    .object({
+      clientId: z.string().uuid(),
+      email: z.string().trim().email("Enter an email address.").max(320),
+      name: z.string().trim().min(1, "Enter their name.").max(200),
+    })
+    .safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message };
+  const { clientId, ...input } = parsed.data;
+  try {
+    const { token } = await clientsData.createClientUser(viewer, clientId, input);
+    refresh();
+    return { ok: true, resetUrl: resetUrl(token) };
+  } catch (err) {
+    if (err instanceof clientsData.EmailTakenError) return { error: err.message };
+    throw err;
+  }
 }

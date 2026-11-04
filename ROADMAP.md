@@ -28,6 +28,20 @@ for files, its own Cloudflare Tunnel.
 
 ---
 
+## ✅ Phase 2a: Results for clients (live 2026-11-03)
+
+- [x] **Monthly reports**: visitors, page views, leads, sources, top pages, percent change against the
+      month before (or the same days of last month while a month is in progress)
+- [x] **Website analytics** from the client's own site (anonymous counts in Cloudflare D1), refreshed hourly
+- [x] **Google rankings** and **AI answer checks**, typed in LMS Dash and pushed to the portal
+- [x] **Rankings forecast** three months ahead, with a range and a plain explanation
+- [x] **To-dos**: what the client has to do themselves, with numbered steps and a link
+- [x] **Brand kit**: business card and logo previews and downloads
+- [x] **Billing**: current balance, overdue, payment instructions, paid to date
+- [x] **Live updates** over SSE from Postgres `NOTIFY` (replaces polling)
+- [x] **LMS Dash sync**: signed ticket webhook, `list_request_activity`, sync tools for rankings and invoices
+- [ ] One login for LMS Dash and the portal (see Decisions)
+
 ## Next up: Housekeeping (small, do first)
 
 Quick wins that protect what's live.
@@ -63,8 +77,8 @@ sees the modules for services they buy (needs a per-client module switch).
 - [ ] **Per-client modules:** admin toggles which sections each client sees
 - [ ] **Leads inbox:** the client's own website forms POST to the portal (a per-client key),
       New/Contacted status, count on Home. Website forms only, no email or call tracking.
-- [ ] **Performance:** visitors, top pages, sources. Prefer **Cloudflare Web Analytics**
-      (free, and our sites are on Cloudflare) via its API; Umami as a fallback.
+- [x] **Performance:** visitors, top pages, sources. Built on each site's own D1 counters instead
+      of Cloudflare Web Analytics (Phase 2a).
 - [ ] **Site health:** uptime checks, SSL expiry, Google PageSpeed score, last deploy
 - [ ] **Automatic work log** from git commits marked client-visible
 - [ ] Big headline number on Home switches to leads this month (as in the mockup)
@@ -101,6 +115,7 @@ know.
 | Pricing for agencies; whether there's a premium client tier | Phase 3 |
 | Which email service (Resend vs. others) | Phase 1.5 |
 | Analytics source if a client's site isn't on Cloudflare | Phase 2 |
+| Merge LMS Dash and the portal behind one login (portal as the sign-in, Dash trusts it) or one app | After the Dash sync has run a month |
 
 ## Not doing (for now)
 

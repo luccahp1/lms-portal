@@ -5,8 +5,11 @@ import { getLatestNote, listWorkLog } from "@/lib/data/updates";
 import { listRequests } from "@/lib/data/requests";
 import { listMessages } from "@/lib/data/messages";
 import { listFiles } from "@/lib/data/files";
-import { listInvoices } from "@/lib/data/invoices";
-import { formatDate, formatDateTime, formatMoney } from "@/lib/format";
+import { balance, listInvoices } from "@/lib/data/invoices";
+import { countOpenTodos } from "@/lib/data/todos";
+import { getSiteStats } from "@/lib/data/stats";
+import { change, reportPeriods, summarise } from "@/lib/reports";
+import { formatDate, formatDateTime, formatMoney, today } from "@/lib/format";
 import { Avatar, ButtonLink, Card, CardTitle, Empty } from "@/components/ui";
 import { MonthlyNote } from "@/components/features/MonthlyNote";
 import { RequestList } from "@/components/features/RequestList";
@@ -14,7 +17,7 @@ import { WorkLogList } from "@/components/features/WorkLogList";
 
 export default async function PortalHome() {
   const viewer = await requireClient();
-  const [agency, note, workLog, requests, messages, files, invoices] = await Promise.all([
+  const [agency, note, workLog, requests, messages, files, invoices, todoCount, stats] = await Promise.all([
     getAgency(viewer),
     getLatestNote(viewer),
     listWorkLog(viewer, undefined, 6),
@@ -22,35 +25,58 @@ export default async function PortalHome() {
     listMessages(viewer),
     listFiles(viewer),
     listInvoices(viewer),
+    countOpenTodos(viewer),
+    getSiteStats(viewer),
   ]);
+  const now = today();
 
   const open = requests.filter((r) => r.status !== "done");
   const waiting = requests.filter((r) => r.status === "review").length;
   const pendingFiles = files.filter((f) => f.approval === "pending").length;
-  const nextInvoice = invoices.filter((i) => i.status === "sent").sort((a, b) => a.dueOn.localeCompare(b.dueOn))[0];
+  const owed = balance(invoices, now);
   const firstName = viewer.name.split(" ")[0];
+  const { current, previous } = reportPeriods(now.slice(0, 7), now);
+  const visits = summarise(stats.rows, current).visits;
+  const visitsBefore = summarise(stats.rows, previous).visits;
+  const visitChange = stats.since && previous.end >= stats.since ? change(visits, visitsBefore) : null;
+  const yourTurn = todoCount + pendingFiles + waiting;
 
-  const stats = [
+  const tiles = [
+    {
+      href: "/portal/reports",
+      label: "Visitors this month",
+      value: stats.connected ? String(visits) : "—",
+      detail: !stats.connected
+        ? "Analytics coming soon"
+        : visitChange === null
+          ? "See your monthly report"
+          : `${visitChange > 0 ? "+" : ""}${visitChange}% vs the same days last month`,
+      tone: visitChange !== null && visitChange > 0 ? "good" : "muted",
+    },
+    {
+      href: todoCount ? "/portal/todos" : pendingFiles ? "/portal/files" : "/portal/requests",
+      label: "Waiting on you",
+      value: String(yourTurn),
+      detail: yourTurn
+        ? [todoCount && `${todoCount} to-do${todoCount > 1 ? "s" : ""}`, pendingFiles && `${pendingFiles} file${pendingFiles > 1 ? "s" : ""} to approve`, waiting && `${waiting} request${waiting > 1 ? "s" : ""} to approve`]
+            .filter(Boolean)
+            .join(", ")
+        : "You’re all caught up",
+      tone: yourTurn ? "warn" : "muted",
+    },
     {
       href: "/portal/requests",
       label: "Open requests",
       value: String(open.length),
-      detail: waiting ? `${waiting} waiting for your approval` : "Nothing waiting on you",
-      warn: waiting > 0,
-    },
-    {
-      href: "/portal/files",
-      label: "Files to approve",
-      value: String(pendingFiles),
-      detail: pendingFiles ? "Something is ready for you" : "You’re all caught up",
-      warn: pendingFiles > 0,
+      detail: open.length ? "We’re on it" : "Need something? Send a request",
+      tone: "muted",
     },
     {
       href: "/portal/billing",
-      label: "Next invoice",
-      value: nextInvoice ? formatMoney(nextInvoice.amountCents) : "—",
-      detail: nextInvoice ? `Due ${formatDate(nextInvoice.dueOn)}` : "Nothing due",
-      warn: false,
+      label: "Balance",
+      value: formatMoney(owed.owing),
+      detail: owed.overdueCount ? `${formatMoney(owed.overdue)} past due` : owed.nextDue ? `Due ${formatDate(owed.nextDue)}` : owed.owing ? "Due now" : "All paid up",
+      tone: owed.overdueCount ? "warn" : "muted",
     },
   ];
 
@@ -71,12 +97,16 @@ export default async function PortalHome() {
 
       <MonthlyNote note={note} agencyName={agency.name} />
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        {stats.map((s) => (
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {tiles.map((s) => (
           <Link key={s.label} href={s.href} className="flex flex-col gap-1.5 rounded-[14px] border border-line bg-surface p-5 hover:border-line-strong">
             <span className="text-[13px] font-medium text-muted">{s.label}</span>
             <span className="text-[26px] font-semibold tracking-tight">{s.value}</span>
-            <span className={`text-[13px] ${s.warn ? "font-medium text-warn" : "text-muted"}`}>{s.detail}</span>
+            <span
+              className={`text-[13px] ${s.tone === "warn" ? "font-medium text-warn" : s.tone === "good" ? "font-medium text-good" : "text-muted"}`}
+            >
+              {s.detail}
+            </span>
           </Link>
         ))}
       </div>

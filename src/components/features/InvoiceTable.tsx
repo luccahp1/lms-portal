@@ -18,7 +18,7 @@ const nextStatus: Partial<Record<InvoiceStatus, { to: InvoiceStatus; label: stri
   sent: { to: "paid", label: "Mark paid" },
 };
 
-export function InvoiceTable({ invoices, admin = false }: { invoices: Invoice[]; admin?: boolean }) {
+export function InvoiceTable({ invoices, admin = false, today }: { invoices: Invoice[]; admin?: boolean; today?: string }) {
   if (invoices.length === 0) {
     return (
       <Card>
@@ -40,7 +40,8 @@ export function InvoiceTable({ invoices, admin = false }: { invoices: Invoice[];
         </thead>
         <tbody>
           {invoices.map((inv) => {
-            const status = invoiceStatusLabel[inv.status];
+            const overdue = today && inv.status === "sent" && inv.dueOn < today;
+            const status = overdue ? { label: "Overdue", tone: "warn" as const } : invoiceStatusLabel[inv.status];
             const next = admin ? nextStatus[inv.status] : undefined;
             return (
               <tr key={inv.id} className="border-t border-subtle">

@@ -10,16 +10,55 @@ export async function getAgency(viewer: Viewer) {
   return row;
 }
 
+// Every client column except the stats token, which never leaves the server.
+const clientColumns = {
+  id: clients.id,
+  agencyId: clients.agencyId,
+  name: clients.name,
+  websiteUrl: clients.websiteUrl,
+  planName: clients.planName,
+  statsUrl: clients.statsUrl,
+  createdAt: clients.createdAt,
+};
+
 export async function listClients(viewer: Viewer) {
   assertAdmin(viewer);
-  return db.select().from(clients).where(eq(clients.agencyId, viewer.agencyId)).orderBy(asc(clients.name));
+  return db.select(clientColumns).from(clients).where(eq(clients.agencyId, viewer.agencyId)).orderBy(asc(clients.name));
 }
 
 export async function getClient(viewer: Viewer, clientId?: string) {
   const id = await resolveClientId(viewer, clientId);
-  const [row] = await db.select().from(clients).where(eq(clients.id, id));
+  const [row] = await db.select(clientColumns).from(clients).where(eq(clients.id, id));
   if (!row) throw new NotFoundError();
   return row;
+}
+
+export async function setPaymentInstructions(viewer: Viewer, text: string) {
+  assertAdmin(viewer);
+  await db.update(agencies).set({ paymentInstructions: text.trim() }).where(eq(agencies.id, viewer.agencyId));
+}
+
+export class EmailTakenError extends Error {
+  constructor() {
+    super("Someone already uses that email address");
+  }
+}
+
+/**
+ * Give someone a login to a client's portal without the sign-up step. Returns a one-time
+ * link (14 days) for them to choose their own password. Nothing is emailed.
+ */
+export async function createClientUser(viewer: Viewer, clientId: string, input: { email: string; name: string }) {
+  assertAdmin(viewer);
+  const id = await resolveClientId(viewer, clientId);
+  const email = input.email.trim().toLowerCase();
+  const [taken] = await db.select({ id: users.id }).from(users).where(eq(users.email, email));
+  if (taken) throw new EmailTakenError();
+  const [user] = await db
+    .insert(users)
+    .values({ agencyId: viewer.agencyId, clientId: id, role: "client", status: "active", email, name: input.name.trim() })
+    .returning({ id: users.id });
+  return { userId: user!.id, token: await createInvite(user!.id) };
 }
 
 /** People who can log in to a client's portal. */

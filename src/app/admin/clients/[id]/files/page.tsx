@@ -9,7 +9,7 @@ export default async function ClientFiles({ params }: { params: Promise<{ id: st
   const files = await listFiles(viewer, id);
   return (
     <>
-      <UploadForm clientId={id} allowApproval />
+      <UploadForm clientId={id} allowApproval allowBrand />
       <FileList files={files} viewerRole="agency_admin" />
     </>
   );

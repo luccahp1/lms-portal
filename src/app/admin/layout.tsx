@@ -3,6 +3,7 @@ import { requireAdmin } from "@/lib/auth/session";
 import { getAgency } from "@/lib/data/clients";
 import { listAgencyOpenRequests } from "@/lib/data/requests";
 import { listPendingSignups } from "@/lib/data/signups";
+import { LiveRefresh } from "@/components/LiveRefresh";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const viewer = await requireAdmin();
@@ -23,6 +24,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         { href: "/admin/signups", label: "Sign-ups", icon: "signups", badge: pending.length },
       ]}
     >
+      <LiveRefresh />
       {children}
     </AppShell>
   );

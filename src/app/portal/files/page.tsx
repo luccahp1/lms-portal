@@ -8,7 +8,7 @@ export const metadata = { title: "Files & approvals" };
 
 export default async function FilesPage() {
   const viewer = await requireClient();
-  const files = await listFiles(viewer);
+  const files = await listFiles(viewer, undefined, "");
   return (
     <>
       <PageHeader title="Files & approvals" subtitle="Designs, documents and photos, all in one place." />

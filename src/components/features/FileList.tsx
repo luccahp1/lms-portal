@@ -51,6 +51,7 @@ export function FileList({ files, viewerRole }: { files: FileRow[]; viewerRole: 
               ) : (
                 approval && <Pill tone={approval.tone}>{approval.label}</Pill>
               )}
+              {viewerRole === "agency_admin" && f.folder === "brand" && <Pill tone="info">Brand kit</Pill>}
               {viewerRole === "agency_admin" && (
                 <form action={deleteFileAction}>
                   <input type="hidden" name="fileId" value={f.id} />

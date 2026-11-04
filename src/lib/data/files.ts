@@ -25,7 +25,11 @@ async function storedBytes() {
   return Number(row.total);
 }
 
-export async function listFiles(viewer: Viewer, clientId?: string) {
+export const FOLDERS = ["", "brand"] as const;
+export type Folder = (typeof FOLDERS)[number];
+
+/** A client's files. `folder` narrows to one folder; omitted lists everything. */
+export async function listFiles(viewer: Viewer, clientId?: string, folder?: Folder) {
   const id = await resolveClientId(viewer, clientId);
   return db
     .select({
@@ -34,14 +38,20 @@ export async function listFiles(viewer: Viewer, clientId?: string) {
       mimeType: files.mimeType,
       sizeBytes: files.sizeBytes,
       approval: files.approval,
+      folder: files.folder,
       createdAt: files.createdAt,
       uploadedByName: users.name,
       uploadedByRole: users.role,
     })
     .from(files)
     .leftJoin(users, eq(users.id, files.uploadedById))
-    .where(eq(files.clientId, id))
+    .where(folder === undefined ? eq(files.clientId, id) : and(eq(files.clientId, id), eq(files.folder, folder)))
     .orderBy(desc(files.createdAt));
+}
+
+/** Raster images are safe to show inline (no scripts, unlike SVG or HTML). */
+export function isInlineImage(mimeType: string) {
+  return /^image\/(png|jpeg|webp|gif)$/.test(mimeType);
 }
 
 export async function getFile(viewer: Viewer, fileId: string) {
@@ -56,9 +66,11 @@ export async function getFile(viewer: Viewer, fileId: string) {
 
 export async function uploadFile(
   viewer: Viewer,
-  input: { name: string; mimeType: string; data: Buffer; needsApproval: boolean },
+  input: { name: string; mimeType: string; data: Buffer; needsApproval: boolean; folder?: Folder },
   clientId?: string,
 ) {
+  // Only the agency files things into the brand kit.
+  const folder: Folder = viewer.role === "agency_admin" ? (input.folder ?? "") : "";
   const id = await resolveClientId(viewer, clientId);
   if (input.data.length === 0) throw new Error("Empty file");
   if (input.data.length > MAX_UPLOAD_BYTES) throw new Error("File is too large");
@@ -75,6 +87,7 @@ export async function uploadFile(
       storageKey,
       mimeType: input.mimeType || "application/octet-stream",
       sizeBytes: input.data.length,
+      folder,
       approval,
     });
   } catch (err) {

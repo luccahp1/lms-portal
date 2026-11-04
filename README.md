@@ -10,12 +10,16 @@ Built first for our own clients, designed multi-tenant so it can be sold to othe
 - Design mockup: [design/client-portal-mockup.dc.html](design/client-portal-mockup.dc.html)
 - MCP endpoint for AI clients: [docs/mcp.md](docs/mcp.md)
 - Adding a client and checking it with **View as client**: [docs/adding-a-client.md](docs/adding-a-client.md)
+- Analytics, monthly reports and the rankings forecast: [docs/analytics.md](docs/analytics.md)
+- Live updates and the LMS Dash sync: [docs/live-updates-and-dash-sync.md](docs/live-updates-and-dash-sync.md)
 
 ## Status
 
 **Live** at https://portal.londonmarketingsolutions.ca. **Phase 1 (built):** agency admin + client portal with monthly updates, work log, requests (with comments and approvals), messages, files (with approvals), and invoices. Clients sign up themselves with email + password through the agency's sign-up link; an admin approves each one. No email sending yet.
 
-Next: housekeeping, email, then results modules (leads, performance, site health). See [ROADMAP.md](ROADMAP.md).
+**Results (built 2026-11-03):** monthly reports from the client's own site analytics (refreshed hourly), Google rankings and AI answer checks pushed from LMS Dash, a three-month rankings forecast, a To-dos page with step-by-step instructions, a Brand kit page (business card, logos), and a Billing page with the current balance. Pages update live over server-sent events driven by Postgres `NOTIFY`, and ticket activity is pushed to LMS Dash by webhook.
+
+Next: housekeeping and email. See [ROADMAP.md](ROADMAP.md).
 
 ## Stack
 
@@ -30,6 +34,10 @@ src/db/schema.ts        tables (every row carries agency_id; client rows carry c
 src/lib/data/           all reads/writes, scoped to the logged-in viewer (tenant isolation lives here)
 src/lib/auth/           password hashing (scrypt), sessions, role guards, API tokens
 src/lib/mcp/            MCP server: protocol + tools over src/lib/data
+src/lib/stats/          hourly fetch of each client site's visit counts
+src/lib/live/           one LISTEN connection, fan-out to /api/live (SSE)
+src/lib/reports.ts      report numbers (pure);  src/lib/forecast.ts  rankings forecast (pure)
+src/lib/webhook.ts      signed ticket events to LMS Dash
 src/app/api/mcp/        MCP endpoint (bearer token auth)
 src/app/actions.ts      server actions shared by both sides
 src/app/portal/         client portal

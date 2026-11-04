@@ -1,0 +1,43 @@
+import { createHmac } from "node:crypto";
+import { eq } from "drizzle-orm";
+import { db } from "@/db";
+import { clients } from "@/db/schema";
+
+// Tells LMS Dash about ticket activity the moment it happens, so the agency side doesn't poll.
+// POST LMS_DASH_WEBHOOK_URL, body JSON, header X-LMS-Signature: sha256=<HMAC of the body with
+// LMS_DASH_WEBHOOK_SECRET>. Fire and forget: a down Dash never breaks a client's request.
+// Dash also resyncs every few minutes with list_request_activity, so a missed call heals.
+
+export type RequestEvent = "request.created" | "request.updated" | "request.commented" | "request.deleted";
+
+export function sign(body: string, secret: string) {
+  return "sha256=" + createHmac("sha256", secret).update(body).digest("hex");
+}
+
+export function notifyDash(
+  event: RequestEvent,
+  request: { id: string; clientId: string; title: string; status: string },
+): void {
+  const url = process.env.LMS_DASH_WEBHOOK_URL;
+  const secret = process.env.LMS_DASH_WEBHOOK_SECRET;
+  if (!url || !secret) return;
+  void (async () => {
+    const [client] = await db.select({ name: clients.name }).from(clients).where(eq(clients.id, request.clientId));
+    const body = JSON.stringify({
+      event,
+      clientId: request.clientId,
+      clientName: client?.name ?? "",
+      requestId: request.id,
+      title: request.title,
+      status: request.status,
+      at: new Date().toISOString(),
+    });
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-LMS-Signature": sign(body, secret) },
+      body,
+      signal: AbortSignal.timeout(3000),
+    });
+    if (!res.ok) console.warn(`LMS Dash webhook ${event}: ${res.status}`);
+  })().catch((err) => console.warn("LMS Dash webhook failed:", err instanceof Error ? err.message : err));
+}
