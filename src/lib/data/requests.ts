@@ -1,10 +1,11 @@
+import { cache } from "react";
 import { and, asc, desc, eq, gt, inArray, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { clients, requestComments, requests, users, type RequestStatus } from "@/db/schema";
 import { notifyDash } from "@/lib/webhook";
 import { assertAdmin, NotFoundError, resolveClientId, type Viewer } from "./viewer";
 
-export async function listRequests(viewer: Viewer, clientId?: string) {
+export const listRequests = cache(async function listRequests(viewer: Viewer, clientId?: string) {
   const id = await resolveClientId(viewer, clientId);
   return db
     .select({
@@ -13,15 +14,17 @@ export async function listRequests(viewer: Viewer, clientId?: string) {
       status: requests.status,
       createdAt: requests.createdAt,
       updatedAt: requests.updatedAt,
-      commentCount: sql<number>`(select count(*)::int from ${requestComments} where ${requestComments.requestId} = ${requests.id})`,
+      // Spelled out: in a single-table select drizzle drops table names, so `${requests.id}`
+      // would come out as "id" and bind to request_comments.id inside the subquery.
+      commentCount: sql<number>`(select count(*)::int from ${requestComments} c where c.request_id = "requests"."id")`,
     })
     .from(requests)
     .where(eq(requests.clientId, id))
     .orderBy(desc(requests.createdAt));
-}
+});
 
 /** Requests across all of an agency's clients, newest activity first. Admin inbox. */
-export async function listAgencyOpenRequests(viewer: Viewer) {
+export const listAgencyOpenRequests = cache(async function listAgencyOpenRequests(viewer: Viewer) {
   assertAdmin(viewer);
   return db
     .select({
@@ -34,7 +37,7 @@ export async function listAgencyOpenRequests(viewer: Viewer) {
     .from(requests)
     .where(and(eq(requests.agencyId, viewer.agencyId), sql`${requests.status} <> 'done'`))
     .orderBy(desc(requests.updatedAt));
-}
+});
 
 async function loadRequest(viewer: Viewer, requestId: string) {
   const [row] = await db

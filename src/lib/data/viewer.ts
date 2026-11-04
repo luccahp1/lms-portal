@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { and, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { clients } from "@/db/schema";
@@ -34,8 +35,12 @@ export function assertAdmin(viewer: Viewer) {
 /**
  * Resolve which client a viewer may act on.
  * Clients are pinned to their own client. Admins may act on any client of their agency.
+ *
+ * Reads that a layout and its page both make (this check, the agency, the nav badges) are
+ * wrapped in React's cache(), so one page view runs each of them once. The cache lasts for
+ * one server render only; server actions and the MCP endpoint call straight through.
  */
-export async function resolveClientId(viewer: Viewer, clientId?: string): Promise<string> {
+export const resolveClientId = cache(async function resolveClientId(viewer: Viewer, clientId?: string): Promise<string> {
   if (viewer.role === "client") {
     if (viewer.status !== "active" || !viewer.clientId) throw new ForbiddenError();
     if (clientId && clientId !== viewer.clientId) throw new NotFoundError();
@@ -48,4 +53,4 @@ export async function resolveClientId(viewer: Viewer, clientId?: string): Promis
     .where(and(eq(clients.id, clientId), eq(clients.agencyId, viewer.agencyId)));
   if (!row) throw new NotFoundError();
   return row.id;
-}
+});

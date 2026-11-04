@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { and, asc, desc, eq, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { actionItems, type ActionStatus } from "@/db/schema";
@@ -26,14 +27,14 @@ export async function listTodos(viewer: Viewer, clientId?: string) {
     .orderBy(asc(actionItems.status), asc(actionItems.sort), desc(actionItems.createdAt));
 }
 
-export async function countOpenTodos(viewer: Viewer, clientId?: string) {
+export const countOpenTodos = cache(async function countOpenTodos(viewer: Viewer, clientId?: string) {
   const id = await resolveClientId(viewer, clientId);
   const [row] = await db
     .select({ n: sql<number>`count(*)::int` })
     .from(actionItems)
     .where(and(eq(actionItems.clientId, id), eq(actionItems.status, "open")));
   return row?.n ?? 0;
-}
+});
 
 function clean(input: TodoInput) {
   const url = input.linkUrl?.trim() || null;

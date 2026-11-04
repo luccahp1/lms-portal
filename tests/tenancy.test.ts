@@ -97,6 +97,19 @@ describe("storage limit", () => {
   });
 });
 
+describe("request list", () => {
+  it("counts each request's comments", async () => {
+    const { admin, clientA } = await makeAgency();
+    const busy = await requestsData.createRequest(clientA.viewer, { title: "Busy", details: "" });
+    await requestsData.createRequest(clientA.viewer, { title: "Quiet", details: "" });
+    await requestsData.addRequestComment(clientA.viewer, busy, "first");
+    await requestsData.addRequestComment(admin, busy, "second");
+
+    const counts = Object.fromEntries((await requestsData.listRequests(clientA.viewer)).map((r) => [r.title, r.commentCount]));
+    expect(counts).toEqual({ Busy: 2, Quiet: 0 });
+  });
+});
+
 describe("workflow rules", () => {
   it("clients approve only requests that are ready for review", async () => {
     const { admin, clientA } = await makeAgency();

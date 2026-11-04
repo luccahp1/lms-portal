@@ -1,14 +1,15 @@
+import { cache } from "react";
 import { and, asc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { agencies, clients, users } from "@/db/schema";
 import { assertAdmin, NotFoundError, resolveClientId, type Viewer } from "./viewer";
 import { createInvite } from "./invites";
 
-export async function getAgency(viewer: Viewer) {
+export const getAgency = cache(async function getAgency(viewer: Viewer) {
   const [row] = await db.select().from(agencies).where(eq(agencies.id, viewer.agencyId));
   if (!row) throw new NotFoundError();
   return row;
-}
+});
 
 // Every client column except the stats token, which never leaves the server.
 const clientColumns = {
@@ -21,17 +22,17 @@ const clientColumns = {
   createdAt: clients.createdAt,
 };
 
-export async function listClients(viewer: Viewer) {
+export const listClients = cache(async function listClients(viewer: Viewer) {
   assertAdmin(viewer);
   return db.select(clientColumns).from(clients).where(eq(clients.agencyId, viewer.agencyId)).orderBy(asc(clients.name));
-}
+});
 
-export async function getClient(viewer: Viewer, clientId?: string) {
+export const getClient = cache(async function getClient(viewer: Viewer, clientId?: string) {
   const id = await resolveClientId(viewer, clientId);
   const [row] = await db.select(clientColumns).from(clients).where(eq(clients.id, id));
   if (!row) throw new NotFoundError();
   return row;
-}
+});
 
 export async function setPaymentInstructions(viewer: Viewer, text: string) {
   assertAdmin(viewer);

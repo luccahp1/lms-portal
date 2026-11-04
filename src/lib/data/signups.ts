@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { and, asc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { agencies, clients, users } from "@/db/schema";
@@ -41,14 +42,14 @@ export async function signUp(input: { joinCode: string; name: string; email: str
   }
 }
 
-export async function listPendingSignups(viewer: Viewer) {
+export const listPendingSignups = cache(async function listPendingSignups(viewer: Viewer) {
   assertAdmin(viewer);
   return db
     .select({ id: users.id, name: users.name, email: users.email, business: users.signupBusiness, createdAt: users.createdAt })
     .from(users)
     .where(and(eq(users.agencyId, viewer.agencyId), eq(users.status, "pending")))
     .orderBy(asc(users.createdAt));
-}
+});
 
 async function loadPending(viewer: Viewer, userId: string) {
   assertAdmin(viewer);

@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { and, desc, eq, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { files, users, type FileApproval } from "@/db/schema";
@@ -30,7 +31,7 @@ export const FOLDERS = ["", "brand"] as const;
 export type Folder = (typeof FOLDERS)[number];
 
 /** A client's files. `folder` narrows to one folder; omitted lists everything. */
-export async function listFiles(viewer: Viewer, clientId?: string, folder?: Folder) {
+export const listFiles = cache(async function listFiles(viewer: Viewer, clientId?: string, folder?: Folder) {
   const id = await resolveClientId(viewer, clientId);
   return db
     .select({
@@ -48,7 +49,7 @@ export async function listFiles(viewer: Viewer, clientId?: string, folder?: Fold
     .leftJoin(users, eq(users.id, files.uploadedById))
     .where(folder === undefined ? eq(files.clientId, id) : and(eq(files.clientId, id), eq(files.folder, folder)))
     .orderBy(desc(files.createdAt));
-}
+});
 
 /** Raster images are safe to show inline (no scripts, unlike SVG or HTML). */
 export function isInlineImage(mimeType: string) {

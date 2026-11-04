@@ -34,9 +34,13 @@ export async function getStatsSource(viewer: Viewer, clientId: string) {
  */
 export async function getSiteStats(viewer: Viewer, clientId?: string) {
   const id = await resolveClientId(viewer, clientId);
-  const [client] = await db.select({ statsUrl: clients.statsUrl }).from(clients).where(eq(clients.id, id));
-  const connected = Boolean(client?.statsUrl);
-  let [row] = await db.select().from(siteStats).where(eq(siteStats.clientId, id));
+  const [joined] = await db
+    .select({ statsUrl: clients.statsUrl, stats: siteStats })
+    .from(clients)
+    .leftJoin(siteStats, eq(siteStats.clientId, clients.id))
+    .where(eq(clients.id, id));
+  const connected = Boolean(joined?.statsUrl);
+  let row = joined?.stats ?? undefined;
   if (connected && !row?.fetchedAt) {
     await refreshClientStats(id);
     [row] = await db.select().from(siteStats).where(eq(siteStats.clientId, id));

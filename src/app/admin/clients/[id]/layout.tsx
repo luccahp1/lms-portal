@@ -12,8 +12,9 @@ export default async function ClientLayout({ children, params }: { children: Rea
   const viewer = await requireAdmin();
   const { id } = await params;
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
-  const client = await orNotFound(getClient(viewer, id));
-  const [requests, todoCount] = await Promise.all([listRequests(viewer, id), countOpenTodos(viewer, id)]);
+  const [client, requests, todoCount] = await orNotFound(
+    Promise.all([getClient(viewer, id), listRequests(viewer, id), countOpenTodos(viewer, id)]),
+  );
   const base = `/admin/clients/${id}`;
 
   return (
