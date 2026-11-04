@@ -1,5 +1,5 @@
 import { getPortalViewer } from "@/lib/auth/session";
-import { subscribe } from "@/lib/live/hub";
+import { subscribe, trackStream } from "@/lib/live/hub";
 
 // Server-sent events: one "change" event whenever data the viewer can see changes.
 // The page then re-renders itself (router.refresh). A client hears only its own client;
@@ -38,7 +38,9 @@ export async function GET(req: Request) {
         }, DEBOUNCE_MS);
       });
       const beat = setInterval(() => send(": ping\n\n"), HEARTBEAT_MS);
+      const untrack = trackStream(() => cleanup());
       cleanup = () => {
+        untrack();
         unsubscribe();
         clearInterval(beat);
         if (timer) clearTimeout(timer);

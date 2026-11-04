@@ -1,4 +1,10 @@
 import { refreshAllStats } from "@/lib/stats/refresh";
+import { closeAllStreams } from "@/lib/live/hub";
+
+// Next's own SIGTERM handler waits for open connections before exiting; end the live
+// streams so a restart takes a moment instead of systemd's 90 s stop timeout.
+process.once("SIGTERM", closeAllStreams);
+process.once("SIGINT", closeAllStreams);
 
 // Refreshes every client's site stats hourly, so the Reports page reads a fresh stored copy
 // instead of calling the client's site on each view. Production only; STATS_REFRESH=off skips it.

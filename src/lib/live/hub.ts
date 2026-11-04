@@ -6,10 +6,32 @@ import { Client } from "pg";
 // through /api/live and get a tiny "changed" event instead of polling the database.
 
 type Listener = (clientId: string) => void;
-type Hub = { listeners: Map<string, Set<Listener>>; client: Client | null; starting: Promise<void> | null };
+type Hub = {
+  listeners: Map<string, Set<Listener>>;
+  client: Client | null;
+  starting: Promise<void> | null;
+  /** Close functions of the open /api/live streams. */
+  streams: Set<() => void>;
+};
 
 const g = globalThis as unknown as { liveHub?: Hub };
-const hub: Hub = (g.liveHub ??= { listeners: new Map(), client: null, starting: null });
+const hub: Hub = (g.liveHub ??= { listeners: new Map(), client: null, starting: null, streams: new Set() });
+
+/** Register an open stream so shutdown can end it. Returns the matching unregister. */
+export function trackStream(close: () => void): () => void {
+  hub.streams.add(close);
+  return () => hub.streams.delete(close);
+}
+
+/**
+ * End every open stream. On SIGTERM Next stops accepting connections and waits for the open
+ * ones to finish, and an SSE stream never finishes by itself, so without this a restart hung
+ * until systemd killed the process (90 s with the portal unreachable). Browsers reconnect to
+ * the new process on their own (retry: 5000).
+ */
+export function closeAllStreams() {
+  for (const close of [...hub.streams]) close();
+}
 
 function dispatch(payload: string) {
   const [agencyId, clientId = ""] = payload.split(":");
