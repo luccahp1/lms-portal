@@ -1,5 +1,18 @@
 # Handoff
 
+## State (2026-11-04, latest): performance pass
+
+- Deployed 2d9d3fe + 088284c. Details, measurements and sources: docs/performance.md. Backups
+  `/srv/backups/lms-portal/*20261104-074054.pre-perf*`.
+- Reads shared by layouts and pages are wrapped in React `cache()` (Home 18 queries to 13). New
+  layout/page reads that both call the same function should be wrapped the same way.
+- The pg pool keeps idle connections 10 minutes (first request after a pause 35-45 ms to 28 ms) and
+  logs idle connection errors instead of crashing.
+- Restarts no longer hang 90 s: `/api/live` streams are closed on SIGTERM (0.8 s with a page open).
+  No unit change was needed.
+- Fixed: the request list comment count was always 0.
+- Held back for Lucca: `pg_stat_statements` (needs a Postgres restart, which PawSit shares).
+
 ## State (2026-11-04, later): agency side moved to LMS Dash
 
 - The admin pages now live in LMS Dash (https://lms-dev.pawsit.ca): each client's **Portal** tab and a
@@ -7,8 +20,7 @@
   bring the old admin pages back. Deployed 07f237b with Dash 0ec6b6e; backups `*20261104-072841*`.
 - View as client from Dash: `create_preview_link`, then `/preview/<token>`: one use, 2 minutes,
   opening a read-only one-hour preview of that one client (tables `preview_links`, `preview_sessions`).
-- Restarting `lms-portal` takes about 90 s: Node waits for open `/api/live` streams. Fix: `TimeoutStopSec=10`
-  in the unit (needs Lucca's OK) or close streams on SIGTERM.
+- (Fixed in the performance pass: restarts used to take about 90 s while `/api/live` streams were open.)
 
 ## State (2026-11-04)
 
@@ -47,7 +59,6 @@
 - Lucca: check Maple's to-dos with View as client, then send office@ the set-password link.
 - Mark LMS-0002/3/4 sent in LMS Dash when they go out.
 - One login for Dash and the portal (ROADMAP decision).
-- Performance pass on the site and database (separate session).
 - Housekeeping and email from ROADMAP.md.
 - 8 old commits carry AI-authorship trailers (repo_hygiene.py blocker). Removing them needs a
   history rewrite + force push; left alone until Lucca decides.
@@ -66,5 +77,7 @@
   rebuild `../current` from `.next/standalone` + `.next/static` + `public`, `sudo systemctl restart lms-portal`.
 - The `lms-portal` MCP client in Claude Code caches the tool list from when it connected; new tools need
   a reconnect (`/mcp`) before they show up.
+- Wrapping a data function in React `cache()` dedupes it within one render only; server actions and
+  `/api/mcp` call straight through, so a write followed by a read in an action is never stale.
 - R2 uploads must go out with a known length: sign with aws4fetch, then send with plain `fetch`
   (`src/lib/storage.ts`). aws4fetch's own fetch sends chunked and R2 answers 411.

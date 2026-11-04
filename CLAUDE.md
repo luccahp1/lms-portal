@@ -34,5 +34,9 @@ Tests need a real Postgres: see the Gotchas in HANDOFF.md for the embedded-postg
   importing db code directly there breaks the Edge build (`Can't resolve 'fs'`).
 - Bash heredocs with long inline Python sometimes fail to parse ("unexpected EOF"); write the script to the
   scratchpad and run it instead.
+- Performance notes and how to measure: docs/performance.md. Reads a layout and its page both make are
+  wrapped in React `cache()` in `src/lib/data`; keep new shared reads wrapped too.
+- A new long-lived response (another SSE route) must register with `trackStream` (`src/lib/live/hub.ts`)
+  or restarts hang until systemd's 90 s stop timeout.
 - LMS Dash is the source for rankings, AI answers and invoices; it pushes them here. Don't edit those
   by hand in the portal or the next Dash sync overwrites them. docs/live-updates-and-dash-sync.md.
