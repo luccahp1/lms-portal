@@ -20,11 +20,10 @@ export function LoginForm() {
         Remember me for 30 days
       </label>
       <Button type="submit" disabled={pending}>
-        {pending ? "Logging in…" : "Log in"}
+        {pending ? "Signing in…" : "Sign in"}
       </Button>
       <p className="text-xs text-muted">
-        New client? Use the sign-up link your agency sent you. Forgot your password? Ask your account manager for a reset
-        link.
+        Forgot your password? Ask us for a reset link. Signing up for the first time? Use the link we sent you.
       </p>
     </form>
   );

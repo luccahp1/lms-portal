@@ -78,7 +78,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
 
       {stats.connected && (
         <>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="k-tiles">
             <StatTile label="Visitors" value={String(cur.visits)} change={pct(cur.visits, prev.visits)} changeLabel={vs} />
             <StatTile label="Pages viewed" value={String(cur.views)} change={pct(cur.views, prev.views)} changeLabel={vs} />
             <StatTile label="Leads" value={String(cur.leads)} change={pct(cur.leads, prev.leads)} changeLabel={vs} />

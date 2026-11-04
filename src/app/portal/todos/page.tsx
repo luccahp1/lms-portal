@@ -3,7 +3,7 @@ import { listTodos } from "@/lib/data/todos";
 import { PageHeader } from "@/components/ui";
 import { TodoList } from "@/components/features/TodoList";
 
-export const metadata = { title: "Your to-dos" };
+export const metadata = { title: "To-dos" };
 
 export default async function TodosPage() {
   const viewer = await requireClient();
@@ -11,7 +11,7 @@ export default async function TodosPage() {
   return (
     <>
       <PageHeader
-        title="Your to-dos"
+        title="To-dos"
         subtitle="A few things only you can do. Each one has the steps to follow. Stuck? Send us a message."
       />
       <TodoList todos={todos} />

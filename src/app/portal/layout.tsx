@@ -8,7 +8,7 @@ import { LiveRefresh } from "@/components/LiveRefresh";
 
 function PreviewBanner({ clientName, personName }: { clientName: string; personName: string }) {
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 rounded-[10px] border border-warn/30 bg-warn-bg px-4 py-3 text-[14px] text-warn">
+    <div className="flex flex-wrap items-center justify-between gap-3 rounded-[12px] border border-warn/30 bg-warn-bg px-4 py-3 text-[14px] text-warn">
       <span>
         <strong>Preview</strong> of {clientName}, seen as {personName}. Forms are switched off, so nothing you click
         here changes anything.
@@ -34,18 +34,17 @@ export default async function PortalLayout({ children }: { children: React.React
   return (
     <AppShell
       agencyName={agency.name}
-      accentColor={agency.accentColor}
       subtitle="Client portal"
       identity={{ title: client.name, detail: viewer.name }}
       nav={[
-        { href: "/portal", label: "Home", icon: "home", exact: true },
-        { href: "/portal/todos", label: "Your to-dos", icon: "todos", badge: todoCount },
+        { href: "/portal", label: "Overview", icon: "home", exact: true },
+        { href: "/portal/todos", label: "To-dos", icon: "todos", badge: todoCount },
         { href: "/portal/reports", label: "Monthly reports", icon: "reports" },
-        { href: "/portal/rankings", label: "Rankings forecast", icon: "rankings" },
+        { href: "/portal/rankings", label: "Rankings", icon: "rankings" },
         { href: "/portal/requests", label: "Requests", icon: "requests", badge: requests.filter((r) => r.status === "review").length },
         { href: "/portal/messages", label: "Messages", icon: "messages" },
         { href: "/portal/files", label: "Files & approvals", icon: "files", badge: files.filter((f) => f.approval === "pending").length },
-        { href: "/portal/brand", label: "Your brand", icon: "brand" },
+        { href: "/portal/brand", label: "Brand", icon: "brand" },
         { href: "/portal/billing", label: "Billing", icon: "billing" },
       ]}
       banner={viewer.previewBy && <PreviewBanner clientName={client.name} personName={viewer.name} />}

@@ -1,53 +1,60 @@
 import Link from "next/link";
 import type { Tone } from "@/lib/format";
 
-export function PageHeader({ title, subtitle, actions }: { title: string; subtitle?: string; actions?: React.ReactNode }) {
+// Built on the shared LMS kit (src/kit/kit.css), so pages here match LMS Dash.
+export function PageHeader({
+  title,
+  subtitle,
+  kicker,
+  actions,
+}: {
+  title: string;
+  subtitle?: string;
+  kicker?: string;
+  actions?: React.ReactNode;
+}) {
   return (
-    <div className="flex flex-wrap items-end justify-between gap-4">
+    <header className="k-ph" style={{ marginBottom: 0 }}>
       <div>
-        <h1 className="text-[28px] font-semibold tracking-tight">{title}</h1>
-        {subtitle && <p className="mt-1 text-[15px] text-muted">{subtitle}</p>}
+        {kicker && <div className="k-ph__k k-mono">{kicker}</div>}
+        <h1>{title}</h1>
+        {subtitle && <p>{subtitle}</p>}
       </div>
-      {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
-    </div>
+      {actions && <div className="k-acts">{actions}</div>}
+    </header>
   );
 }
 
 export function Card({ children, className = "" }: { children: React.ReactNode; className?: string }) {
-  return <section className={`rounded-[14px] border border-line bg-surface p-6 ${className}`}>{children}</section>;
+  return <section className={`k-card k-card--still k-reveal ${className}`}>{children}</section>;
 }
 
 export function CardTitle({ children, action }: { children: React.ReactNode; action?: React.ReactNode }) {
   return (
-    <div className="mb-3 flex items-center justify-between gap-3">
-      <h2 className="text-base font-semibold">{children}</h2>
+    <div className="flex items-center justify-between gap-3">
+      <h2 className="font-display text-base font-bold">{children}</h2>
       {action}
     </div>
   );
 }
 
 const toneClass: Record<Tone, string> = {
-  good: "bg-good-bg text-good",
-  warn: "bg-warn-bg text-warn",
-  info: "bg-info-bg text-info",
-  neutral: "bg-subtle text-ink-2",
+  good: "k-pill--good",
+  warn: "k-pill--warn",
+  info: "k-pill--jay",
+  neutral: "k-pill--mute",
 };
 
 export function Pill({ tone, children }: { tone: Tone; children: React.ReactNode }) {
-  return (
-    <span className={`inline-flex shrink-0 rounded-full px-2.5 py-0.5 text-xs font-semibold ${toneClass[tone]}`}>
-      {children}
-    </span>
-  );
+  return <span className={`k-pill ${toneClass[tone]}`}>{children}</span>;
 }
 
-const buttonBase =
-  "inline-flex min-h-10 items-center justify-center gap-2 rounded-lg px-4 font-medium transition-colors disabled:opacity-60 cursor-pointer";
+const buttonBase = "k-btn disabled:opacity-60 cursor-pointer";
 const buttonVariant = {
-  primary: "bg-accent text-white hover:opacity-90",
-  secondary: "border border-[#e2e2e7] bg-surface text-ink hover:bg-subtle",
-  ghost: "text-accent hover:underline px-0 min-h-8",
-  danger: "border border-[#e2e2e7] bg-surface text-[#b42318] hover:bg-[#fef3f2]",
+  primary: "k-btn--pri",
+  secondary: "",
+  ghost: "k-btn--ghost !px-0 !min-h-8 !text-accent hover:underline",
+  danger: "!text-bad hover:!border-bad",
 };
 
 type Variant = keyof typeof buttonVariant;
@@ -125,7 +132,7 @@ export function Avatar({ text, accent = false }: { text: string; accent?: boolea
 export function FormError({ message }: { message?: string | null }) {
   if (!message) return null;
   return (
-    <p role="alert" className="rounded-lg bg-[#fef3f2] px-3 py-2 text-[#b42318]">
+    <p role="alert" className="rounded-lg bg-bad-bg px-3 py-2 text-bad">
       {message}
     </p>
   );

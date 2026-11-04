@@ -4,7 +4,7 @@ import { isInlineImage, listFiles } from "@/lib/data/files";
 import { formatBytes } from "@/lib/format";
 import { buttonClass, Card, CardTitle, Empty, PageHeader } from "@/components/ui";
 
-export const metadata = { title: "Your brand" };
+export const metadata = { title: "Brand" };
 
 type BrandFile = Awaited<ReturnType<typeof listFiles>>[number];
 
@@ -56,7 +56,7 @@ export default async function BrandPage() {
 
   return (
     <>
-      <PageHeader title="Your brand" subtitle={`Business card, logos and print files for ${client.name}, ready to download.`} />
+      <PageHeader title="Brand" subtitle={`Business card, logos and print files for ${client.name}, ready to download.`} />
       {files.length === 0 && (
         <Card>
           <Empty>Your brand files will appear here once they’re ready.</Empty>

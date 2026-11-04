@@ -5,7 +5,7 @@ import { formatMonthKey } from "@/lib/format";
 import { Card, CardTitle, Empty, PageHeader, Pill } from "@/components/ui";
 import { positionText } from "@/components/features/Results";
 
-export const metadata = { title: "Rankings forecast" };
+export const metadata = { title: "Rankings" };
 
 const MONTHS_AHEAD = 3;
 const CHART_MAX = 40;
@@ -38,17 +38,17 @@ function ForecastChart({ history, forecast }: { history: RankPoint[]; forecast: 
     <svg viewBox={`0 0 ${w} ${h}`} className="h-auto w-full" role="img" aria-label="Position history and forecast">
       {[1, 3, 10, 30].map((t) => (
         <g key={t}>
-          <line x1={pad.left} x2={w - pad.right} y1={y(t)} y2={y(t)} stroke="var(--color-line)" />
+          <line x1={pad.left} x2={w - pad.right} y1={y(t)} y2={y(t)} stroke="var(--grid)" />
           <text x={pad.left - 6} y={y(t) + 4} textAnchor="end" fontSize="10" fill="var(--color-muted)">
             #{t}
           </text>
         </g>
       ))}
-      <polygon points={band} fill="var(--accent)" opacity={0.1} />
-      <polyline points={ahead} fill="none" stroke="var(--accent)" strokeWidth={2} strokeDasharray="5 4" />
-      <polyline points={real} fill="none" stroke="var(--accent)" strokeWidth={2.5} />
+      <polygon points={band} fill="var(--violet)" opacity={0.1} />
+      <polyline points={ahead} fill="none" stroke="var(--violet)" strokeWidth={2} strokeDasharray="5 4" />
+      <polyline points={real} fill="none" stroke="var(--violet)" strokeWidth={2.5} />
       {history.map((p, i) => (
-        <circle key={p.month} cx={x(i)} cy={y(p.position)} r={3.5} fill="var(--accent)" />
+        <circle key={p.month} cx={x(i)} cy={y(p.position)} r={3.5} fill="var(--violet)" />
       ))}
       {months.map((m, i) => (
         <text key={m} x={x(i)} y={h - 6} textAnchor="middle" fontSize="10" fill="var(--color-muted)">
@@ -79,7 +79,7 @@ export default async function RankingsPage() {
   return (
     <>
       <PageHeader
-        title="Rankings forecast"
+        title="Rankings"
         subtitle="Where you show up on Google today, and where we expect you to be over the next few months."
       />
 
@@ -89,22 +89,22 @@ export default async function RankingsPage() {
         </Card>
       ) : (
         <>
-          <div className="grid gap-4 sm:grid-cols-3">
-            <div className="flex flex-col gap-1.5 rounded-[14px] border border-line bg-surface p-5">
-              <span className="text-[13px] font-medium text-muted">On Google’s first page now</span>
-              <span className="text-[26px] font-semibold tracking-tight">
+          <div className="k-tiles k-c-violet">
+            <div className="k-tile">
+              <span className="k-tile__l k-mono">On Google’s first page now</span>
+              <span className="k-tile__v">
                 {nowPageOne} <span className="text-base font-normal text-muted">of {rows.length}</span>
               </span>
             </div>
-            <div className="flex flex-col gap-1.5 rounded-[14px] border border-line bg-surface p-5">
-              <span className="text-[13px] font-medium text-muted">Expected by {horizon ? formatMonthKey(horizon) : "—"}</span>
-              <span className="text-[26px] font-semibold tracking-tight">
+            <div className="k-tile">
+              <span className="k-tile__l k-mono">Expected by {horizon ? formatMonthKey(horizon) : "—"}</span>
+              <span className="k-tile__v">
                 {onPageOne} <span className="text-base font-normal text-muted">of {rows.length}</span>
               </span>
             </div>
-            <div className="flex flex-col gap-1.5 rounded-[14px] border border-line bg-surface p-5">
-              <span className="text-[13px] font-medium text-muted">Months of real data so far</span>
-              <span className="text-[26px] font-semibold tracking-tight">{Math.max(...rows.map((r) => r.history.length))}</span>
+            <div className="k-tile">
+              <span className="k-tile__l k-mono">Months of real data so far</span>
+              <span className="k-tile__v">{Math.max(...rows.map((r) => r.history.length))}</span>
             </div>
           </div>
 

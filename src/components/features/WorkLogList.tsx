@@ -22,7 +22,7 @@ export function WorkLogList({ entries, canDelete = false }: { entries: Entry[]; 
           {canDelete && (
             <form action={deleteWorkLogAction}>
               <input type="hidden" name="entryId" value={e.id} />
-              <button type="submit" className="cursor-pointer text-xs text-muted hover:text-[#b42318]" aria-label={`Delete "${e.title}"`}>
+              <button type="submit" className="cursor-pointer text-xs text-muted hover:text-bad" aria-label={`Delete "${e.title}"`}>
                 Delete
               </button>
             </form>

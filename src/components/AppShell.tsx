@@ -1,11 +1,15 @@
 import { logout } from "@/app/(auth)/actions";
 import { initials } from "@/lib/format";
 import { Icon } from "./icons";
+import { KitMotion, MenuButton, Scrim, ThemeToggle } from "./KitClient";
 import { NavLinks, type NavItem } from "./NavLinks";
 
+/**
+ * The same shell as LMS Dash: the dark brand band with the forest rule, the account chip top
+ * right, the left nav with its active bar, and the page on a light canvas. Built from src/kit.
+ */
 export function AppShell({
   agencyName,
-  accentColor,
   subtitle,
   identity,
   nav,
@@ -13,7 +17,8 @@ export function AppShell({
   children,
 }: {
   agencyName: string;
-  accentColor: string;
+  /** Kept for the admin layout; the kit colours come from the shared tokens. */
+  accentColor?: string;
   subtitle: string;
   identity: { title: string; detail: string };
   nav: NavItem[];
@@ -22,46 +27,55 @@ export function AppShell({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-screen flex-wrap" style={{ "--accent": accentColor } as React.CSSProperties}>
-      <nav
-        aria-label="Main"
-        className="flex flex-[1_1_220px] flex-col gap-5 border-r border-line bg-surface px-4 py-5 md:max-w-[260px]"
-      >
-        <div className="flex items-center gap-2.5 px-2 py-1">
-          <div className="flex size-8 items-center justify-center rounded-lg bg-accent text-[13px] font-bold text-white">
-            {initials(agencyName)}
-          </div>
-          <div className="flex flex-col leading-tight">
-            <span className="font-semibold">{agencyName}</span>
-            <span className="text-xs text-muted">{subtitle}</span>
-          </div>
-        </div>
-        <div className="flex items-center gap-2.5 rounded-[10px] border border-line px-3 py-2.5">
-          <div className="flex size-7 items-center justify-center rounded-full bg-subtle text-xs font-semibold text-ink-2">
-            {initials(identity.title)}
-          </div>
-          <div className="flex min-w-0 flex-col leading-tight">
-            <span className="truncate text-[13px] font-semibold">{identity.title}</span>
-            <span className="truncate text-xs text-muted">{identity.detail}</span>
-          </div>
-        </div>
-        <NavLinks items={nav} />
-        <form action={logout} className="mt-auto">
-          <button
-            type="submit"
-            className="flex min-h-10 w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 font-medium text-[#55555f] hover:bg-subtle"
-          >
-            <Icon name="logout" />
-            Log out
+    <>
+      <header className="k-band">
+        <MenuButton />
+        <a className="k-brand" href="/portal" aria-label={`${agencyName} home`}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/mark.svg" alt="" width={30} height={31} />
+          <span className="k-brand__text">
+            <span className="k-brand__wm">{agencyName}</span>
+            <span className="k-brand__sub">{subtitle}</span>
+          </span>
+        </a>
+        <span className="k-band__sp" />
+        <span className="k-live" id="live" title="Updates by themselves">
+          <i />
+          <span>LIVE</span>
+        </span>
+        <ThemeToggle />
+        <div className="k-chip">
+          <button type="button" disabled title={identity.detail}>
+            <span className="k-av">{initials(identity.title)}</span>
+            <span className="k-chip__t">
+              <small>Your account</small>
+              <span>{identity.title}</span>
+            </span>
           </button>
-        </form>
-      </nav>
-      <main className="min-w-0 flex-[999_1_560px] px-4 pt-8 pb-12 sm:px-8 lg:px-12">
-        <div className="mx-auto flex max-w-[1120px] flex-col gap-6">
-          {banner}
-          {children}
         </div>
-      </main>
-    </div>
+      </header>
+      <div className="k-shell">
+        <nav className="k-side" id="side" aria-label="Main">
+          <NavLinks items={nav} group={subtitle === "Client portal" ? "Your portal" : "Agency"} />
+          <div className="k-side__foot">
+            <div className="k-side__grp k-mono">Other</div>
+            <form action={logout}>
+              <button type="submit" className="k-nav">
+                <Icon name="logout" />
+                <span>Log out</span>
+              </button>
+            </form>
+          </div>
+        </nav>
+        <Scrim />
+        <main className="k-main" id="main">
+          <div className="flex flex-col gap-6">
+            {banner}
+            {children}
+          </div>
+        </main>
+      </div>
+      <KitMotion />
+    </>
   );
 }

@@ -3,12 +3,12 @@ import { getViewer } from "@/lib/auth/session";
 import { AuthShell } from "../AuthShell";
 import { LoginForm } from "./LoginForm";
 
-export const metadata = { title: "Log in" };
+export const metadata = { title: "Sign in" };
 
 export default async function LoginPage() {
   if (await getViewer()) redirect("/");
   return (
-    <AuthShell title="Log in" subtitle="Welcome back to your client portal.">
+    <AuthShell title="Sign in" subtitle="London Marketing Solutions">
       <LoginForm />
     </AuthShell>
   );

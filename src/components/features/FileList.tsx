@@ -55,7 +55,7 @@ export function FileList({ files, viewerRole }: { files: FileRow[]; viewerRole: 
               {viewerRole === "agency_admin" && (
                 <form action={deleteFileAction}>
                   <input type="hidden" name="fileId" value={f.id} />
-                  <button type="submit" className="cursor-pointer text-xs text-muted hover:text-[#b42318]" aria-label={`Delete ${f.name}`}>
+                  <button type="submit" className="cursor-pointer text-xs text-muted hover:text-bad" aria-label={`Delete ${f.name}`}>
                     Delete
                   </button>
                 </form>

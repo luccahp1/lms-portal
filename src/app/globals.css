@@ -1,35 +1,56 @@
 @import "tailwindcss";
+/* The shared LMS kit (tokens, components). Canonical copy in lms-dash/app/static/kit;
+   scripts/sync_kit.py there copies it into src/kit. Never edit src/kit by hand. */
+@import "../kit/tokens.css";
+@import "../kit/kit.css";
 
-/* Mercury-style tokens. --accent is overridden per agency in the app layouts. */
-:root {
-  --accent: #5160e0;
+@font-face {
+  font-family: "Departure Mono";
+  src: url("/fonts/DepartureMono-Regular.woff2") format("woff2");
+  font-display: swap;
 }
 
+/* Tailwind names on the kit tokens, so every page follows the light and dark themes. */
 @theme inline {
-  --color-canvas: #fafafb;
-  --color-surface: #ffffff;
-  --color-line: #ededf0;
-  --color-line-strong: #dcdce2;
-  --color-subtle: #f1f1f4;
-  --color-ink: #1c1c24;
-  --color-ink-2: #3a3a44;
-  --color-muted: #63636e;
-  --color-accent: var(--accent);
-  --color-good: #1b7a50;
-  --color-good-bg: #e7f6ee;
-  --color-warn: #9a4b06;
-  --color-warn-bg: #fef3e2;
-  --color-info: #3b48c4;
-  --color-info-bg: #eef0fd;
-  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --color-canvas: var(--bg);
+  --color-surface: var(--surface);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-2);
+  --color-subtle: var(--surface-2);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-muted: var(--ink-3);
+  --color-accent: var(--forest);
+  --color-good: var(--good);
+  --color-good-bg: color-mix(in srgb, var(--good) 12%, var(--surface));
+  --color-warn: var(--warn);
+  --color-warn-bg: color-mix(in srgb, var(--warn) 12%, var(--surface));
+  --color-info: var(--jay);
+  --color-info-bg: color-mix(in srgb, var(--jay) 12%, var(--surface));
+  --color-bad: var(--bad);
+  --color-bad-bg: color-mix(in srgb, var(--bad) 10%, var(--surface));
+  --font-sans: var(--font-body);
+  --font-display: var(--font-display);
+  --font-mono: var(--font-mono);
+}
+
+/* Older class names in the pages still say accent. */
+:root {
+  --accent: var(--forest);
 }
 
 body {
-  background: var(--color-canvas);
-  color: var(--color-ink);
+  background: var(--bg);
+  color: var(--ink);
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
 }
 
 :focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--forest);
   outline-offset: 2px;
 }

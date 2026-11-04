@@ -20,7 +20,7 @@ export default async function JoinPage({ params }: { params: Promise<{ code: str
     );
   }
   return (
-    <div style={{ "--accent": agency.accentColor } as React.CSSProperties}>
+    <div>
       <AuthShell title="Create your account" subtitle={`Your client portal with ${agency.name}.`}>
         <SignUpForm joinCode={code} />
         <p className="mt-4 text-[13px] text-muted">
