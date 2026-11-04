@@ -11,7 +11,8 @@ import * as signupsData from "@/lib/data/signups";
 import * as statsData from "@/lib/data/stats";
 import * as rankingsData from "@/lib/data/rankings";
 import * as todosData from "@/lib/data/todos";
-import { fetchStoredFile } from "@/lib/storage";
+import { fetchStoredFile, signedDownloadUrl } from "@/lib/storage";
+import { createPreviewLink } from "@/lib/data/preview";
 
 // Everything an agency admin can do in the portal, as MCP tools.
 // Each tool calls the same data-layer function the admin pages use, so tenant
@@ -530,6 +531,55 @@ export const tools: Tool[] = [
         .max(200),
     }),
     run: async (viewer, { clientId, questions }) => ({ questions: (await rankingsData.syncAiAnswers(viewer, clientId, questions)).length }),
+  }),
+
+  // ---- LMS Dash: the client's portal tab ----
+  tool({
+    name: "get_client_portal",
+    description:
+      "Everything LMS Dash's portal tab shows for one client in one call: details, logins, monthly notes, work log, messages, files, to-dos and the analytics connection.",
+    input: z.object({ clientId }),
+    readOnly: true,
+    run: async (viewer, { clientId }) => {
+      const [client, users, notes, workLog, messages, files, todos, stats, source] = await Promise.all([
+        clientsData.getClient(viewer, clientId),
+        clientsData.listClientUsers(viewer, clientId),
+        updatesData.listNotes(viewer, clientId),
+        updatesData.listWorkLog(viewer, clientId, 100),
+        messagesData.listMessages(viewer, clientId),
+        filesData.listFiles(viewer, clientId),
+        todosData.listTodos(viewer, clientId),
+        statsData.getSiteStats(viewer, clientId),
+        statsData.getStatsSource(viewer, clientId),
+      ]);
+      return {
+        client,
+        users,
+        notes,
+        workLog,
+        messages: messages.slice(-100),
+        files,
+        todos,
+        analytics: { ...source, connected: stats.connected, rows: stats.rows.length, since: stats.since, fetchedAt: stats.fetchedAt, error: stats.error },
+      };
+    },
+  }),
+  tool({
+    name: "create_preview_link",
+    description:
+      "A one-time link (2 minutes) that opens this client's portal read-only, as they see it, for an hour. For View as client from LMS Dash. Optional userId picks which of their logins.",
+    input: z.object({ clientId, userId: uuid.optional() }),
+    run: async (viewer, { clientId, userId }) => ({ url: `${appUrl()}/preview/${await createPreviewLink(viewer, clientId, userId)}` }),
+  }),
+  tool({
+    name: "file_download_url",
+    description: "A 5-minute download link for a client file. url is null when files are on local disk; use read_file then.",
+    input: z.object({ fileId: uuid }),
+    readOnly: true,
+    run: async (viewer, { fileId }) => {
+      const file = await filesData.getFile(viewer, fileId);
+      return { name: file.name, mimeType: file.mimeType, sizeBytes: file.sizeBytes, url: await signedDownloadUrl(file.storageKey, file.name) };
+    },
   }),
 
   // ---- To-dos for the client ----

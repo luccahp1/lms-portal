@@ -89,6 +89,18 @@ function contentDisposition(filename: string, kind: "attachment" | "inline" = "a
   return `${kind}; filename="${ascii}"; filename*=UTF-8''${encodeURIComponent(filename)}`;
 }
 
+/** A 5-minute signed R2 link for a download, or null when files are on local disk. */
+export async function signedDownloadUrl(key: string, filename: string): Promise<string | null> {
+  checkKey(key);
+  const remote = r2();
+  if (!remote) return null;
+  const url = new URL(`${remote.base}/${key}`);
+  url.searchParams.set("X-Amz-Expires", String(DOWNLOAD_LINK_SECONDS));
+  url.searchParams.set("response-content-disposition", contentDisposition(filename));
+  url.searchParams.set("response-content-type", "application/octet-stream");
+  return (await remote.client.sign(url.toString(), { method: "GET", aws: { signQuery: true } })).url;
+}
+
 /**
  * The response for an authorised download. With R2 this is a redirect to a
  * short-lived signed URL, so the bytes come from Cloudflare, not the home

@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { agencies, clients, users } from "@/db/schema";
 import { hashPassword } from "@/lib/auth/crypto";
 import { assertAdmin, NotFoundError, resolveClientId, type Viewer } from "./viewer";
+import { notifyDashActivity } from "@/lib/webhook";
 
 // Self sign-up: anyone with an agency's join link can create an account, but it
 // stays "pending" (no client, no data access) until an agency admin approves it.
@@ -30,6 +31,7 @@ export async function signUp(input: { joinCode: string; name: string; email: str
       .insert(users)
       .values({ agencyId: agency.id, role: "client", status: "pending", name: input.name, email, signupBusiness: input.business, passwordHash })
       .returning({ id: users.id });
+    notifyDashActivity("signup.created", null, { name: input.name, business: input.business });
     return user.id;
   } catch (err) {
     // Two sign-ups with the same email at once: the unique index catches the second.

@@ -1,4 +1,4 @@
-import { getViewer } from "@/lib/auth/session";
+import { getPortalViewer } from "@/lib/auth/session";
 import { subscribe } from "@/lib/live/hub";
 
 // Server-sent events: one "change" event whenever data the viewer can see changes.
@@ -13,7 +13,7 @@ const HEARTBEAT_MS = 25_000;
 const DEBOUNCE_MS = 400;
 
 export async function GET(req: Request) {
-  const viewer = await getViewer();
+  const viewer = await getPortalViewer();
   if (!viewer || viewer.status !== "active") return new Response("Unauthorized", { status: 401 });
   const onlyClient = viewer.role === "client" ? viewer.clientId : null;
   const encoder = new TextEncoder();

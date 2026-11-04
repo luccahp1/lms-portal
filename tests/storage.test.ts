@@ -43,8 +43,8 @@ describe("Cloudflare R2", () => {
     const calls: Request[] = [];
     vi.stubGlobal(
       "fetch",
-      vi.fn(async (req: Request) => {
-        calls.push(req);
+      vi.fn(async (input: Request | string, init?: RequestInit) => {
+        calls.push(new Request(input, init));
         return new Response(null, { status: 200 });
       }),
     );
@@ -55,6 +55,8 @@ describe("Cloudflare R2", () => {
     expect(calls[0]!.url).toBe(`https://acct.r2.cloudflarestorage.com/portal-files/${key}`);
     expect(calls[0]!.headers.get("authorization")).toMatch(/^AWS4-HMAC-SHA256 Credential=key\//);
     expect(calls[0]!.headers.get("content-type")).toBe("image/png");
+    // A plain byte body, so the request goes out with a Content-Length (R2 refuses chunked: 411).
+    expect(new Uint8Array(await calls[0]!.arrayBuffer())).toEqual(new Uint8Array(Buffer.from("data")));
   });
 
   it("fails loudly when the upload is rejected", async () => {

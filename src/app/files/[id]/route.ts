@@ -1,4 +1,4 @@
-import { getViewer } from "@/lib/auth/session";
+import { getPortalViewer } from "@/lib/auth/session";
 import { getFile, isInlineImage } from "@/lib/data/files";
 import { NotFoundError } from "@/lib/data/viewer";
 import { downloadResponse } from "@/lib/storage";
@@ -7,7 +7,7 @@ import { downloadResponse } from "@/lib/storage";
 // a short-lived R2 link. An attachment, so uploaded HTML/SVG never renders; only
 // `?view=1` on a PNG/JPEG/WebP/GIF shows the image inline (brand kit previews).
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
-  const viewer = await getViewer();
+  const viewer = await getPortalViewer();
   if (!viewer || viewer.status !== "active") return new Response("Not found", { status: 404 });
   const { id } = await params;
   if (!/^[0-9a-f-]{36}$/i.test(id)) return new Response("Not found", { status: 404 });

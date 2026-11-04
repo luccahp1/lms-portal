@@ -85,6 +85,26 @@ export const sessions = pgTable("sessions", {
   expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
 });
 
+// "View as client" opened from LMS Dash: a one-time link (minutes) that becomes a
+// preview-only session for one client. It can render /portal pages for that client and
+// nothing else: no admin pages, no server actions. Both store only sha256 of the token.
+export const previewLinks = pgTable("preview_links", {
+  tokenHash: text("token_hash").primaryKey(),
+  adminId: uuid("admin_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  clientId: uuid("client_id").notNull().references(() => clients.id, { onDelete: "cascade" }),
+  asUserId: uuid("as_user_id").references(() => users.id, { onDelete: "cascade" }),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  usedAt: timestamp("used_at", { withTimezone: true }),
+});
+
+export const previewSessions = pgTable("preview_sessions", {
+  id: text("id").primaryKey(),
+  adminId: uuid("admin_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  clientId: uuid("client_id").notNull().references(() => clients.id, { onDelete: "cascade" }),
+  asUserId: uuid("as_user_id").references(() => users.id, { onDelete: "cascade" }),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+});
+
 export const invites = pgTable("invites", {
   tokenHash: text("token_hash").primaryKey(),
   userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),

@@ -7,10 +7,12 @@ import { db } from "@/db";
 import { sessions, users } from "@/db/schema";
 import { randomToken, sha256, verifyPassword } from "./crypto";
 import { NotFoundError, type Viewer } from "@/lib/data/viewer";
-import { previewViewer } from "@/lib/data/preview";
+import { previewSessionViewer, previewViewer, PREVIEW_SESSION_TTL_MS, endPreviewSession } from "@/lib/data/preview";
 
 const COOKIE = "lms_session";
 const PREVIEW_COOKIE = "lms_preview";
+// Preview-only session opened from LMS Dash (src/lib/data/preview.ts).
+const PREVIEW_SESSION_COOKIE = "lms_preview_session";
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const REMEMBERED_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 // Without "remember me" the cookie dies with the browser, and the server
@@ -89,13 +91,42 @@ export async function requireAdmin(): Promise<Viewer> {
   return viewer;
 }
 
-/** Real clients, or an admin who opened "View as client". */
+/** Real clients, or an admin who opened "View as client" (here or from LMS Dash). */
 export async function requireClient(): Promise<Viewer> {
+  const fromDash = await getDashPreview();
+  if (fromDash) return fromDash;
   const viewer = await requireViewer();
   if (viewer.role === "client") return viewer;
   const preview = await getPreview(viewer);
   if (!preview) redirect("/admin");
   return preview;
+}
+
+/**
+ * Whoever may read client data on a portal route that isn't a page (file downloads, /api/live):
+ * a real session first, else a preview session from LMS Dash (pinned to its one client).
+ */
+export async function getPortalViewer(): Promise<Viewer | null> {
+  return (await getViewer()) ?? (await getDashPreview());
+}
+
+const getDashPreview = cache(async (): Promise<Viewer | null> => {
+  const token = (await cookies()).get(PREVIEW_SESSION_COOKIE)?.value;
+  return token ? previewSessionViewer(token) : null;
+});
+
+export async function startDashPreview(sessionToken: string) {
+  (await cookies()).set(PREVIEW_SESSION_COOKIE, sessionToken, cookieOptions(new Date(Date.now() + PREVIEW_SESSION_TTL_MS)));
+}
+
+/** Ends a Dash preview if one is open. True when there was one. */
+export async function endDashPreview(): Promise<boolean> {
+  const jar = await cookies();
+  const token = jar.get(PREVIEW_SESSION_COOKIE)?.value;
+  if (!token) return false;
+  await endPreviewSession(token);
+  jar.delete(PREVIEW_SESSION_COOKIE);
+  return true;
 }
 
 // ---- "View as client" ----

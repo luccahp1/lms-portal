@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { AppShell } from "@/components/AppShell";
 import { requireAdmin } from "@/lib/auth/session";
 import { getAgency } from "@/lib/data/clients";
@@ -7,6 +8,9 @@ import { LiveRefresh } from "@/components/LiveRefresh";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const viewer = await requireAdmin();
+  // The agency side lives in LMS Dash now (docs/live-updates-and-dash-sync.md). Unset
+  // ADMIN_HOME_URL to bring these pages back.
+  if (process.env.ADMIN_HOME_URL) redirect(process.env.ADMIN_HOME_URL);
   const [agency, open, pending] = await Promise.all([
     getAgency(viewer),
     listAgencyOpenRequests(viewer),

@@ -2,6 +2,7 @@ import { and, asc, desc, eq, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { actionItems, type ActionStatus } from "@/db/schema";
 import { assertAdmin, NotFoundError, resolveClientId, type Viewer } from "./viewer";
+import { notifyDashActivity } from "@/lib/webhook";
 
 // "Your to-dos": things only the client can do (verify Google, sign the agreement), each with
 // steps to follow. The agency writes them; the client ticks them off.
@@ -88,6 +89,7 @@ export async function setTodoStatus(viewer: Viewer, todoId: string, status: Acti
       updatedAt: new Date(),
     })
     .where(eq(actionItems.id, todo.id));
+  if (viewer.role === "client") notifyDashActivity("todo.updated", todo.clientId, { title: todo.title, status });
 }
 
 export async function deleteTodo(viewer: Viewer, todoId: string) {

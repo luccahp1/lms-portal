@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { files, users, type FileApproval } from "@/db/schema";
 import { assertAdmin, NotFoundError, resolveClientId, type Viewer } from "./viewer";
 import { deleteStoredFile, storeFile } from "@/lib/storage";
+import { notifyDashActivity } from "@/lib/webhook";
 
 export const MAX_UPLOAD_BYTES = 25 * 1024 * 1024;
 
@@ -94,6 +95,7 @@ export async function uploadFile(
     await deleteStoredFile(storageKey);
     throw err;
   }
+  if (viewer.role === "client") notifyDashActivity("file.uploaded", id, { name: input.name });
 }
 
 /** Client response to a file the agency marked as needing approval. */
@@ -101,6 +103,7 @@ export async function respondToFile(viewer: Viewer, fileId: string, decision: "a
   const file = await getFile(viewer, fileId);
   if (viewer.role !== "client" || file.approval !== "pending") throw new NotFoundError();
   await db.update(files).set({ approval: decision }).where(eq(files.id, file.id));
+  notifyDashActivity("file.responded", file.clientId, { name: file.name, decision });
 }
 
 export async function deleteFile(viewer: Viewer, fileId: string) {

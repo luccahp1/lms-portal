@@ -2,6 +2,7 @@ import { asc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { messages, users } from "@/db/schema";
 import { resolveClientId, type Viewer } from "./viewer";
+import { notifyDashActivity } from "@/lib/webhook";
 
 export async function listMessages(viewer: Viewer, clientId?: string) {
   const id = await resolveClientId(viewer, clientId);
@@ -23,4 +24,5 @@ export async function listMessages(viewer: Viewer, clientId?: string) {
 export async function sendMessage(viewer: Viewer, body: string, clientId?: string) {
   const id = await resolveClientId(viewer, clientId);
   await db.insert(messages).values({ agencyId: viewer.agencyId, clientId: id, authorId: viewer.userId, body });
+  if (viewer.role === "client") notifyDashActivity("message.created", id);
 }
