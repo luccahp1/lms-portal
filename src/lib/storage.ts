@@ -40,11 +40,15 @@ export async function storeFile(agencyId: string, clientId: string, data: Buffer
   checkKey(key);
   const remote = r2();
   if (remote) {
-    const res = await remote.client.fetch(`${remote.base}/${key}`, {
+    // Sign, then send the bytes ourselves: aws4fetch's own fetch re-wraps the body as a stream,
+    // which goes out chunked with no Content-Length, and R2 answers 411.
+    const bytes = new Uint8Array(data);
+    const signed = await remote.client.sign(`${remote.base}/${key}`, {
       method: "PUT",
-      body: new Uint8Array(data),
+      body: bytes,
       headers: { "Content-Type": mimeType || "application/octet-stream" },
     });
+    const res = await fetch(signed.url, { method: "PUT", headers: signed.headers, body: bytes });
     if (!res.ok) throw new Error(`R2 upload failed: ${res.status}`);
     return key;
   }
