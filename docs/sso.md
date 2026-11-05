@@ -28,7 +28,7 @@ Signing out of Dash ends the portal session too: Dash sends the browser to `/log
 
 | Where | Name | Value |
 |---|---|---|
-| Portal `.env` | `DASH_URL` | Dash as browsers see it, e.g. `https://lms-dev.pawsit.ca`. Unset = admins land on `/admin` (which still follows `ADMIN_HOME_URL`) |
+| Portal `.env` | `DASH_URL` | Dash as browsers see it, `https://dash.londonmarketingsolutions.ca`. Unset = admins land on `/admin` (which still follows `ADMIN_HOME_URL`) |
 | Dash `.env` | `PORTAL_PUBLIC_URL` | The portal as browsers see it, `https://portal.londonmarketingsolutions.ca` |
 | Dash `.env` | `LMS_SSO_MAP` | `email:account` pairs, comma separated, e.g. `lucca.marketingsolutions@gmail.com:lucca` |
 | Dash `.env` | `PORTAL_URL`, `PORTAL_TOKEN` | Already set for the portal link (docs/portal-sync.md in Dash) |

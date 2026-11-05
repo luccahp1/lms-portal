@@ -1,8 +1,10 @@
 # Handoff
 
-## State (2026-11-04, latest): same look and one login with LMS Dash (not deployed)
+## State (2026-11-05, latest): same look and one login with LMS Dash, deployed
 
-Committed to main, **not deployed**.
+Deployed f28fb93 (migration `0006_sso_links` applied). Backups first:
+`/srv/backups/lms-portal/src.20261105-031032.pre-one-workspace.tgz`, `current.20261105-031032.pre-one-workspace/`,
+`env.20261105-031032.pre-one-workspace.bak`, `lms_portal.20261105-031032.pre-one-workspace.dump`.
 
 - **Design kit** in `src/kit/` is a copy of LMS Dash's `app/static/kit/` (edit it there, run its
   `scripts/sync_kit.py`; `tests/sso.test.ts` checks they match). Tailwind's colours map onto the
@@ -21,8 +23,15 @@ Committed to main, **not deployed**.
   Dash's sign out calls.
 - Checks: typecheck, lint (one old warning in tests/dash-admin.test.ts), 71 tests, build (103 kB
   shared first load, unchanged). End to end with Dash locally, at 1440 and 375 px.
-- To ship: deploy (docs/deploy-home-server.md, runs the migration), set `DASH_URL` in the server
-  .env, restart. Ask Lucca first.
+- Server `.env`: `DASH_URL` and `ADMIN_HOME_URL` are https://dash.londonmarketingsolutions.ca (Dash's
+  new address on the `lms` tunnel; lms-dev.pawsit.ca is retired). Old files
+  `env.20261105-031202.pre-dash-url.bak`, `env.20261105-032548.pre-dash-domain.bak`.
+- Evan Koza has an `agency_admin` account (evankoza.marketingsolutions@gmail.com, LMS agency);
+  the 14-day set-password link went to Lucca, nothing emailed.
+- Checked on production over the public URLs with temporary session rows (deleted after): admin
+  `/sso/dash` lands in Dash signed in, View as client from Dash opens `/portal`, a used token is
+  refused, Dash's sign out ends the portal session, a client on `/sso/dash` goes to `/portal`.
+- Rollback: unset `DASH_URL` and restart (admins land on `/admin`, which follows `ADMIN_HOME_URL`).
 
 ## State (2026-11-04, latest): performance pass
 
@@ -39,7 +48,7 @@ Committed to main, **not deployed**.
 
 ## State (2026-11-04, later): agency side moved to LMS Dash
 
-- The admin pages now live in LMS Dash (https://lms-dev.pawsit.ca): each client's **Portal** tab and a
+- The admin pages now live in LMS Dash (https://dash.londonmarketingsolutions.ca, was lms-dev.pawsit.ca): each client's **Portal** tab and a
   **Sign-ups** page. `/admin` here redirects to `ADMIN_HOME_URL` (set in the server .env). Unset it to
   bring the old admin pages back. Deployed 07f237b with Dash 0ec6b6e; backups `*20261104-072841*`.
 - View as client from Dash: `create_preview_link`, then `/preview/<token>`: one use, 2 minutes,
@@ -82,7 +91,6 @@ Committed to main, **not deployed**.
 
 - Lucca: check Maple's to-dos with View as client, then send office@ the set-password link.
 - Mark LMS-0002/3/4 sent in LMS Dash when they go out.
-- One login for Dash and the portal (ROADMAP decision).
 - Housekeeping and email from ROADMAP.md.
 - 8 old commits carry AI-authorship trailers (repo_hygiene.py blocker). Removing them needs a
   history rewrite + force push; left alone until Lucca decides.
