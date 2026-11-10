@@ -48,7 +48,20 @@
     const ticks = [0, top / 2, top];
     const tf = fmt[yFormat] || fmt.compact;
     const grid = ticks.map((t) => `<line class="g" x1="${pl}" x2="${w - pr}" y1="${Y(t).toFixed(1)}" y2="${Y(t).toFixed(1)}"/><text class="ax" x="${pl - 6}" y="${(Y(t) + 3).toFixed(1)}" text-anchor="end">${esc(tf(t))}</text>`).join('');
-    const xl = labels ? labels.map((l, i) => (l ? `<text class="ax" x="${X(i).toFixed(1)}" y="${h - 3}" text-anchor="${i === 0 ? 'start' : i === vals.length - 1 ? 'end' : 'middle'}">${esc(l)}</text>` : '')).join('') : '';
+    // Keep x labels apart: a label too close to the one before it is dropped, and the last one
+    // always shows, pushing out whichever label sits too close in front of it.
+    const MIN_GAP = 64;
+    const keep = [];
+    if (labels) {
+      labels.forEach((l, i) => {
+        if (!l) return;
+        const prev = keep[keep.length - 1];
+        if (prev === undefined || X(i) - X(prev) >= MIN_GAP) keep.push(i);
+        else if (i === vals.length - 1) keep[keep.length - 1] = i;
+      });
+      if (keep.length > 1 && X(keep[keep.length - 1]) - X(keep[keep.length - 2]) < MIN_GAP) keep.splice(keep.length - 2, 1);
+    }
+    const xl = keep.map((i) => `<text class="ax" x="${X(i).toFixed(1)}" y="${h - 3}" text-anchor="${i === 0 ? 'start' : i === vals.length - 1 ? 'end' : 'middle'}">${esc(labels[i])}</text>`).join('');
     let sec = '';
     if (second) {
       const sp = second.map((v, i) => [X(i), Y(Number(v) || 0)]);
