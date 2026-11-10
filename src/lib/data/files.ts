@@ -80,8 +80,9 @@ export async function uploadFile(
   // Only the agency can ask the client to approve something.
   const approval: FileApproval = viewer.role === "agency_admin" && input.needsApproval ? "pending" : "none";
   const storageKey = await storeFile(viewer.agencyId, id, input.data, input.mimeType);
+  let fileId: string;
   try {
-    await db.insert(files).values({
+    const [row] = await db.insert(files).values({
       agencyId: viewer.agencyId,
       clientId: id,
       uploadedById: viewer.userId,
@@ -91,12 +92,14 @@ export async function uploadFile(
       sizeBytes: input.data.length,
       folder,
       approval,
-    });
+    }).returning({ id: files.id });
+    fileId = row!.id;
   } catch (err) {
     await deleteStoredFile(storageKey);
     throw err;
   }
   if (viewer.role === "client") notifyDashActivity("file.uploaded", id, { name: input.name });
+  return fileId;
 }
 
 /** Client response to a file the agency marked as needing approval. */

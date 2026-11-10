@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { requireClient } from "@/lib/auth/session";
-import { getAgency } from "@/lib/data/clients";
+import { getAgency, getClient } from "@/lib/data/clients";
+import { getIntake } from "@/lib/data/intake";
+import { findTemplate } from "@/lib/templates";
+import { ProjectTracker, showProjectTracker } from "@/components/features/ProjectTracker";
 import { getLatestNote, listWorkLog } from "@/lib/data/updates";
 import { listRequests } from "@/lib/data/requests";
 import { listMessages } from "@/lib/data/messages";
@@ -38,8 +41,10 @@ function lastMonths(now: string, n = 6) {
 
 export default async function PortalOverview() {
   const viewer = await requireClient();
-  const [agency, note, workLog, requests, messages, files, invoices, todos, stats, rankings, ai] = await Promise.all([
+  const [agency, client, intake, note, workLog, requests, messages, files, invoices, todos, stats, rankings, ai] = await Promise.all([
     getAgency(viewer),
+    getClient(viewer),
+    getIntake(viewer),
     getLatestNote(viewer),
     listWorkLog(viewer, undefined, 6),
     listRequests(viewer),
@@ -99,6 +104,7 @@ export default async function PortalOverview() {
     invoices.filter((i) => i.status !== "draft" && String(i.issuedOn).startsWith(m.key)).reduce((s, i) => s + i.amountCents / 100, 0),
   );
   const yourTurn = openTodos.length + pendingFiles + toApprove;
+  const hasSite = Boolean(client.reviewUrl || client.websiteUrl);
 
   return (
     <>
@@ -111,12 +117,33 @@ export default async function PortalOverview() {
             <ButtonLink href="/portal/messages" variant="secondary">
               Message us
             </ButtonLink>
-            <ButtonLink href="/portal/requests/new">Ask us for something</ButtonLink>
+            {hasSite ? (
+              <>
+                <ButtonLink href="/portal/requests/new" variant="secondary">
+                  Ask us for something
+                </ButtonLink>
+                {/* A full page load: the review tool has its own layout. */}
+                <a className="k-btn k-btn--pri" href="/review">
+                  Request website changes
+                </a>
+              </>
+            ) : (
+              <ButtonLink href="/portal/requests/new">Ask us for something</ButtonLink>
+            )}
           </>
         }
       />
 
       <div className="k-grid">
+        {showProjectTracker(client.stage) && (
+          <ProjectTracker
+            stage={client.stage}
+            templateName={findTemplate(intake.templateSlug)?.name ?? null}
+            answersSent={Boolean(intake.submittedAt)}
+            openTodos={openTodos.length}
+            hasSite={hasSite}
+          />
+        )}
         <KitCard c="forest" icon="web" title="Your website" sub="last 30 days" span="k-s8" go="/portal/reports">
           {stats.connected ? (
             <>

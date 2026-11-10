@@ -18,6 +18,8 @@ import * as invoicesData from "@/lib/data/invoices";
 import * as signupsData from "@/lib/data/signups";
 import * as statsData from "@/lib/data/stats";
 import * as todosData from "@/lib/data/todos";
+import * as intakeData from "@/lib/data/intake";
+import type { IntakeResult } from "@/components/features/IntakeFlow";
 import { requestStatus, invoiceStatus } from "@/db/schema";
 
 export type ActionState = { error?: string; resetUrl?: string; ok?: boolean } | undefined;
@@ -359,4 +361,22 @@ export async function createClientUserAction(_prev: ActionState, formData: FormD
     if (err instanceof clientsData.EmailTakenError) return { error: err.message };
     throw err;
   }
+}
+
+// ---- Your project: the design pick and the intake answers, once the client has a login ----
+
+export async function saveIntakePickAction(slug: string, note: string): Promise<IntakeResult> {
+  const viewer = await requireViewer();
+  if (viewer.role !== "client") return { ok: false, error: "This is a preview, so nothing can be changed here." };
+  await intakeData.saveIntake(viewer, { templateSlug: z.string().max(40).parse(slug), templateNote: z.string().max(2000).parse(note) });
+  refresh();
+  return { ok: true };
+}
+
+export async function saveIntakeAnswersAction(answers: Record<string, string>, submit: boolean): Promise<IntakeResult> {
+  const viewer = await requireViewer();
+  if (viewer.role !== "client") return { ok: false, error: "This is a preview, so nothing can be changed here." };
+  await intakeData.saveIntake(viewer, { answers: z.record(z.string().max(40), z.string().max(4000)).parse(answers), submit });
+  if (submit) refresh();
+  return { ok: true };
 }

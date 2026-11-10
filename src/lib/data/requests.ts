@@ -4,10 +4,11 @@ import { db } from "@/db";
 import { clients, requestComments, requests, users, type RequestStatus } from "@/db/schema";
 import { notifyDash } from "@/lib/webhook";
 import { assertAdmin, NotFoundError, resolveClientId, type Viewer } from "./viewer";
+import { noteCounts, notesForRequests } from "./review";
 
 export const listRequests = cache(async function listRequests(viewer: Viewer, clientId?: string) {
   const id = await resolveClientId(viewer, clientId);
-  return db
+  const rows = await db
     .select({
       id: requests.id,
       title: requests.title,
@@ -21,6 +22,9 @@ export const listRequests = cache(async function listRequests(viewer: Viewer, cl
     .from(requests)
     .where(eq(requests.clientId, id))
     .orderBy(desc(requests.createdAt));
+  // Requests made with "Request website changes" carry notes: how many, and how many are done.
+  const counts = await noteCounts(rows.map((r) => r.id));
+  return rows.map((r) => ({ ...r, notes: counts.get(r.id) ?? null }));
 });
 
 /** Requests across all of an agency's clients, newest activity first. Admin inbox. */
@@ -63,7 +67,9 @@ export async function getRequest(viewer: Viewer, requestId: string) {
     .leftJoin(users, eq(users.id, requestComments.authorId))
     .where(eq(requestComments.requestId, request.id))
     .orderBy(asc(requestComments.createdAt));
-  return { request, comments };
+  // What the client marked on their site, when the request came from "Request website changes".
+  const changeNotes = await notesForRequests([request.id]);
+  return { request, comments, changeNotes };
 }
 
 export async function createRequest(viewer: Viewer, input: { title: string; details: string }, clientId?: string) {
@@ -149,8 +155,10 @@ export async function listRequestActivity(viewer: Viewer, since?: Date, limit = 
     .leftJoin(users, eq(users.id, requestComments.authorId))
     .where(inArray(requestComments.requestId, rows.map((r) => r.id)))
     .orderBy(asc(requestComments.createdAt));
+  const notes = await notesForRequests(rows.map((r) => r.id));
   return rows.map((r) => ({
     ...r,
+    changeNotes: notes.filter((n) => n.requestId === r.id),
     comments: comments
       .filter((c) => c.requestId === r.id)
       .map((c) => ({ id: c.id, body: c.body, createdAt: c.createdAt, authorName: c.authorName, authorRole: c.authorRole })),

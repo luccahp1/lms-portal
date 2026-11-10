@@ -53,6 +53,12 @@ export const clients = pgTable(
     // (see docs/analytics.md). The token is a secret: never send it to a client page.
     statsUrl: text("stats_url"),
     statsToken: text("stats_token"),
+    // What "Request website changes" loads: the preview build while we are building, the
+    // live site otherwise. Null falls back to websiteUrl.
+    reviewUrl: text("review_url"),
+    // Where the project stands, pushed from LMS Dash: discovery, design, build, review,
+    // launched. "" for clients from before onboarding existed (no project card shown).
+    stage: text("stage").notNull().default(""),
     createdAt: createdAt(),
   },
   (t) => [index("clients_agency_idx").on(t.agencyId)],
@@ -335,7 +341,94 @@ export const actionItems = pgTable(
   (t) => [index("action_items_client_idx").on(t.clientId, t.status)],
 );
 
+// A new client's personal start link (/start/<token>): pick a design, answer the intake
+// questions, create the first portal login. Only sha256 of the token is kept.
+export const startLinks = pgTable(
+  "start_links",
+  {
+    tokenHash: text("token_hash").primaryKey(),
+    agencyId: uuid("agency_id").notNull().references(() => agencies.id, { onDelete: "cascade" }),
+    clientId: uuid("client_id").notNull().references(() => clients.id, { onDelete: "cascade" }),
+    // Who we talked to, to greet them and prefill the login form.
+    contactName: text("contact_name").notNull().default(""),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    // Set once the login was created through this link. The link then only points at /login.
+    claimedAt: timestamp("claimed_at", { withTimezone: true }),
+    claimedById: uuid("claimed_by_id").references(() => users.id, { onDelete: "set null" }),
+    createdAt: createdAt(),
+  },
+  (t) => [index("start_links_client_idx").on(t.clientId)],
+);
+
+// What a new client told us: the design they picked and their answers. One per client.
+export const intakes = pgTable("intakes", {
+  clientId: uuid("client_id")
+    .primaryKey()
+    .references(() => clients.id, { onDelete: "cascade" }),
+  agencyId: uuid("agency_id").notNull().references(() => agencies.id, { onDelete: "cascade" }),
+  // A slug from src/lib/templates.ts.
+  templateSlug: text("template_slug"),
+  templateNote: text("template_note").notNull().default(""),
+  // Question key (src/lib/intake.ts) to answer.
+  answers: jsonb("answers").$type<Record<string, string>>().notNull().default({}),
+  // When they pressed "Send to London Marketing Solutions". Answers stay editable after.
+  submittedAt: timestamp("submitted_at", { withTimezone: true }),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+// Where on a page a change note points. Pins and text edits sit on one element; a drawing's
+// strokes are stored relative to the element under it, so they follow it when the page reflows.
+export type NoteAnchor = {
+  selector: string;
+  tag: string;
+  /** The element's own words, cut short, so the note still reads if the page changes. */
+  text: string;
+  /** Click point inside the element, 0..1 of its width and height. */
+  rx: number;
+  ry: number;
+  /** The same point in page pixels when the note was made: the fallback if the element is gone. */
+  docX: number;
+  docY: number;
+  /** Element size when the note was made (drawings scale with it). */
+  w: number;
+  h: number;
+};
+
+// One thing a client marked on their website (or on the design they picked) with
+// "Request website changes". request_id is null while it is still in their draft; sending
+// the draft creates one request and files every note under it.
+export const changeNotes = pgTable(
+  "change_notes",
+  {
+    id: id(),
+    agencyId: uuid("agency_id").notNull().references(() => agencies.id, { onDelete: "cascade" }),
+    clientId: uuid("client_id").notNull().references(() => clients.id, { onDelete: "cascade" }),
+    requestId: uuid("request_id").references(() => requests.id, { onDelete: "cascade" }),
+    authorId: uuid("author_id").references(() => users.id, { onDelete: "set null" }),
+    // "site" = their website (review_url or website_url), "template" = the design they picked.
+    source: text("source").notNull().default("site"),
+    // pin (comment on a spot), text (wording changed in place), draw, page (about the whole page)
+    kind: text("kind").notNull(),
+    pagePath: text("page_path").notNull().default("/"),
+    pageTitle: text("page_title").notNull().default(""),
+    anchor: jsonb("anchor").$type<NoteAnchor | null>(),
+    // Frame width when the note was made, so we know if it is about the phone layout.
+    viewportW: integer("viewport_w").notNull().default(0),
+    body: text("body").notNull().default(""),
+    textBefore: text("text_before"),
+    textAfter: text("text_after"),
+    // Each stroke is x0,y0,x1,y1... as fractions of the anchor element's box.
+    strokes: jsonb("strokes").$type<number[][] | null>(),
+    fileId: uuid("file_id").references(() => files.id, { onDelete: "set null" }),
+    doneAt: timestamp("done_at", { withTimezone: true }),
+    doneById: uuid("done_by_id").references(() => users.id, { onDelete: "set null" }),
+    createdAt: createdAt(),
+  },
+  (t) => [index("change_notes_client_idx").on(t.clientId, t.requestId)],
+);
+
 export type User = typeof users.$inferSelect;
+export type ChangeNote = typeof changeNotes.$inferSelect;
 export type Client = typeof clients.$inferSelect;
 export type Agency = typeof agencies.$inferSelect;
 export type RequestStatus = (typeof requestStatus.enumValues)[number];
