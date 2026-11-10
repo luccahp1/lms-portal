@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   // Same cookie as LMS Dash. Read on the server so the page arrives in the right theme.
-  const theme = (await cookies()).get("lms_theme")?.value === "dark" ? "dark" : undefined;
+  const theme = (await cookies()).get("lms_look")?.value === "dark" ? "dark" : undefined;
   return (
     <html lang="en" className={`${inter.variable} ${bricolage.variable}`} data-theme={theme}>
       <body className="font-sans text-sm leading-relaxed antialiased">{children}</body>

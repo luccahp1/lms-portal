@@ -29,7 +29,7 @@ export function ThemeToggle() {
     else delete document.documentElement.dataset.theme;
     // On londonmarketingsolutions.ca the choice is shared with LMS Dash.
     const shared = /(^|\.)londonmarketingsolutions\.ca$/.test(location.hostname) ? "; domain=.londonmarketingsolutions.ca" : "";
-    document.cookie = `lms_theme=${next}; path=/; max-age=31536000; samesite=lax${shared}`;
+    document.cookie = `lms_look=${next}; path=/; max-age=31536000; samesite=lax${shared}`;
     setDark(!dark);
   };
   const label = dark ? "Switch to light theme" : "Switch to dark theme";

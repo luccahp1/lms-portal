@@ -8,7 +8,7 @@ Deployed f28fb93 (migration `0006_sso_links` applied). Backups first:
 
 - **Design kit** in `src/kit/` is a copy of LMS Dash's `app/static/kit/` (edit it there, run its
   `scripts/sync_kit.py`; `tests/sso.test.ts` checks they match). Tailwind's colours map onto the
-  kit tokens in `src/app/globals.css`; light by default, dark via the band's toggle (`lms_theme`
+  kit tokens in `src/app/globals.css`; light by default, dark via the band's toggle (`lms_look`
   cookie read in `src/app/layout.tsx`, no flash). Pieces: `src/components/kit.tsx`
   (KitCard, KitTile, KitHead, Count, Svg), `src/lib/charts.ts`, `src/components/KitClient.tsx`
   (motion on each page, theme toggle, phone drawer).
