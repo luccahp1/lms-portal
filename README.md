@@ -19,6 +19,12 @@ Built first for our own clients, designed multi-tenant so it can be sold to othe
 
 **Results (built 2026-11-03):** monthly reports from the client's own site analytics (refreshed hourly), Google rankings and AI answer checks pushed from LMS Dash, a three-month rankings forecast, a To-dos page with step-by-step instructions, a Brand kit page (business card, logos), and a Billing page with the current balance. Pages update live over server-sent events driven by Postgres `NOTIFY`, and ticket activity is pushed to LMS Dash by webhook.
 
+**Onboarding and website changes (built 2026-11-11, not deployed):** ten niche site designs
+(`/templates`), a personal start link where a new client picks one, answers the intake questions
+and creates their own login (`/start/<token>`), a project card on their Overview, and **Request
+website changes**: their own site served through the portal with comment, edit-text, draw and
+page-note tools ([docs/website-changes.md](docs/website-changes.md)).
+
 Next: housekeeping and email. See [ROADMAP.md](ROADMAP.md).
 
 ## Stack
@@ -33,6 +39,9 @@ Runs on a single small server: one Node process, the existing Postgres, no Docke
 src/db/schema.ts        tables (every row carries agency_id; client rows carry client_id)
 src/lib/data/           all reads/writes, scoped to the logged-in viewer (tenant isolation lives here)
 src/lib/auth/           password hashing (scrypt), sessions, role guards, API tokens
+src/lib/review/         the review frame: token, fetching and rewriting a client's site
+src/templates/          the ten site designs (one HTML document each)
+src/app/review/         Request website changes;  src/app/site/  the frame;  src/app/start/  start links
 src/lib/mcp/            MCP server: protocol + tools over src/lib/data
 src/lib/stats/          hourly fetch of each client site's visit counts
 src/lib/live/           one LISTEN connection, fan-out to /api/live (SSE)

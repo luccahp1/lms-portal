@@ -281,7 +281,7 @@ export const tools: Tool[] = [
   }),
   tool({
     name: "get_request",
-    description: "A request with its details and comment thread.",
+    description: "A request with its details, its comment thread, and changeNotes: what the client marked on their site when it came from Request website changes.",
     input: z.object({ requestId: uuid }),
     readOnly: true,
     run: (viewer, { requestId }) => requestsData.getRequest(viewer, requestId),
@@ -563,7 +563,11 @@ export const tools: Tool[] = [
       ]);
       return {
         client,
-        intake: { ...intake, templateName: findTemplate(intake.templateSlug)?.name ?? null },
+        intake: {
+          ...intake,
+          templateName: findTemplate(intake.templateSlug)?.name ?? null,
+          questions: INTAKE_QUESTIONS.map((q) => ({ key: q.key, label: q.label, answer: intake.answers[q.key] ?? "" })),
+        },
         startLink,
         users,
         notes,

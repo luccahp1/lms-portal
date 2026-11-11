@@ -32,6 +32,8 @@ for files, its own Cloudflare Tunnel.
 
 - [x] **Monthly reports**: visitors, page views, leads, sources, top pages, percent change against the
       month before (or the same days of last month while a month is in progress)
+- [x] **Onboarding** (2026-11-11): ten site designs, start links, intake answers, project card. docs/adding-a-client.md
+- [x] **Request website changes** (2026-11-11): the client's site in a frame with comment, edit-text, draw and page-note tools. docs/website-changes.md
 - [x] **Website analytics** from the client's own site (anonymous counts in Cloudflare D1), refreshed hourly
 - [x] **Google rankings** and **AI answer checks**, typed in LMS Dash and pushed to the portal
 - [x] **Rankings forecast** three months ahead, with a range and a plain explanation

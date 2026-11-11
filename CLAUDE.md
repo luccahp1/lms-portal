@@ -43,3 +43,9 @@ Tests need a real Postgres: see the Gotchas in HANDOFF.md for the embedded-postg
 - `src/kit/` is a copy of LMS Dash's `app/static/kit/`. Never edit it here: change it in lms-dash and run its `scripts/sync_kit.py`. Kit classes start with `k-`.
 - `src/lib/auth/session.ts` imports `server-only`, so tests can't import it; pure helpers (homePath, dashUrl) live in `src/lib/auth/home.ts`.
 - `next build` fails with "Unexpected end of JSON input" while `next dev` is running in the same folder (shared `.next`). Stop dev first.
+- The review frame (`/site/<token>/...`) serves a client's own site through the portal. Everything it returns must keep the
+  `sandbox` CSP from `frameHeaders()` and it must stay GET-only: that is what stops a client site's scripts acting as the portal.
+  docs/website-changes.md. Bump `AGENT_VERSION` in `src/lib/review/proxy.ts` when `public/review-agent.js` changes.
+- `src/templates/*.ts` are HTML inside a template literal: no backticks, no `${`, no backslashes in them.
+- Review and intake writes refuse a viewer with `previewBy` set. Keep that in any new client-side write.
+- `start_links`, `intakes`, `change_notes` and `clients` are on the live-notify trigger (migration 0008).
