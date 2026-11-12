@@ -63,8 +63,8 @@ export function AppShell({
           {dashboardUrl && (
             <>
               <div className="k-side__grp k-mono">Your tools</div>
-              {/* Another site with its own login, so a plain link in a new tab, not a nav item. */}
-              <a href={dashboardUrl} target="_blank" rel="noopener" className="k-nav">
+              {/* Another site, in a new tab. /sso/dashboard signs the client in there when it can. */}
+              <a href="/sso/dashboard" target="_blank" rel="noopener" className="k-nav">
                 <Icon name="home" />
                 <span>Open your dashboard</span>
               </a>

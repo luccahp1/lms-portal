@@ -57,6 +57,13 @@
       "when": 1794426594438,
       "tag": "0007_talented_wolfsbane",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1794505815300,
+      "tag": "0008_dashboard_sso",
+      "breakpoints": true
     }
   ]
 }

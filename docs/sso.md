@@ -41,7 +41,28 @@ Every admin who should get into Dash needs an active `agency_admin` account here
 Dash's `/login?local=1` is its old password sign-in, kept as the way in. A failed token also lands
 there (`?sso=failed`), so a broken portal never loops the browser.
 
+## Into a client's job dashboard
+
+A client whose company has the job dashboard (mikedash, one installation per company) gets
+**Open your dashboard** in their side menu. It goes through `/sso/dashboard` here:
+
+1. `dashboardSignInUrl()` (`src/lib/data/dashboard-sso.ts`) makes a one-time token for that
+   client user (2 minutes, works once, only its sha256 stored in `dashboard_sso_links`, bound to
+   their client) and redirects to `<dashboard_url>/dashboard/sso?t=<token>`.
+2. The dashboard POSTs `{token}` to `/api/dashboard-sso/redeem` here with
+   `Authorization: Bearer <its secret>`. Each dashboard has its own secret, made with the MCP tool
+   `set_client_dashboard_sign_in` and stored here only as `clients.dashboard_sso_secret_hash`.
+3. The answer is the person's email and name, or one 401 for everything else: unknown, used or
+   expired token, a secret that is not that client's, or a user no longer active for that client.
+   The token is burnt on the first try, right or wrong.
+4. The dashboard starts its own session for the account with that email, or shows its login page.
+
+An admin in View as client, or a client whose dashboard has no secret yet, is sent to the plain
+dashboard address and signs in there. Turning sign-in off (`enabled: false`) or making a new
+secret stops the old one working at once. Dashboard side: mikedash `src/lib/portal-sso.ts`.
+
 ## Tests
 
 `tests/sso.test.ts` here (tokens, expiry, other agencies, clients refused, where each account
-lands). Dash: `tests/test_sso.py`.
+lands). Dash: `tests/test_sso.py`. The client dashboard: `tests/dashboard-sso.test.ts` here and
+mikedash `tests/portal-sso.test.ts`.

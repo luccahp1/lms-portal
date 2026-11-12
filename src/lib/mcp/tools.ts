@@ -2,6 +2,7 @@ import { z } from "zod";
 import { requestStatus, invoiceStatus } from "@/db/schema";
 import type { Viewer } from "@/lib/data/viewer";
 import * as clientsData from "@/lib/data/clients";
+import * as dashboardSso from "@/lib/data/dashboard-sso";
 import * as requestsData from "@/lib/data/requests";
 import * as messagesData from "@/lib/data/messages";
 import * as filesData from "@/lib/data/files";
@@ -159,6 +160,19 @@ export const tools: Tool[] = [
     run: async (viewer, { clientId, dashboardUrl }) => ({
       dashboardUrl: await clientsData.setClientDashboard(viewer, clientId, dashboardUrl),
     }),
+  }),
+  tool({
+    name: "set_client_dashboard_sign_in",
+    description:
+      "Turn one-click sign-in from a client's portal into their job dashboard on or off. On returns a new secret, shown once: put it in that dashboard's .env.local as OE_PORTAL_SSO_SECRET. Turning it on again replaces the old secret. Off makes 'Open your dashboard' open the dashboard's own login.",
+    input: z.object({ clientId, enabled: z.boolean() }),
+    run: async (viewer, { clientId, enabled }) => {
+      if (!enabled) {
+        await dashboardSso.clearDashboardSsoSecret(viewer, clientId);
+        return { enabled: false };
+      }
+      return { enabled: true, secret: await dashboardSso.rotateDashboardSsoSecret(viewer, clientId) };
+    },
   }),
   tool({
     name: "create_password_reset_link",
