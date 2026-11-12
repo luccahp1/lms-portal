@@ -53,6 +53,9 @@ export const clients = pgTable(
     // (see docs/analytics.md). The token is a secret: never send it to a client page.
     statsUrl: text("stats_url"),
     statsToken: text("stats_token"),
+    // The client's own job dashboard (a separate installation per company), when they have
+    // one. Shown to the client as "Open your dashboard". Always https; set by an admin only.
+    dashboardUrl: text("dashboard_url"),
     createdAt: createdAt(),
   },
   (t) => [index("clients_agency_idx").on(t.agencyId)],

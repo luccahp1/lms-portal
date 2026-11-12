@@ -152,6 +152,15 @@ export const tools: Tool[] = [
     },
   }),
   tool({
+    name: "set_client_dashboard",
+    description:
+      "Link a client to their own job dashboard (leads, estimates, invoices, FieldKit). Their portal then shows an 'Open your dashboard' button. Pass an https:// address, or an empty string to remove the button.",
+    input: z.object({ clientId, dashboardUrl: z.string().trim().max(500) }),
+    run: async (viewer, { clientId, dashboardUrl }) => ({
+      dashboardUrl: await clientsData.setClientDashboard(viewer, clientId, dashboardUrl),
+    }),
+  }),
+  tool({
     name: "create_password_reset_link",
     description: "One-time link (valid 14 days) that lets a client user set a new password. Give it to them yourself; nothing is emailed.",
     input: z.object({ userId: uuid.describe("Client user id, from get_client") }),
