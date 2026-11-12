@@ -1,5 +1,25 @@
 # Handoff
 
+## State (2026-11-12): job dashboard link and one-click sign-in into it
+
+luccahp1/lms-portal#3 merged. A client whose company has the job dashboard (mikedash, one installation
+per company) gets **Open your dashboard** in the side menu.
+
+- `clients.dashboard_url` (migration 0007), set by an admin (client Settings, MCP `set_client_dashboard`,
+  or Dash's Job dashboard box). Plain `https://` only.
+- **One-click sign-in** (migration 0008, `dashboard_sso_links` + `clients.dashboard_sso_secret_hash`).
+  `/sso/dashboard` makes a 2-minute, single-use token (sha256 stored, bound to the client) and sends the
+  browser to `<dashboard>/dashboard/sso?t=`. The dashboard redeems it at `POST /api/dashboard-sso/redeem`
+  with its own secret (Bearer). One 401 for every failure; the token burns on the first try. Admins in
+  View as client and clients without a secret get the plain address. MCP `set_client_dashboard_sign_in
+  {clientId, enabled}` makes (shows once) or removes the secret. docs/sso.md, "Into a client's job dashboard".
+- Tests: 81 pass against embedded Postgres 16 (`tests/dashboard-sso.test.ts` is new). Lint: no new
+  warnings (the one in `tests/dash-admin.test.ts` is old).
+- Checked in a browser against a local portal and a local mikedash: client signs in to the portal,
+  Open your dashboard lands signed in; a bad token lands on the dashboard's login with a note; the
+  admin form shows and saves the address.
+- **Deploy needs `npm run db:migrate`** (0007 and 0008).
+
 ## State (2026-11-05, latest): same look and one login with LMS Dash, deployed
 
 Deployed f28fb93 (migration `0006_sso_links` applied). Backups first:
