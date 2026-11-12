@@ -49,7 +49,8 @@ export default async function ClientSettings({ params }: { params: Promise<{ id:
           </Field>
           <p className="text-[13px] text-muted">
             For clients who have their own job dashboard. Their portal shows an Open your dashboard button that
-            goes here; they sign in there with their dashboard login. Leave empty to hide the button.
+            goes here. With one-click sign-in on (MCP <code>set_client_dashboard_sign_in</code>) it signs them in;
+            otherwise they sign in there with their dashboard login. Leave empty to hide the button.
           </p>
           <div>
             <Button type="submit">Save</Button>
