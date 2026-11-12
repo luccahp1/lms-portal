@@ -50,6 +50,13 @@
       "when": 1793829359562,
       "tag": "0006_sso_links",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1794426594438,
+      "tag": "0007_talented_wolfsbane",
+      "breakpoints": true
     }
   ]
 }

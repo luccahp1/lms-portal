@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { requireAdmin } from "@/lib/auth/session";
 import { getClient, listClientUsers } from "@/lib/data/clients";
-import { removeClientUserAction, updateClientAction } from "@/app/actions";
+import { removeClientUserAction, setClientDashboardAction, updateClientAction } from "@/app/actions";
 import { formatDate } from "@/lib/format";
 import { Button, buttonClass, Card, CardTitle, Field, Input } from "@/components/ui";
 import { getSiteStats, getStatsSource } from "@/lib/data/stats";
@@ -34,6 +34,23 @@ export default async function ClientSettings({ params }: { params: Promise<{ id:
           <Field label="Plan">
             <Input name="planName" maxLength={200} defaultValue={client.planName ?? ""} />
           </Field>
+          <div>
+            <Button type="submit">Save</Button>
+          </div>
+        </form>
+      </Card>
+
+      <Card>
+        <CardTitle>Job dashboard</CardTitle>
+        <form action={setClientDashboardAction} className="flex max-w-xl flex-col gap-4">
+          <input type="hidden" name="clientId" value={id} />
+          <Field label="Dashboard address">
+            <Input name="dashboardUrl" maxLength={500} placeholder="https://" defaultValue={client.dashboardUrl ?? ""} />
+          </Field>
+          <p className="text-[13px] text-muted">
+            For clients who have their own job dashboard. Their portal shows an Open your dashboard button that
+            goes here; they sign in there with their dashboard login. Leave empty to hide the button.
+          </p>
           <div>
             <Button type="submit">Save</Button>
           </div>

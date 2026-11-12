@@ -50,6 +50,18 @@ An empty portal makes a poor first impression. At minimum:
 Messages, request comments, files and non-draft invoices show up for the client straight away, so
 agree on wording before sending them.
 
+## 4b. Link their job dashboard, if they have one
+
+Clients who also have the job dashboard (leads, estimates, invoices, FieldKit; one installation
+per company, see mikedash `docs/NEW-CLIENT.md`) get an **Open your dashboard** link in their
+portal's side menu.
+
+- Admin: client Settings → Job dashboard → paste the address → Save.
+- MCP: `set_client_dashboard { clientId, dashboardUrl }`. An empty string removes the link.
+
+It has to be an `https://` address. It is a plain link: they sign in on the dashboard with their
+dashboard login, which is separate from their portal login.
+
 ## 5. Check it as the client
 
 Open the client in Admin and click **View as client** (top right). It opens the portal in a new tab

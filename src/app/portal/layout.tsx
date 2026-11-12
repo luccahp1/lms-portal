@@ -36,6 +36,7 @@ export default async function PortalLayout({ children }: { children: React.React
       agencyName={agency.name}
       subtitle="Client portal"
       identity={{ title: client.name, detail: viewer.name }}
+      dashboardUrl={client.dashboardUrl}
       nav={[
         { href: "/portal", label: "Overview", icon: "home", exact: true },
         { href: "/portal/todos", label: "To-dos", icon: "todos", badge: todoCount },
