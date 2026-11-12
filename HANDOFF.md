@@ -18,7 +18,7 @@ per company) gets **Open your dashboard** in the side menu.
 - Checked in a browser against a local portal and a local mikedash: client signs in to the portal,
   Open your dashboard lands signed in; a bad token lands on the dashboard's login with a note; the
   admin form shows and saves the address.
-- **Deploy needs `npm run db:migrate`** (0007 and 0008).
+- **Deployed 2026-11-12** (f40374b, migrations 0007 and 0008 applied). Backups: `/srv/backups/lms-portal/*.20261112-181651.pre-dashboard-sso*`.
 
 ## State (2026-11-05, latest): same look and one login with LMS Dash, deployed
 
