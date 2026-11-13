@@ -454,6 +454,14 @@ export const tools: Tool[] = [
     run: async (viewer, { clientId, ...input }) => invoicesData.upsertInvoice(viewer, clientId, input),
   }),
   tool({
+    name: "delete_invoice",
+    description:
+      "Remove one of a client's invoices by its number (LMS Dash uses this when an invoice is deleted, renumbered or moved to another client there). Invoices come from LMS Dash: delete it there, not here, or the next sync puts it back.",
+    input: z.object({ clientId, number: z.string().trim().min(1).max(50) }),
+    destructive: true,
+    run: async (viewer, { clientId, number }) => ({ deleted: await invoicesData.deleteInvoiceByNumber(viewer, clientId, number), number }),
+  }),
+  tool({
     name: "set_payment_instructions",
     description: "How clients pay, shown on every client's Billing page (e.g. the e-Transfer address).",
     input: z.object({ text: z.string().trim().max(1000) }),

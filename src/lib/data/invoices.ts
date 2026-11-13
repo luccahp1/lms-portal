@@ -47,6 +47,21 @@ export async function upsertInvoice(
   return { id: row!.id, created: true };
 }
 
+/**
+ * Remove an invoice by its number. LMS Dash calls this when an invoice is deleted there, given a
+ * new number, or moved to another client, so the old copy stops counting toward what a client
+ * owes. Only the copy under `clientId` goes; false when that client has no such invoice.
+ */
+export async function deleteInvoiceByNumber(viewer: Viewer, clientId: string, number: string): Promise<boolean> {
+  assertAdmin(viewer);
+  const id = await resolveClientId(viewer, clientId);
+  const removed = await db
+    .delete(invoices)
+    .where(and(eq(invoices.agencyId, viewer.agencyId), eq(invoices.clientId, id), eq(invoices.number, number)))
+    .returning({ id: invoices.id });
+  return removed.length > 0;
+}
+
 /** What the client owes right now: every sent invoice, split into overdue and not yet due. */
 export function balance(rows: { status: InvoiceStatus; amountCents: number; dueOn: string }[], today: string) {
   const sent = rows.filter((i) => i.status === "sent");

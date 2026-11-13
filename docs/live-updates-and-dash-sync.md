@@ -51,6 +51,7 @@ and a webhook for ticket activity.
 | `sync_rankings` | The client's full set of tracked searches with positions per month (0 = not found) |
 | `sync_ai_answers` | The AI answer checks: question, month, engine, `yes` / `cited` / `no` |
 | `upsert_invoice` | An invoice by number. Drafts stay hidden; `sent` counts toward the balance |
+| `delete_invoice` | Takes away the copy of an invoice that Dash deleted, renumbered or moved to another client |
 | `upsert_monthly_note` | Optional: the report summary as the month's note |
 
 ### Environment (server `.env`)

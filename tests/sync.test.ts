@@ -66,6 +66,24 @@ describe("rankings and AI answers pushed from LMS Dash", () => {
     const clash = await call(admin, "upsert_invoice", { ...base, clientId: clientB.client.id, status: "sent" });
     expect(clash.isError).toBe(true);
   });
+
+  it("delete_invoice removes one client's copy, so the number can move to another client", async () => {
+    const { admin, clientA, clientB } = await makeAgency();
+    const { listInvoices, deleteInvoiceByNumber } = await import("@/lib/data/invoices");
+    const base = { number: "LMS-0007", amountCents: 50000, issuedOn: "2026-11-01", dueOn: "2026-11-15", status: "sent" };
+    await call(admin, "upsert_invoice", { ...base, clientId: clientA.client.id });
+    await call(admin, "upsert_invoice", { ...base, number: "LMS-0008", clientId: clientA.client.id });
+
+    // The wrong client's id removes nothing.
+    expect((await call(admin, "delete_invoice", { clientId: clientB.client.id, number: "LMS-0007" })).data.deleted).toBe(false);
+    expect(await listInvoices(clientA.viewer)).toHaveLength(2);
+    await expect(deleteInvoiceByNumber(clientA.viewer, clientA.client.id, "LMS-0007")).rejects.toBeInstanceOf(ForbiddenError);
+
+    expect((await call(admin, "delete_invoice", { clientId: clientA.client.id, number: "LMS-0007" })).data.deleted).toBe(true);
+    expect((await listInvoices(clientA.viewer)).map((i) => i.number)).toEqual(["LMS-0008"]);
+    expect((await call(admin, "upsert_invoice", { ...base, clientId: clientB.client.id })).data.created).toBe(true);
+    expect((await listInvoices(clientB.viewer)).map((i) => i.number)).toEqual(["LMS-0007"]);
+  });
 });
 
 describe("to-dos", () => {
