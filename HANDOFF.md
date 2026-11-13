@@ -20,7 +20,7 @@ Merged into `main` from `claude/loving-babbage-u1e3ts` (PR #2) with the matching
   (fonts, the quote form staying switched off, visit counts not moving).
 - Existing clients see one new thing: the **Request website changes** button, because they have a
   website address. No project card (their stage is empty).
-## State (2026-11-13): payments, part-paid invoices, billing FAQ (pushed, not deployed)
+## State (2026-11-13): payments, part-paid invoices, billing FAQ (deployed 2a8a843; onboarding merge 3fbc1cd deployed 23:00 UTC)
 
 LMS Dash now records payments and works out how much of each invoice they cover; the portal shows
 the result. Dash is the source: nothing here changes a payment.
