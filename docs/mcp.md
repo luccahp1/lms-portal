@@ -76,3 +76,18 @@ claude mcp add --transport http --scope user lms-portal https://portal.londonmar
 Add an entry to `tools` in `src/lib/mcp/tools.ts` with a zod input schema and a `run` that calls a
 data-layer function. Mark it `readOnly` or `destructive` as appropriate, and cover it in
 `tests/mcp.test.ts`.
+
+## Onboarding and change notes (2026-11-11)
+
+| Tool | What |
+|---|---|
+| `list_site_templates` | The ten site designs with a link to each |
+| `create_start_link { clientId, contactName? }` | A client's personal start link (30 days). Returns the URL once |
+| `get_intake { clientId }` | The design they picked, their note, their answers, the link's state |
+| `save_intake { clientId, templateSlug?, templateNote?, answers? }` | Record a pick or answers made in a meeting |
+| `set_client_stage { clientId, stage }` | discovery, design, build, review, launched, or "" |
+| `set_review_source { clientId, url }` | What Request website changes loads; empty for the live site |
+| `set_change_note_done { noteId, done }` | Tick a change note. The client sees it |
+
+`get_request` and `list_request_activity` return `changeNotes`; `get_client_portal` returns
+`intake` and `startLink`. See [adding-a-client.md](adding-a-client.md) and [website-changes.md](website-changes.md).

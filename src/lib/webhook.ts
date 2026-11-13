@@ -10,7 +10,15 @@ import { clients } from "@/db/schema";
 
 export type RequestEvent = "request.created" | "request.updated" | "request.commented" | "request.deleted";
 /** Client activity outside tickets, so the client's portal tab in Dash stays current. */
-export type ActivityEvent = "message.created" | "file.uploaded" | "file.responded" | "todo.updated" | "signup.created";
+export type ActivityEvent =
+  | "message.created"
+  | "file.uploaded"
+  | "file.responded"
+  | "todo.updated"
+  | "signup.created"
+  // A new client picked a design or sent their answers, or made their login from the start link.
+  | "intake.updated"
+  | "start.claimed";
 
 export function sign(body: string, secret: string) {
   return "sha256=" + createHmac("sha256", secret).update(body).digest("hex");

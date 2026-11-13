@@ -5,11 +5,15 @@ import { Avatar, Button, Card, Pill, Select, Textarea } from "@/components/ui";
 import { ResetForm } from "@/components/ResetForm";
 import { requestStatus } from "@/db/schema";
 import type { getRequest } from "@/lib/data/requests";
+import { KIND_LABEL, PHONE_MAX, pageLabel, type NoteKind } from "@/lib/review/describe";
 
 type Data = Awaited<ReturnType<typeof getRequest>>;
 
 export function RequestDetail({ data, viewerRole, backHref }: { data: Data; viewerRole: "agency_admin" | "client"; backHref: string }) {
-  const { request, comments } = data;
+  const { request, comments, changeNotes } = data;
+  const notesDone = changeNotes.filter((n) => n.doneAt).length;
+  // With notes, the details repeat them in words (for LMS Dash); show only the first line here.
+  const details = changeNotes.length ? request.details.split("\n\n")[0] : request.details;
   const status = requestStatusLabel[request.status];
 
   return (
@@ -25,7 +29,57 @@ export function RequestDetail({ data, viewerRole, backHref }: { data: Data; view
           </div>
           <Pill tone={status.tone}>{status.label}</Pill>
         </div>
-        {request.details && <p className="whitespace-pre-line">{request.details}</p>}
+        {details && <p className="whitespace-pre-line">{details}</p>}
+
+        {changeNotes.length > 0 && (
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <h2 className="text-base font-semibold">
+                Marked on the {changeNotes[0]!.source === "template" ? "design" : "website"}
+                <span className="ml-2 font-normal text-muted">
+                  {notesDone} of {changeNotes.length} done
+                </span>
+              </h2>
+              {viewerRole === "client" && (
+                // A full page load: the review tool has its own layout.
+                <a className="k-btn" href={`/review?request=${request.id}`}>
+                  {request.status === "review" ? "Check the changes on the page" : "See these on the page"}
+                </a>
+              )}
+            </div>
+            <ol className="flex flex-col">
+              {changeNotes.map((n, i) => (
+                <li key={n.id} className="flex gap-3 border-t border-subtle py-3 first:border-t-0">
+                  <span
+                    className={`mt-0.5 grid size-6 shrink-0 place-items-center rounded-full text-xs font-bold text-white ${n.doneAt ? "bg-good" : "bg-[var(--coral)]"}`}
+                    title={n.doneAt ? "Done" : "Not done yet"}
+                  >
+                    {n.doneAt ? "✓" : i + 1}
+                  </span>
+                  <div className="flex min-w-0 flex-col leading-snug">
+                    <span className="text-[13px] text-muted">
+                      {KIND_LABEL[n.kind as NoteKind] ?? "Note"} · {pageLabel(n)}
+                      {n.viewportW > 0 && n.viewportW <= PHONE_MAX ? " · phone layout" : ""}
+                    </span>
+                    {n.kind === "text" ? (
+                      <span>
+                        <s className="text-muted">{n.textBefore}</s> <span className="font-medium text-accent">{n.textAfter}</span>
+                      </span>
+                    ) : (
+                      n.anchor?.text && <span className="truncate text-[13px] text-muted">“{n.anchor.text}”</span>
+                    )}
+                    {n.body && <span className="whitespace-pre-line">{n.body}</span>}
+                    {n.fileId && (
+                      <a className="text-accent hover:underline" href={`/files/${n.fileId}`}>
+                        Attached: {n.fileName ?? "file"}
+                      </a>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </div>
+        )}
 
         {viewerRole === "client" && request.status === "review" && (
           <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-warn-bg px-4 py-3">

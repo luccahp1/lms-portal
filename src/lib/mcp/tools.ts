@@ -16,6 +16,10 @@ import * as todosData from "@/lib/data/todos";
 import { fetchStoredFile, signedDownloadUrl } from "@/lib/storage";
 import { createPreviewLink } from "@/lib/data/preview";
 import { redeemSsoLink } from "@/lib/data/sso";
+import * as intakeData from "@/lib/data/intake";
+import * as reviewData from "@/lib/data/review";
+import { INTAKE_QUESTIONS, STAGES } from "@/lib/intake";
+import { findTemplate, TEMPLATES } from "@/lib/templates";
 
 // Everything an agency admin can do in the portal, as MCP tools.
 // Each tool calls the same data-layer function the admin pages use, so tenant
@@ -62,13 +66,15 @@ function previewUrl(clientId: string) {
 
 // Returned by new_client_guide. docs/adding-a-client.md is the long version.
 const NEW_CLIENT_STEPS = [
-  "1. Check get_overview first so you don't add the client twice.",
-  "2. create_client with the business name, website and plan.",
-  "3. Send the owner the agency sign-up link yourself (nothing is emailed). They sign up with their own email and password.",
-  "4. list_pending_signups, then approve_signup with the clientId from step 2. Don't use newClientName here or you get a duplicate client.",
-  "5. Fill the portal so it isn't empty on their first login: upsert_monthly_note for this month, add_work_log for work already done, create_invoice for real invoices (draft stays hidden from the client).",
-  "6. Give the user the previewUrl so they can check the portal as the client sees it, before telling the client it's ready.",
-  "Messages, comments, files and non-draft invoices are visible to the client, so confirm wording with the user first. Someone locked out: create_password_reset_link.",
+  "The whole journey, with the team's checklist, is LMS Dash's Pipeline (lms-dash docs/onboarding.md). These are the portal's steps in it.",
+  "1. Check get_overview first so you don't add the client twice, then create_client with the business name (website and plan when known).",
+  "2. create_start_link { clientId, contactName }. Give the url to the user to send to the client themselves (nothing is emailed). On it the client picks one of the ten site designs (list_site_templates), answers the intake questions and creates their own portal login. No sign-up approval is needed.",
+  "3. get_intake shows the design they picked, their note and their answers. If they picked in a meeting instead, record it with save_intake.",
+  "4. set_client_stage as the project moves: discovery, design, build, review, launched. The client sees a project card with the next thing to do until it is launched. LMS Dash pushes this by itself for linked clients.",
+  "5. While building, set_review_source to the preview build's address. The client's Request website changes button then opens that build with comment, edit-text and draw tools. Clear it at launch so it falls back to the live site.",
+  "6. Change notes arrive as an ordinary request (get_request returns changeNotes). Tick each one with set_change_note_done as it is fixed, then set_request_status review so the client can check and approve.",
+  "7. Fill the portal before telling them it is ready: save_todo for anything only they can do, upsert_monthly_note, add_work_log, real invoices. Check with the previewUrl first.",
+  "Messages, comments, files, to-dos and non-draft invoices are visible to the client, so confirm wording with the user first. Someone locked out: create_password_reset_link. The old way still works: the agency sign-up link plus approve_signup.",
 ];
 
 export const tools: Tool[] = [
@@ -299,7 +305,7 @@ export const tools: Tool[] = [
   }),
   tool({
     name: "get_request",
-    description: "A request with its details and comment thread.",
+    description: "A request with its details, its comment thread, and changeNotes: what the client marked on their site when it came from Request website changes.",
     input: z.object({ requestId: uuid }),
     readOnly: true,
     run: (viewer, { requestId }) => requestsData.getRequest(viewer, requestId),
@@ -598,7 +604,7 @@ export const tools: Tool[] = [
     input: z.object({ clientId }),
     readOnly: true,
     run: async (viewer, { clientId }) => {
-      const [client, users, notes, workLog, messages, files, todos, stats, source] = await Promise.all([
+      const [client, users, notes, workLog, messages, files, todos, stats, source, intake, startLink] = await Promise.all([
         clientsData.getClient(viewer, clientId),
         clientsData.listClientUsers(viewer, clientId),
         updatesData.listNotes(viewer, clientId),
@@ -608,9 +614,17 @@ export const tools: Tool[] = [
         todosData.listTodos(viewer, clientId),
         statsData.getSiteStats(viewer, clientId),
         statsData.getStatsSource(viewer, clientId),
+        intakeData.getIntake(viewer, clientId),
+        intakeData.getStartLinkState(viewer, clientId),
       ]);
       return {
         client,
+        intake: {
+          ...intake,
+          templateName: findTemplate(intake.templateSlug)?.name ?? null,
+          questions: INTAKE_QUESTIONS.map((q) => ({ key: q.key, label: q.label, answer: intake.answers[q.key] ?? "" })),
+        },
+        startLink,
         users,
         notes,
         workLog,
@@ -648,6 +662,78 @@ export const tools: Tool[] = [
       const file = await filesData.getFile(viewer, fileId);
       return { name: file.name, mimeType: file.mimeType, sizeBytes: file.sizeBytes, url: await signedDownloadUrl(file.storageKey, file.name) };
     },
+  }),
+
+  // ---- Onboarding: the start link, the design pick, the intake answers, the project stage ----
+  tool({
+    name: "list_site_templates",
+    description: "The ten website designs a new client picks from, with a link to each. Add ?name=&phone=&city= to a link to show a business's own details on it.",
+    input: noInput,
+    readOnly: true,
+    run: async () => ({
+      galleryUrl: `${appUrl()}/templates`,
+      templates: TEMPLATES.map((t) => ({ slug: t.slug, name: t.name, fits: t.fits, blurb: t.blurb, url: `${appUrl()}/templates/${t.slug}` })),
+    }),
+  }),
+  tool({
+    name: "create_start_link",
+    description:
+      "A personal start link for a new client (30 days): they pick a site design, answer the intake questions and create their own portal login, with no approval step. Replaces any unused earlier link. Send it to them yourself; nothing is emailed.",
+    input: z.object({ clientId, contactName: z.string().trim().max(200).optional() }),
+    run: async (viewer, { clientId, contactName }) => {
+      const { token, expiresAt } = await intakeData.createStartLink(viewer, clientId, contactName);
+      return { url: `${appUrl()}/start/${token}`, expiresAt };
+    },
+  }),
+  tool({
+    name: "get_intake",
+    description: "What a new client told us: the design they picked, their note about it, their answers to the intake questions, and whether their start link was used.",
+    input: z.object({ clientId }),
+    readOnly: true,
+    run: async (viewer, { clientId }) => {
+      const [intake, startLink] = await Promise.all([intakeData.getIntake(viewer, clientId), intakeData.getStartLinkState(viewer, clientId)]);
+      const template = findTemplate(intake.templateSlug);
+      return {
+        ...intake,
+        template: template ? { slug: template.slug, name: template.name, url: `${appUrl()}/templates/${template.slug}` } : null,
+        questions: INTAKE_QUESTIONS.map((q) => ({ key: q.key, label: q.label, answer: intake.answers[q.key] ?? "" })),
+        startLink,
+      };
+    },
+  }),
+  tool({
+    name: "save_intake",
+    description:
+      "Record a design pick or intake answers for a client, e.g. when they chose in a meeting. answers replaces all answers, so pass the full set (keys from get_intake's questions).",
+    input: z.object({
+      clientId,
+      templateSlug: z.string().max(40).optional().describe("A slug from list_site_templates"),
+      templateNote: z.string().max(2000).optional(),
+      answers: z.record(z.string(), z.string().max(2000)).optional(),
+    }),
+    run: async (viewer, { clientId, ...patch }) => intakeData.saveIntake(viewer, patch, clientId),
+  }),
+  tool({
+    name: "set_client_stage",
+    description: `Where a client's website project stands: ${STAGES.join(", ")}, or "" to hide the project card. The client sees it on their Overview. LMS Dash pushes this for linked clients.`,
+    input: z.object({ clientId, stage: z.enum(["", ...STAGES]) }),
+    run: async (viewer, { clientId, stage }) => {
+      await clientsData.setStage(viewer, clientId, stage);
+      return { clientId, stage };
+    },
+  }),
+  tool({
+    name: "set_review_source",
+    description:
+      "The address the client's Request website changes button loads: the preview build while we are building. An empty url clears it, and the tool falls back to the client's live website.",
+    input: z.object({ clientId, url: z.string().trim().max(500) }),
+    run: async (viewer, { clientId, url }) => ({ reviewUrl: await clientsData.setReviewSource(viewer, clientId, url) }),
+  }),
+  tool({
+    name: "set_change_note_done",
+    description: "Tick (or untick) one change note of a request made with Request website changes. The client sees the tick. Note ids come from get_request's changeNotes.",
+    input: z.object({ noteId: uuid, done: z.boolean() }),
+    run: async (viewer, { noteId, done }) => ({ noteId, done, ...(await reviewData.setNoteDone(viewer, noteId, done)) }),
   }),
 
   // ---- To-dos for the client ----

@@ -1,5 +1,25 @@
 # Handoff
 
+## State (2026-11-11, merged 2026-11-13): onboarding, templates and Request website changes
+
+Merged into `main` from `claude/loving-babbage-u1e3ts` (PR #2) with the matching lms-dash branch. Docs: docs/adding-a-client.md, docs/website-changes.md; lms-dash docs/onboarding.md.
+
+- Migrations `0010_onboarding_and_change_notes` and `0011_live_notify_onboarding` (renumbered after
+  `0009_payments` at the merge; same SQL) (new tables
+  `start_links`, `intakes`, `change_notes`; `clients.review_url`, `clients.stage`; the notify
+  trigger now covers them and `clients`).
+- Deploy this before Dash. `REVIEW_SECRET=<long random string>` belongs in the server `.env`
+  (without it each process makes its own, so review links stop working after a restart)
+  (`python -c "import secrets; print(secrets.token_urlsafe(48))"`). Do not set `REVIEW_ALLOW_PRIVATE`.
+- `skipTrailingSlashRedirect` is on in `next.config.ts` (the review frame needs it); `/portal/`
+  and `/portal` both still work.
+- Checks: typecheck, lint (the one old warning), 100 tests, build (shared first load still 103 kB).
+  Walked end to end with Dash locally in Chromium at 1440 and 390 px.
+- Before showing clients: the ten designs use drawn photo slots, not photographs, and their sample
+  wording and prices are placeholders. Check `/site/...` against Maple's real site once deployed
+  (fonts, the quote form staying switched off, visit counts not moving).
+- Existing clients see one new thing: the **Request website changes** button, because they have a
+  website address. No project card (their stage is empty).
 ## State (2026-11-13): payments, part-paid invoices, billing FAQ (pushed, not deployed)
 
 LMS Dash now records payments and works out how much of each invoice they cover; the portal shows

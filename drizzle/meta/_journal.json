@@ -71,6 +71,20 @@
       "when": 1794544214908,
       "tag": "0009_payments",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1794569612138,
+      "tag": "0010_onboarding_and_change_notes",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1794569617554,
+      "tag": "0011_live_notify_onboarding",
+      "breakpoints": true
     }
   ]
 }

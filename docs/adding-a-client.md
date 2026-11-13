@@ -1,54 +1,56 @@
 # Adding a client
 
-How to put a new client on the portal, check it the way they will see it, and hand it over.
-Every step can be done in the admin pages or through the MCP endpoint ([mcp.md](mcp.md)). The
-MCP tool `new_client_guide` returns a short version of this list with the live sign-up link, and
-the server's instructions tell AI clients to call it before onboarding anyone.
+A new client now starts in LMS Dash, on the **Pipeline**: the team's step list from the first call
+to a live site (lms-dash `docs/onboarding.md`). This page is the portal's half of it. Every step
+can also be done over MCP ([mcp.md](mcp.md)); the tool `new_client_guide` returns a short version.
 
-## 1. Create the client
+## 1. Create the client and send the start link
 
-Check the client isn't there already (Admin → Clients, or `get_overview`), then create it.
+- Dash: New lead, then **Make the start link** on the client's Onboarding page. It creates the
+  portal client and gives you the link with a message to send. Nothing is emailed.
+- MCP: `create_client`, then `create_start_link { clientId, contactName }`.
 
-- Admin: Clients → New client.
-- MCP: `create_client` with `name`, `websiteUrl` and `planName`. The result includes the new
-  client's `id` and `previewUrl`.
+The link is `/start/<token>`: personal, good for 30 days, and a new one replaces an unused old
+one. Only its hash is stored (`start_links`). Without logging in, the client:
 
-## 2. Get the owner logged in
+1. **Picks a design.** The ten site designs (`src/templates/`, listed in `src/lib/templates.ts`)
+   show with their own business name and phone on them. They open any of them full size, on a
+   computer or phone frame, choose one and say what they like about it.
+2. **Answers "About your business".** The questions are `src/lib/intake.ts` (LMS Dash's intake
+   sheet in plain words). Answers save when a field is left.
+3. **Creates their portal login.** The account is active at once: we sent this link to this
+   client, so there is no approval step. The link is then spent.
 
-Nothing is emailed yet, so send the agency sign-up link yourself (Admin → Sign-ups, or
-`signUpLink` from `get_overview`). The owner signs up with their own email and password and lands
-on a waiting page.
+Picked a design together in a meeting? Record it in Dash (**Picked in the meeting**) or with
+`save_intake`. The public gallery is `/templates` (add `?name=&phone=&city=` to personalise it).
 
-## 3. Approve the sign-up into the client
+After that the same things live on the client's **Your project** page (`/portal/project`).
 
-- Admin: Sign-ups → pick the client from step 1 → Approve.
-- MCP: `list_pending_signups`, then `approve_signup` with `userId` and the `clientId` from step 1.
+The old way still works: the agency sign-up link (`/join/<code>`) plus approving the sign-up, or
+`create_client_user` for a one-time set-password link.
 
-Approve into the existing client. Choosing "new client" (or `newClientName`) creates a second,
-empty client with the same name.
+## 2. The project card
 
-**Or skip the sign-up link** and create the login yourself: client Settings → Add a login directly, or
-`create_client_user { clientId, email, name }`. You get a one-time link (14 days) where they choose
-their own password. Send it to them; nothing is emailed.
+`clients.stage` (discovery, design, build, review, launched) is pushed from LMS Dash with
+`set_client_stage`. While it is one of the first four, the client's Overview shows **Your website
+project**: five steps and the one thing they can do next. It disappears at `launched`, and never
+shows for clients whose stage is empty (everyone from before this existed).
 
-If someone can't get in later, make them a one-time password link (client Settings → Reset link,
-or `create_password_reset_link`) and send it to them.
+## 3. While building: the preview site
 
-## 4. Fill it before their first login
+Set the build's address with `set_review_source` (Dash: **Connect the preview site**). The
+client's **Request website changes** button opens it with the markup tools
+([website-changes.md](website-changes.md)). Clear it at launch and the tool uses `websiteUrl`.
 
-An empty portal makes a poor first impression. At minimum:
+## 4. Fill it before telling them it is ready
 
-- This month's update: wins, what we're working on, what's next (`upsert_monthly_note`).
-- Work already done, one entry per item (`add_work_log`).
-- Real invoices (`create_invoice`, or `upsert_invoice` by number). Drafts stay hidden from the client until marked sent.
-- Website analytics: client Settings → Website analytics, or `set_stats_source` ([analytics.md](analytics.md)).
-- Rankings and AI answers: pushed from LMS Dash (`sync_rankings`, `sync_ai_answers`).
-- To-dos for anything only the client can do, with steps (client → To-dos tab, or `save_todo`).
-- Brand kit: business card and logo files uploaded with **Brand kit** ticked (or `upload_file` with
-  `folder: "brand"`). PNG/JPEG previews show on their Your brand page; PDFs are downloads.
+- To-dos for anything only they can do (`save_todo`; Dash sends a starter set).
+- This month's update (`upsert_monthly_note`) and work already done (`add_work_log`).
+- Real invoices, analytics (`set_stats_source`), rankings and AI answers from LMS Dash.
+- Brand kit files (`upload_file` with `folder: "brand"`).
 
-Messages, request comments, files and non-draft invoices show up for the client straight away, so
-agree on wording before sending them.
+Messages, request comments, files, to-dos and non-draft invoices show up for the client straight
+away, so agree on wording before sending them.
 
 ## 4b. Link their job dashboard, if they have one
 
@@ -69,23 +71,13 @@ docs/sso.md, "Into a client's job dashboard".
 
 ## 5. Check it as the client
 
-Open the client in Admin and click **View as client** (top right). It opens the portal in a new tab
-exactly as the client's first user sees it: their name, their nav badges, no draft invoices. Client
-Settings has a **View as <name>** button per person when a client has more than one login. Before
-anyone joins, the preview shows the client with a placeholder user.
-
-The preview is look-only. A banner marks it, every form and button inside it is disabled, and
-**Exit preview** takes you back to the client's admin page. Admin pages keep working normally in
-other tabs while a preview is open; opening a preview for another client replaces the first one.
-
-Over MCP, `get_client`, `get_overview` and `create_client` return a `previewUrl` for each client.
-It only works in a browser that is logged in as an agency admin.
+**View as client** in LMS Dash opens the portal exactly as the client's first user sees it,
+read-only (a banner marks it, every form is disabled). It also opens the review tool: a request's
+**See them on the site** link in Dash goes to `/preview/<token>?next=/review?request=<id>`.
 
 ## How the preview works
 
-`/admin/clients/<id>/preview` (optionally `?user=<id>`) checks the admin, sets an `lms_preview`
-cookie and redirects to `/portal`. `requireClient()` in `src/lib/auth/session.ts` returns a client
-viewer built by `previewViewer()` (`src/lib/data/preview.ts`) when the real viewer is an admin and
-that cookie is set, so every portal page runs the same data-layer code a real client gets. Admin
-pages and server actions never read the cookie, so a preview can't act as the client.
-`/portal/exit-preview` clears it.
+`requireClient()` in `src/lib/auth/session.ts` returns a client viewer built by `previewViewer()`
+(`src/lib/data/preview.ts`) for an admin with the `lms_preview` cookie, or for a preview session
+opened from LMS Dash. Server actions never use it, and the review and intake data functions
+refuse any viewer with `previewBy` set, so a preview can't act as the client.

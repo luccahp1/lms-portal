@@ -3,7 +3,15 @@ import { formatDate, requestStatusLabel } from "@/lib/format";
 import { Empty, Pill } from "@/components/ui";
 import type { RequestStatus } from "@/db/schema";
 
-type Row = { id: string; title: string; status: RequestStatus; createdAt: Date; commentCount?: number };
+type Row = {
+  id: string;
+  title: string;
+  status: RequestStatus;
+  createdAt: Date;
+  commentCount?: number;
+  /** Set for requests made with "Request website changes". */
+  notes?: { done: number; total: number } | null;
+};
 
 export function RequestList({ rows, basePath, compact = false }: { rows: Row[]; basePath: string; compact?: boolean }) {
   if (rows.length === 0) return <Empty>No requests yet.</Empty>;
@@ -21,6 +29,7 @@ export function RequestList({ rows, basePath, compact = false }: { rows: Row[]; 
                 <span className="font-medium">{r.title}</span>
                 <span className="text-[13px] text-muted">
                   Opened {formatDate(r.createdAt)}
+                  {r.notes ? ` · ${r.notes.done} of ${r.notes.total} ${r.notes.total === 1 ? "change" : "changes"} done` : ""}
                   {r.commentCount ? ` · ${r.commentCount} comment${r.commentCount === 1 ? "" : "s"}` : ""}
                 </span>
               </div>

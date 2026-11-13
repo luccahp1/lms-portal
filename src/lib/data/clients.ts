@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { agencies, clients, users } from "@/db/schema";
 import { assertAdmin, NotFoundError, resolveClientId, type Viewer } from "./viewer";
 import { createInvite } from "./invites";
+import { isStage } from "@/lib/intake";
 
 export const getAgency = cache(async function getAgency(viewer: Viewer) {
   const [row] = await db.select().from(agencies).where(eq(agencies.id, viewer.agencyId));
@@ -21,6 +22,8 @@ const clientColumns = {
   monthlyCents: clients.monthlyCents,
   creditCents: clients.creditCents,
   statsUrl: clients.statsUrl,
+  reviewUrl: clients.reviewUrl,
+  stage: clients.stage,
   dashboardUrl: clients.dashboardUrl,
   createdAt: clients.createdAt,
 };
@@ -149,4 +152,41 @@ export async function createPasswordResetLink(viewer: Viewer, userId: string) {
 export async function removeClientUser(viewer: Viewer, userId: string) {
   const user = await loadClientUser(viewer, userId);
   await db.delete(users).where(eq(users.id, user.id));
+}
+
+export class BadUrlError extends Error {
+  constructor() {
+    super("Use a full web address starting with https://");
+  }
+}
+
+/**
+ * The address "Request website changes" loads for this client: the preview build while we
+ * are building. Empty clears it, and the tool falls back to the client's live website.
+ */
+export async function setReviewSource(viewer: Viewer, clientId: string, url: string) {
+  assertAdmin(viewer);
+  const id = await resolveClientId(viewer, clientId);
+  let value: string | null = null;
+  if (url.trim()) {
+    let parsed: URL;
+    try {
+      parsed = new URL(url.trim());
+    } catch {
+      throw new BadUrlError();
+    }
+    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") throw new BadUrlError();
+    if (parsed.username || parsed.password) throw new BadUrlError();
+    value = parsed.toString();
+  }
+  await db.update(clients).set({ reviewUrl: value }).where(eq(clients.id, id));
+  return value;
+}
+
+/** Where the project stands (LMS Dash pushes this). "" hides the project card. */
+export async function setStage(viewer: Viewer, clientId: string, stage: string) {
+  assertAdmin(viewer);
+  const id = await resolveClientId(viewer, clientId);
+  if (stage !== "" && !isStage(stage)) throw new Error("Unknown stage");
+  await db.update(clients).set({ stage }).where(eq(clients.id, id));
 }
