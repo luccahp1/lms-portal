@@ -23,7 +23,17 @@ the result. Dash is the source: nothing here changes a payment.
   `npm ci && npm run build && npm run db:migrate`, rebuild `../current`, restart `lms-portal`.
   Then reconnect the Claude Code `lms-portal` MCP client so it lists `sync_payments`.
 
-## State (2026-11-12, later): sign-in limit and delete_invoice, pushed, not deployed
+## Deployed 2026-11-13: 5446a53
+
+Sign-in limit and `delete_invoice` (below) are live. No migration (still 0000 to 0008).
+- Backups: `/srv/backups/lms-portal/{src.tgz,current/,env.bak,lms_portal.dump}` named `*.20261113-111823.pre-audit`.
+- Checked: `/login` 200 local and public; the 11th wrong try from one browser shows "Too many tries";
+  a wrong try from another address still gets the normal "don't match"; MCP `tools/list` has 52
+  tools including `delete_invoice`. A correct sign-in was not tried (no test account).
+- Rollback: `rm -rf current && cp -a /srv/backups/lms-portal/current.20261113-111823.pre-audit current`,
+  then restart `lms-portal`.
+
+## State (2026-11-12, later): sign-in limit and delete_invoice
 
 From the cross-repo audit (`lms-dash/docs/SYSTEM-AUDIT.md`). Two changes on `main`, neither on the
 server yet. No migration in either.
