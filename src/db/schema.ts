@@ -59,6 +59,13 @@ export const clients = pgTable(
     // Where the project stands, pushed from LMS Dash: discovery, design, build, review,
     // launched. "" for clients from before onboarding existed (no project card shown).
     stage: text("stage").notNull().default(""),
+    // The client's own job dashboard (a separate installation per company), when they have
+    // one. Shown to the client as "Open your dashboard". Always https; set by an admin only.
+    dashboardUrl: text("dashboard_url"),
+    // sha256 of the secret that dashboard presents when it redeems a sign-in token (docs/sso.md,
+    // "Into a client's dashboard"). Null: the link opens the dashboard's own login. Never selected
+    // for a page.
+    dashboardSsoSecretHash: text("dashboard_sso_secret_hash"),
     createdAt: createdAt(),
   },
   (t) => [index("clients_agency_idx").on(t.agencyId)],
@@ -116,6 +123,17 @@ export const previewSessions = pgTable("preview_sessions", {
 export const ssoLinks = pgTable("sso_links", {
   tokenHash: text("token_hash").primaryKey(),
   userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  usedAt: timestamp("used_at", { withTimezone: true }),
+});
+
+// One-time tokens that sign a client user in to their own job dashboard. Same rules as
+// sso_links: 2 minutes, once, only the hash stored. Bound to the client, so only that client's
+// dashboard (holding that client's secret) can redeem one.
+export const dashboardSsoLinks = pgTable("dashboard_sso_links", {
+  tokenHash: text("token_hash").primaryKey(),
+  userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  clientId: uuid("client_id").notNull().references(() => clients.id, { onDelete: "cascade" }),
   expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
   usedAt: timestamp("used_at", { withTimezone: true }),
 });

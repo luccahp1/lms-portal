@@ -154,6 +154,13 @@ export async function createClientAction(_prev: ActionState, formData: FormData)
   redirect(`/admin/clients/${client.id}`);
 }
 
+export async function setClientDashboardAction(formData: FormData) {
+  const viewer = await requireAdmin();
+  const input = parse(z.object({ clientId: z.string().uuid(), dashboardUrl: z.string().trim().max(500).optional() }), formData);
+  await clientsData.setClientDashboard(viewer, input.clientId, input.dashboardUrl);
+  refresh();
+}
+
 export async function updateClientAction(formData: FormData) {
   const viewer = await requireAdmin();
   const input = parse(z.object({ clientId: z.string().uuid(), ...clientFields }), formData);

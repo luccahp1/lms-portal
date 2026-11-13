@@ -52,6 +52,23 @@ client's **Request website changes** button opens it with the markup tools
 Messages, request comments, files, to-dos and non-draft invoices show up for the client straight
 away, so agree on wording before sending them.
 
+## 4b. Link their job dashboard, if they have one
+
+Clients who also have the job dashboard (leads, estimates, invoices, FieldKit; one installation
+per company, see mikedash `docs/NEW-CLIENT.md`) get an **Open your dashboard** link in their
+portal's side menu.
+
+- Admin: client Settings → Job dashboard → paste the address → Save.
+- MCP: `set_client_dashboard { clientId, dashboardUrl }`. An empty string removes the link.
+
+It has to be an `https://` address. On its own the link opens the dashboard's login page.
+
+To have the link sign them straight in, turn on one-click sign-in: MCP
+`set_client_dashboard_sign_in { clientId, enabled: true }` returns a secret, once. Put it in that
+dashboard's `.env.local` as `OE_PORTAL_SSO_SECRET` (with `OE_PORTAL_URL` set to this portal) and
+restart it. The client's portal email must be the email on their dashboard account. How it works:
+docs/sso.md, "Into a client's job dashboard".
+
 ## 5. Check it as the client
 
 **View as client** in LMS Dash opens the portal exactly as the client's first user sees it,

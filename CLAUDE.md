@@ -48,4 +48,4 @@ Tests need a real Postgres: see the Gotchas in HANDOFF.md for the embedded-postg
   docs/website-changes.md. Bump `AGENT_VERSION` in `src/lib/review/proxy.ts` when `public/review-agent.js` changes.
 - `src/templates/*.ts` are HTML inside a template literal: no backticks, no `${`, no backslashes in them.
 - Review and intake writes refuse a viewer with `previewBy` set. Keep that in any new client-side write.
-- `start_links`, `intakes`, `change_notes` and `clients` are on the live-notify trigger (migration 0008).
+- `start_links`, `intakes`, `change_notes` and `clients` are on the live-notify trigger (migration 0010).

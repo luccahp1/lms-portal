@@ -14,6 +14,7 @@ export function AppShell({
   identity,
   nav,
   banner,
+  dashboardUrl,
   children,
 }: {
   agencyName: string;
@@ -24,6 +25,8 @@ export function AppShell({
   nav: NavItem[];
   /** Shown above the page, e.g. the "View as client" notice. */
   banner?: React.ReactNode;
+  /** The client's own job dashboard, when they have one: an "Open your dashboard" link in the nav. */
+  dashboardUrl?: string | null;
   children: React.ReactNode;
 }) {
   return (
@@ -57,6 +60,16 @@ export function AppShell({
       <div className="k-shell">
         <nav className="k-side" id="side" aria-label="Main">
           <NavLinks items={nav} group={subtitle === "Client portal" ? "Your portal" : "Agency"} />
+          {dashboardUrl && (
+            <>
+              <div className="k-side__grp k-mono">Your tools</div>
+              {/* Another site, in a new tab. /sso/dashboard signs the client in there when it can. */}
+              <a href="/sso/dashboard" target="_blank" rel="noopener" className="k-nav">
+                <Icon name="home" />
+                <span>Open your dashboard</span>
+              </a>
+            </>
+          )}
           <div className="k-side__foot">
             <div className="k-side__grp k-mono">Other</div>
             <form action={logout}>

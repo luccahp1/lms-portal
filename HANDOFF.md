@@ -5,7 +5,7 @@
 On branch `claude/loving-babbage-u1e3ts` (draft PR), with the matching lms-dash branch. Nothing
 is on luccaserver. Docs: docs/adding-a-client.md, docs/website-changes.md; lms-dash docs/onboarding.md.
 
-- Migrations `0007_onboarding_and_change_notes` and `0008_live_notify_onboarding` (new tables
+- Migrations `0009_onboarding_and_change_notes` and `0010_live_notify_onboarding` (new tables
   `start_links`, `intakes`, `change_notes`; `clients.review_url`, `clients.stage`; the notify
   trigger now covers them and `clients`).
 - Deploy this before Dash. Add `REVIEW_SECRET=<long random string>` to the server `.env`
@@ -19,6 +19,25 @@ is on luccaserver. Docs: docs/adding-a-client.md, docs/website-changes.md; lms-d
   (fonts, the quote form staying switched off, visit counts not moving).
 - Existing clients see one new thing: the **Request website changes** button, because they have a
   website address. No project card (their stage is empty).
+## State (2026-11-12): job dashboard link and one-click sign-in into it
+
+luccahp1/lms-portal#3 merged. A client whose company has the job dashboard (mikedash, one installation
+per company) gets **Open your dashboard** in the side menu.
+
+- `clients.dashboard_url` (migration 0007), set by an admin (client Settings, MCP `set_client_dashboard`,
+  or Dash's Job dashboard box). Plain `https://` only.
+- **One-click sign-in** (migration 0008, `dashboard_sso_links` + `clients.dashboard_sso_secret_hash`).
+  `/sso/dashboard` makes a 2-minute, single-use token (sha256 stored, bound to the client) and sends the
+  browser to `<dashboard>/dashboard/sso?t=`. The dashboard redeems it at `POST /api/dashboard-sso/redeem`
+  with its own secret (Bearer). One 401 for every failure; the token burns on the first try. Admins in
+  View as client and clients without a secret get the plain address. MCP `set_client_dashboard_sign_in
+  {clientId, enabled}` makes (shows once) or removes the secret. docs/sso.md, "Into a client's job dashboard".
+- Tests: 81 pass against embedded Postgres 16 (`tests/dashboard-sso.test.ts` is new). Lint: no new
+  warnings (the one in `tests/dash-admin.test.ts` is old).
+- Checked in a browser against a local portal and a local mikedash: client signs in to the portal,
+  Open your dashboard lands signed in; a bad token lands on the dashboard's login with a note; the
+  admin form shows and saves the address.
+- **Deployed 2026-11-12** (f40374b, migrations 0007 and 0008 applied). Backups: `/srv/backups/lms-portal/*.20261112-181651.pre-dashboard-sso*`.
 
 ## State (2026-11-05, latest): same look and one login with LMS Dash, deployed
 

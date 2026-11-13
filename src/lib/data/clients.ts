@@ -22,6 +22,7 @@ const clientColumns = {
   statsUrl: clients.statsUrl,
   reviewUrl: clients.reviewUrl,
   stage: clients.stage,
+  dashboardUrl: clients.dashboardUrl,
   createdAt: clients.createdAt,
 };
 
@@ -101,6 +102,32 @@ export async function updateClient(
     .update(clients)
     .set({ name: input.name, websiteUrl: input.websiteUrl || null, planName: input.planName || null })
     .where(eq(clients.id, id));
+}
+
+// The link is rendered to the client as a button, so only a plain https address is stored:
+// no credentials in it, no javascript: or http: targets.
+export function cleanDashboardUrl(input: string | null | undefined): string | null {
+  const text = (input ?? "").trim();
+  if (!text) return null;
+  let url: URL;
+  try {
+    url = new URL(text);
+  } catch {
+    throw new Error("That doesn't look like a web address. It should start with https://");
+  }
+  if (url.protocol !== "https:" || url.username || url.password) {
+    throw new Error("The dashboard link must be a plain https:// address.");
+  }
+  return url.origin + (url.pathname === "/" ? "" : url.pathname.replace(/\/+$/, ""));
+}
+
+// Set or clear (empty) the link to the client's own job dashboard.
+export async function setClientDashboard(viewer: Viewer, clientId: string, dashboardUrl: string | null | undefined) {
+  assertAdmin(viewer);
+  const id = await resolveClientId(viewer, clientId);
+  const clean = cleanDashboardUrl(dashboardUrl);
+  await db.update(clients).set({ dashboardUrl: clean }).where(eq(clients.id, id));
+  return clean;
 }
 
 async function loadClientUser(viewer: Viewer, userId: string) {
