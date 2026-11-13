@@ -1,5 +1,30 @@
 # Handoff
 
+## State (2026-11-12, later): sign-in limit and delete_invoice, pushed, not deployed
+
+From the cross-repo audit (`lms-dash/docs/SYSTEM-AUDIT.md`). Two changes on `main`, neither on the
+server yet. No migration in either.
+
+- **Sign-in limits wrong tries** (50d7c0d). The sign-in page is public and opens both the portal and
+  LMS Dash, and it took unlimited password guesses. `src/lib/auth/login.ts` counts wrong tries in
+  memory for 15 minutes: 10 per address, 30 per email. The address is `cf-connecting-ip` (set by
+  Cloudflare, not the browser), then the last hop of `x-forwarded-for`. An unknown email is checked
+  against a throwaway hash, so it is refused as slowly as a wrong password. `checkCredentials` in
+  `session.ts` is gone; `attemptLogin` replaces it and is testable (no `server-only`).
+  `tests/login.test.ts`.
+- **`delete_invoice` MCP tool** (4236118), `deleteInvoiceByNumber` in `src/lib/data/invoices.ts`.
+  Removes one client's invoice by number. LMS Dash calls it when an invoice is deleted, renumbered,
+  moved to another client or turned into an estimate there; before, the old copy stayed on the
+  client's Billing page and in what they owe. Dash falls back to hiding the invoice as a draft
+  while the portal does not have the tool, so the two can be deployed in either order.
+  `tests/sync.test.ts`.
+- Checks: typecheck, lint (the one old warning), 89 tests against embedded Postgres 16, build.
+- **To deploy** (docs/deploy-home-server.md, ask Lucca first): archive `main`, `npm ci && npm run
+  build`, rebuild `../current`, restart `lms-portal`. `npm run db:migrate` has nothing to apply.
+  After it, check a wrong password ten times from one browser gets "Too many tries", and that the
+  Claude Code `lms-portal` MCP client is reconnected so it lists `delete_invoice`.
+- Not done: the limit is per process and resets on restart; no lockout notice is sent to anyone.
+
 ## State (2026-11-12): job dashboard link and one-click sign-in into it
 
 luccahp1/lms-portal#3 merged. A client whose company has the job dashboard (mikedash, one installation
