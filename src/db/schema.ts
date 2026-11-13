@@ -49,6 +49,11 @@ export const clients = pgTable(
     name: text("name").notNull(),
     websiteUrl: text("website_url"),
     planName: text("plan_name"),
+    // What the client pays each month, in cents (set by LMS Dash with sync_payments). Null: no
+    // monthly services. Shown on their Billing page with the next invoice and due dates.
+    monthlyCents: integer("monthly_cents"),
+    // Paid beyond what is owed, kept for the next invoice (also from sync_payments).
+    creditCents: integer("credit_cents").notNull().default(0),
     // The client's own site answers GET <statsUrl>?from=&to= with anonymous visit counts
     // (see docs/analytics.md). The token is a secret: never send it to a client page.
     statsUrl: text("stats_url"),
@@ -251,6 +256,9 @@ export const invoices = pgTable(
     number: text("number").notNull(),
     description: text("description").notNull().default(""),
     amountCents: integer("amount_cents").notNull(),
+    // How much of a sent invoice is covered by payments (LMS Dash works it out). A sent invoice
+    // with paidCents > 0 is part paid; only amountCents - paidCents counts toward the balance.
+    paidCents: integer("paid_cents").notNull().default(0),
     issuedOn: date("issued_on").notNull(),
     dueOn: date("due_on").notNull(),
     status: invoiceStatus("status").notNull().default("draft"),
@@ -259,6 +267,27 @@ export const invoices = pgTable(
   (t) => [
     index("invoices_client_idx").on(t.clientId, t.issuedOn),
     uniqueIndex("invoices_agency_number_idx").on(t.agencyId, t.number),
+  ],
+);
+
+// Payments recorded in LMS Dash, replaced as a set by sync_payments. ref is Dash's payment id.
+// seenAt is when the client dismissed the "Payment received" notice; null shows it.
+export const payments = pgTable(
+  "payments",
+  {
+    id: id(),
+    agencyId: uuid("agency_id").notNull().references(() => agencies.id, { onDelete: "cascade" }),
+    clientId: uuid("client_id").notNull().references(() => clients.id, { onDelete: "cascade" }),
+    ref: text("ref").notNull(),
+    amountCents: integer("amount_cents").notNull(),
+    paidOn: date("paid_on").notNull(),
+    note: text("note").notNull().default(""),
+    seenAt: timestamp("seen_at", { withTimezone: true }),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    index("payments_client_idx").on(t.clientId, t.paidOn),
+    uniqueIndex("payments_agency_ref_idx").on(t.agencyId, t.ref),
   ],
 );
 

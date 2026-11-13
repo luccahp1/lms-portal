@@ -102,7 +102,7 @@ export function Svg({ html, className }: { html: string; className?: string }) {
 }
 
 /** A number that counts up from 0 when it comes into view. */
-export function Count({ value, format = "int", suf = "" }: { value: number; format?: "int" | "money" | "pct" | "dec1"; suf?: string }) {
+export function Count({ value, format = "int", suf = "" }: { value: number; format?: "int" | "money" | "cents" | "pct" | "dec1"; suf?: string }) {
   return <span dangerouslySetInnerHTML={{ __html: charts.count(value, { format, suf }) }} />;
 }
 

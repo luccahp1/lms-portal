@@ -18,6 +18,8 @@ const clientColumns = {
   name: clients.name,
   websiteUrl: clients.websiteUrl,
   planName: clients.planName,
+  monthlyCents: clients.monthlyCents,
+  creditCents: clients.creditCents,
   statsUrl: clients.statsUrl,
   dashboardUrl: clients.dashboardUrl,
   createdAt: clients.createdAt,

@@ -29,6 +29,7 @@ or `destructiveHint` so clients can ask before deleting.
 | `sync_ai_answers` | Replace the AI answer checks |
 | `upsert_invoice` | Create or update an invoice by number |
 | `delete_invoice` | Remove one client's invoice by number (LMS Dash calls it when one is deleted, renumbered or moved there) |
+| `sync_payments` | Replace a client's payments, monthly amount and credit (LMS Dash). New payments show the client a "Payment received" notice |
 | `set_payment_instructions` | How clients pay, shown on Billing |
 | `list_request_activity` | Requests changed since a time, with comments (Dash resync) |
 | `delete_request` | Remove a test or spam ticket |

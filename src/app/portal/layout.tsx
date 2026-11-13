@@ -5,6 +5,8 @@ import { listRequests } from "@/lib/data/requests";
 import { listFiles } from "@/lib/data/files";
 import { countOpenTodos } from "@/lib/data/todos";
 import { LiveRefresh } from "@/components/LiveRefresh";
+import { listPayments } from "@/lib/data/payments";
+import { PaymentNotice } from "@/components/features/PaymentNotice";
 
 function PreviewBanner({ clientName, personName }: { clientName: string; personName: string }) {
   return (
@@ -23,13 +25,15 @@ function PreviewBanner({ clientName, personName }: { clientName: string; personN
 
 export default async function PortalLayout({ children }: { children: React.ReactNode }) {
   const viewer = await requireClient();
-  const [agency, client, requests, files, todoCount] = await Promise.all([
+  const [agency, client, requests, files, todoCount, payments] = await Promise.all([
     getAgency(viewer),
     getClient(viewer),
     listRequests(viewer),
     listFiles(viewer),
     countOpenTodos(viewer),
+    listPayments(viewer),
   ]);
+  const notice = <PaymentNotice payments={payments.filter((p) => !p.seenAt)} />;
 
   return (
     <AppShell
@@ -54,10 +58,14 @@ export default async function PortalLayout({ children }: { children: React.React
       {viewer.previewBy ? (
         // Look, don't touch: every form and button in the preview is disabled.
         <fieldset disabled className="contents">
+          {notice}
           {children}
         </fieldset>
       ) : (
-        children
+        <>
+          {notice}
+          {children}
+        </>
       )}
     </AppShell>
   );

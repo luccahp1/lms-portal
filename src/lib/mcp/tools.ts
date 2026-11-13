@@ -8,6 +8,7 @@ import * as messagesData from "@/lib/data/messages";
 import * as filesData from "@/lib/data/files";
 import * as updatesData from "@/lib/data/updates";
 import * as invoicesData from "@/lib/data/invoices";
+import * as paymentsData from "@/lib/data/payments";
 import * as signupsData from "@/lib/data/signups";
 import * as statsData from "@/lib/data/stats";
 import * as rankingsData from "@/lib/data/rankings";
@@ -441,12 +442,13 @@ export const tools: Tool[] = [
   tool({
     name: "upsert_invoice",
     description:
-      "Create or update an invoice by its number (LMS Dash uses this to keep the portal in step). Drafts are hidden from the client; only 'sent' counts toward the balance they owe. amountCents is in cents.",
+      "Create or update an invoice by its number (LMS Dash uses this to keep the portal in step). Drafts are hidden from the client; only 'sent' counts toward the balance they owe, less paidCents (the part already paid). Amounts are in cents.",
     input: z.object({
       clientId,
       number: z.string().trim().min(1).max(50),
       description: z.string().trim().max(500).default(""),
       amountCents: z.number().int().min(0),
+      paidCents: z.number().int().min(0).default(0),
       issuedOn: isoDate,
       dueOn: isoDate,
       status: z.enum(invoiceStatus.enumValues),
@@ -460,6 +462,29 @@ export const tools: Tool[] = [
     input: z.object({ clientId, number: z.string().trim().min(1).max(50) }),
     destructive: true,
     run: async (viewer, { clientId, number }) => ({ deleted: await invoicesData.deleteInvoiceByNumber(viewer, clientId, number), number }),
+  }),
+  tool({
+    name: "sync_payments",
+    description:
+      "Replace a client's payments with this set (LMS Dash uses this; payments not listed are removed). Each new payment shows the client a 'Payment received' notice until they dismiss it. Also sets their monthly amount (null: no monthly services) and credit (paid beyond what is owed). Amounts are in cents; ref is the payment's id in LMS Dash.",
+    input: z.object({
+      clientId,
+      monthlyCents: z.number().int().min(0).nullable(),
+      creditCents: z.number().int().min(0).default(0),
+      payments: z
+        .array(
+          z.object({
+            ref: z.string().trim().min(1).max(64),
+            amountCents: z.number().int().positive(),
+            paidOn: isoDate,
+            note: z.string().trim().max(500).default(""),
+          }),
+        )
+        .max(2000),
+    }),
+    run: async (viewer, { clientId, monthlyCents, creditCents, payments }) => ({
+      payments: (await paymentsData.syncPayments(viewer, clientId, { monthlyCents, creditCents }, payments)).length,
+    }),
   }),
   tool({
     name: "set_payment_instructions",

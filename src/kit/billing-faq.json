@@ -1,0 +1,45 @@
+{
+  "_about": "Billing questions shown at the bottom of Billing in LMS Dash and the client portal. From the standard Website Services Agreement. {monthly} becomes the client's monthly amount ('$365.00 a month'), or 'your monthly fee' when unknown. Edit here, then py scripts/sync_kit.py.",
+  "items": [
+    {
+      "q": "When do I get my monthly invoice?",
+      "a": "Monthly services are billed in advance. Your invoice for {monthly} is sent on the 1st of each month."
+    },
+    {
+      "q": "When is it due?",
+      "a": "Within 15 days, so by the 16th of the month. One-off work (like a website build) is due when you get the invoice."
+    },
+    {
+      "q": "How do I pay?",
+      "a": "By Interac e-Transfer, or by direct deposit using the details on your invoice. Once we receive it, it shows here as a payment and comes off your balance."
+    },
+    {
+      "q": "Can I pay part of an invoice?",
+      "a": "Yes. Whatever you send comes off your oldest invoice first. If you pay more than you owe, the extra is kept as a credit for your next invoice."
+    },
+    {
+      "q": "What happens if I pay late?",
+      "a": "Invoices unpaid after 30 days may be charged interest of 2% a month (26.8% a year). If an invoice is more than 30 days overdue, services (including hosting and email) can be paused after 7 days' written notice, and they resume once the account is paid."
+    },
+    {
+      "q": "How many changes are included each month?",
+      "a": "Up to 5 hours of small edits a month (photos, wording, hours and similar). Unused hours don't roll over."
+    },
+    {
+      "q": "What does extra work cost?",
+      "a": "Once the 5 included hours are used, changes are $25.00 each. We always tell you before doing billable work, and it is added to your next monthly invoice. New pages, features or a redesign are quoted separately."
+    },
+    {
+      "q": "Is HST charged?",
+      "a": "No. We are not registered for HST. If that changes, we will give you 30 days' written notice before adding it."
+    },
+    {
+      "q": "How do I cancel?",
+      "a": "Monthly services run month to month with no long-term commitment. Give us 30 days' notice by email. You pay through the end of the notice period, with no cancellation fees."
+    },
+    {
+      "q": "Can prices change?",
+      "a": "Only with 30 days' written notice before a monthly fee changes."
+    }
+  ]
+}

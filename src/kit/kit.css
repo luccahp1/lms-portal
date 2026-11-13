@@ -310,3 +310,28 @@ a.k-row:hover, button.k-row:hover { background: var(--surface-2); color: var(--i
   .k-tile__v { font-size: 23px; }
   .k-pop { position: fixed; left: 16px; right: 16px; top: calc(var(--band-h) + 10px); width: auto; }
 }
+
+/* ── billing: FAQ, payment notice, owed list ───────── */
+.k-faq { display: flex; flex-direction: column; }
+.k-faq details { border-top: 1px solid var(--line); }
+.k-faq details:first-child { border-top: 0; }
+.k-faq summary {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 2px; cursor: pointer;
+  list-style: none; font-weight: 600; color: var(--ink);
+}
+.k-faq summary::-webkit-details-marker { display: none; }
+.k-faq summary::after { content: '+'; flex: none; color: var(--ink-3); font: 400 18px/1 var(--font-mono); transition: transform .2s var(--ease); }
+.k-faq details[open] summary::after { transform: rotate(45deg); }
+.k-faq details p { margin: 0 0 12px; padding: 0 2px; color: var(--ink-2); line-height: 1.55; }
+.k-notice {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; padding: 12px 14px; border-radius: var(--radius-tile);
+  background: color-mix(in srgb, var(--good) 10%, var(--surface)); border: 1px solid color-mix(in srgb, var(--good) 30%, transparent); color: var(--ink);
+}
+.k-notice__m { flex: 1; min-width: 200px; }
+.k-notice__m b { color: var(--good); }
+.k-pay { display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-end; }
+.k-pay label { display: flex; flex-direction: column; gap: 4px; color: var(--ink-3); font-size: 11px; }
+.k-pay input { min-height: 36px; }
+.k-pay .k-pay__amt { width: 140px; }
+.k-pay .k-pay__note { flex: 1; min-width: 140px; }
+.k-late { color: var(--bad); font-size: 12px; font-weight: 600; }

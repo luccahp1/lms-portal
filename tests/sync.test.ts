@@ -86,6 +86,57 @@ describe("rankings and AI answers pushed from LMS Dash", () => {
   });
 });
 
+describe("payments pushed from LMS Dash", () => {
+  it("part payments lower the balance, show a notice once, and a removed payment comes back off", async () => {
+    const { admin, clientA, clientB } = await makeAgency();
+    const { listInvoices, balance } = await import("@/lib/data/invoices");
+    const { listPayments, markPaymentsSeen } = await import("@/lib/data/payments");
+    const cid = clientA.client.id;
+    const inv = { clientId: cid, issuedOn: "2026-11-01", status: "sent" };
+    await call(admin, "upsert_invoice", { ...inv, number: "LMS-0002", description: "Website build", amountCents: 85000, dueOn: "2026-11-01" });
+    await call(admin, "upsert_invoice", { ...inv, number: "LMS-0003", description: "Monthly, November", amountCents: 35000, dueOn: "2026-11-16" });
+
+    // $1,000 of $1,200: Dash covers the oldest invoice, then part of the next.
+    await call(admin, "upsert_invoice", { ...inv, number: "LMS-0002", description: "Website build", amountCents: 85000, dueOn: "2026-11-01", status: "paid", paidCents: 85000 });
+    await call(admin, "upsert_invoice", { ...inv, number: "LMS-0003", description: "Monthly, November", amountCents: 35000, dueOn: "2026-11-16", paidCents: 15000 });
+    const synced = await call(admin, "sync_payments", {
+      clientId: cid,
+      monthlyCents: 36500,
+      payments: [{ ref: "7", amountCents: 100000, paidOn: "2026-11-12", note: "e-Transfer" }],
+    });
+    expect(synced.data.payments).toBe(1);
+
+    const client = await clientsData.getClient(clientA.viewer);
+    expect(client.monthlyCents).toBe(36500);
+    const b = balance(await listInvoices(clientA.viewer), "2026-11-12", client.creditCents);
+    expect(b.owing).toBe(20000);
+    expect(b.paid).toBe(100000);
+    expect(b.open).toEqual([{ number: "LMS-0003", description: "Monthly, November", dueOn: "2026-11-16", leftCents: 20000, partPaid: true }]);
+
+    // The notice shows until dismissed, and a re-sync of the same payment keeps it dismissed.
+    expect((await listPayments(clientA.viewer)).filter((p) => !p.seenAt)).toHaveLength(1);
+    await markPaymentsSeen(clientA.viewer);
+    await call(admin, "sync_payments", { clientId: cid, monthlyCents: 36500, payments: [{ ref: "7", amountCents: 100000, paidOn: "2026-11-12" }] });
+    expect((await listPayments(clientA.viewer)).filter((p) => !p.seenAt)).toHaveLength(0);
+    expect(await listPayments(clientB.viewer)).toEqual([]);
+
+    // Overpaid: the rest is credit. Removed in Dash: gone here too.
+    await call(admin, "sync_payments", { clientId: cid, monthlyCents: null, creditCents: 5000, payments: [] });
+    expect(await listPayments(clientA.viewer)).toEqual([]);
+    expect((await clientsData.getClient(clientA.viewer)).creditCents).toBe(5000);
+    expect((await call(admin, "sync_payments", { clientId: cid, monthlyCents: null, payments: [{ ref: "x", amountCents: -5, paidOn: "2026-11-12" }] })).isError).toBe(true);
+  });
+
+  it("a client cannot sync payments, and an admin preview never clears the notice", async () => {
+    const { admin, clientA } = await makeAgency();
+    const { syncPayments, listPayments, markPaymentsSeen } = await import("@/lib/data/payments");
+    await expect(syncPayments(clientA.viewer, clientA.client.id, { monthlyCents: null, creditCents: 0 }, [])).rejects.toBeInstanceOf(ForbiddenError);
+    await call(admin, "sync_payments", { clientId: clientA.client.id, monthlyCents: null, payments: [{ ref: "1", amountCents: 500, paidOn: "2026-11-12" }] });
+    await markPaymentsSeen({ ...clientA.viewer, previewBy: admin.userId });
+    expect((await listPayments(clientA.viewer))[0]!.seenAt).toBeNull();
+  });
+});
+
 describe("to-dos", () => {
   it("admin writes them, the client ticks them off, nobody else can touch them", async () => {
     const { admin, clientA, clientB } = await makeAgency();

@@ -8,6 +8,7 @@ type Invoice = {
   number: string;
   description: string;
   amountCents: number;
+  paidCents?: number;
   issuedOn: string;
   dueOn: string;
   status: InvoiceStatus;
@@ -41,7 +42,12 @@ export function InvoiceTable({ invoices, admin = false, today }: { invoices: Inv
         <tbody>
           {invoices.map((inv) => {
             const overdue = today && inv.status === "sent" && inv.dueOn < today;
-            const status = overdue ? { label: "Overdue", tone: "warn" as const } : invoiceStatusLabel[inv.status];
+            const partPaid = inv.status === "sent" && (inv.paidCents ?? 0) > 0;
+            const status = overdue
+              ? { label: "Overdue", tone: "warn" as const }
+              : partPaid
+                ? { label: "Part paid", tone: "info" as const }
+                : invoiceStatusLabel[inv.status];
             const next = admin ? nextStatus[inv.status] : undefined;
             return (
               <tr key={inv.id} className="border-t border-subtle">
@@ -51,7 +57,10 @@ export function InvoiceTable({ invoices, admin = false, today }: { invoices: Inv
                 </td>
                 <td className="px-3 py-3.5 text-muted">{formatDate(inv.issuedOn)}</td>
                 <td className="px-3 py-3.5 text-muted">{formatDate(inv.dueOn)}</td>
-                <td className="px-3 py-3.5">{formatMoney(inv.amountCents)}</td>
+                <td className="px-3 py-3.5">
+                  {formatMoney(inv.amountCents)}
+                  {partPaid && <div className="text-[13px] text-muted">{formatMoney(inv.amountCents - inv.paidCents!)} left</div>}
+                </td>
                 <td className="px-6 py-3.5 text-right">
                   <div className="flex items-center justify-end gap-3">
                     {next && (

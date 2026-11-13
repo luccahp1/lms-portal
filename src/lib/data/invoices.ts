@@ -27,7 +27,7 @@ export async function createInvoice(
 export async function upsertInvoice(
   viewer: Viewer,
   clientId: string,
-  input: { number: string; description: string; amountCents: number; issuedOn: string; dueOn: string; status: InvoiceStatus },
+  input: { number: string; description: string; amountCents: number; paidCents?: number; issuedOn: string; dueOn: string; status: InvoiceStatus },
 ) {
   assertAdmin(viewer);
   const id = await resolveClientId(viewer, clientId);
@@ -62,17 +62,37 @@ export async function deleteInvoiceByNumber(viewer: Viewer, clientId: string, nu
   return removed.length > 0;
 }
 
-/** What the client owes right now: every sent invoice, split into overdue and not yet due. */
-export function balance(rows: { status: InvoiceStatus; amountCents: number; dueOn: string }[], today: string) {
-  const sent = rows.filter((i) => i.status === "sent");
-  const overdue = sent.filter((i) => i.dueOn < today);
-  const sum = (list: typeof rows) => list.reduce((s, i) => s + i.amountCents, 0);
+type BalanceRow = { number?: string; description?: string; status: InvoiceStatus; amountCents: number; paidCents?: number; dueOn: string };
+
+/** What is still owed on one invoice: nothing on drafts and paid ones, the unpaid part of a sent one. */
+export function leftOn(i: BalanceRow) {
+  return i.status === "sent" ? Math.max(0, i.amountCents - (i.paidCents ?? 0)) : 0;
+}
+
+/**
+ * What the client owes right now. LMS Dash records the payments and works out how much of each
+ * invoice they cover (paidCents), so a sent invoice can be part paid; only the rest counts.
+ * owing: still to pay. paid: everything paid so far (paid invoices, part payments and any credit).
+ * open: the invoices with something left on them, oldest due first, for the "Owed for" list.
+ */
+export function balance(rows: BalanceRow[], today: string, creditCents = 0) {
+  const open = rows
+    .filter((i) => leftOn(i) > 0)
+    .map((i) => ({ number: i.number ?? "", description: i.description ?? "", dueOn: i.dueOn, leftCents: leftOn(i), partPaid: (i.paidCents ?? 0) > 0 }))
+    .sort((a, b) => a.dueOn.localeCompare(b.dueOn));
+  const overdue = open.filter((i) => i.dueOn < today);
+  const sum = (list: { leftCents: number }[]) => list.reduce((s, i) => s + i.leftCents, 0);
+  const paid =
+    rows.reduce((s, i) => s + (i.status === "paid" ? i.amountCents : i.status === "sent" ? Math.min(i.amountCents, i.paidCents ?? 0) : 0), 0) +
+    creditCents;
   return {
-    owing: sum(sent),
+    owing: sum(open),
     overdue: sum(overdue),
     overdueCount: overdue.length,
-    paid: sum(rows.filter((i) => i.status === "paid")),
-    nextDue: sent.filter((i) => i.dueOn >= today).sort((a, b) => a.dueOn.localeCompare(b.dueOn))[0]?.dueOn ?? null,
+    paid,
+    credit: creditCents,
+    open,
+    nextDue: open.find((i) => i.dueOn >= today)?.dueOn ?? null,
   };
 }
 

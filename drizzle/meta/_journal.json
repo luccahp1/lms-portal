@@ -64,6 +64,13 @@
       "when": 1794505815300,
       "tag": "0008_dashboard_sso",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1794544214908,
+      "tag": "0009_payments",
+      "breakpoints": true
     }
   ]
 }

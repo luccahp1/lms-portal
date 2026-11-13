@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { requireClient } from "@/lib/auth/session";
-import { getAgency } from "@/lib/data/clients";
+import { getAgency, getClient } from "@/lib/data/clients";
 import { getLatestNote, listWorkLog } from "@/lib/data/updates";
 import { listRequests } from "@/lib/data/requests";
 import { listMessages } from "@/lib/data/messages";
@@ -38,8 +38,9 @@ function lastMonths(now: string, n = 6) {
 
 export default async function PortalOverview() {
   const viewer = await requireClient();
-  const [agency, note, workLog, requests, messages, files, invoices, todos, stats, rankings, ai] = await Promise.all([
+  const [agency, client, note, workLog, requests, messages, files, invoices, todos, stats, rankings, ai] = await Promise.all([
     getAgency(viewer),
+    getClient(viewer),
     getLatestNote(viewer),
     listWorkLog(viewer, undefined, 6),
     listRequests(viewer),
@@ -93,7 +94,7 @@ export default async function PortalOverview() {
   const pendingFiles = files.filter((f) => f.approval === "pending").length;
   const toApprove = requests.filter((r) => r.status === "review").length;
   const open = requests.filter((r) => r.status !== "done");
-  const owed = balance(invoices, now);
+  const owed = balance(invoices, now, client.creditCents);
   const billMonths = lastMonths(now);
   const billed = billMonths.map((m) =>
     invoices.filter((i) => i.status !== "draft" && String(i.issuedOn).startsWith(m.key)).reduce((s, i) => s + i.amountCents / 100, 0),
@@ -274,10 +275,10 @@ export default async function PortalOverview() {
                 )
               }
             >
-              <Count value={owed.owing / 100} format="money" />
+              <Count value={owed.owing / 100} format="cents" />
             </KitTile>
             <KitTile label="Paid">
-              <Count value={owed.paid / 100} format="money" />
+              <Count value={owed.paid / 100} format="cents" />
             </KitTile>
           </div>
           {billed.some(Boolean) ? (

@@ -70,7 +70,7 @@ describe("signing in to LMS Dash through the portal", () => {
 
 describe("the shared design kit", () => {
   const dash = join(__dirname, "..", "..", "lms-dash", "app", "static", "kit");
-  const files = ["tokens.css", "kit.css", "motion.js", "charts.js"];
+  const files = ["tokens.css", "kit.css", "motion.js", "charts.js", "billing-faq.json"];
 
   it("is here", () => {
     for (const f of files) expect(existsSync(join(__dirname, "..", "src", "kit", f))).toBe(true);

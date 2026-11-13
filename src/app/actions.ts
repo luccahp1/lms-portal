@@ -7,7 +7,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { requireAdmin, requireViewer } from "@/lib/auth/session";
+import { requireAdmin, requireClient, requireViewer } from "@/lib/auth/session";
 import type { Viewer } from "@/lib/data/viewer";
 import * as clientsData from "@/lib/data/clients";
 import * as requestsData from "@/lib/data/requests";
@@ -15,6 +15,7 @@ import * as messagesData from "@/lib/data/messages";
 import * as filesData from "@/lib/data/files";
 import * as updatesData from "@/lib/data/updates";
 import * as invoicesData from "@/lib/data/invoices";
+import * as paymentsData from "@/lib/data/payments";
 import * as signupsData from "@/lib/data/signups";
 import * as statsData from "@/lib/data/stats";
 import * as todosData from "@/lib/data/todos";
@@ -276,6 +277,14 @@ export async function setInvoiceStatusAction(formData: FormData) {
   const viewer = await requireAdmin();
   const input = parse(z.object({ invoiceId: z.string().uuid(), status: z.enum(invoiceStatus.enumValues) }), formData);
   await invoicesData.setInvoiceStatus(viewer, input.invoiceId, input.status);
+  refresh();
+}
+
+/** The client closed the "Payment received" notice. */
+export async function dismissPaymentsAction(formData: FormData) {
+  const viewer = await requireClient();
+  const ids = formData.getAll("id").map(String).filter((id) => z.string().uuid().safeParse(id).success);
+  await paymentsData.markPaymentsSeen(viewer, ids);
   refresh();
 }
 

@@ -1,5 +1,28 @@
 # Handoff
 
+## State (2026-11-13): payments, part-paid invoices, billing FAQ (pushed, not deployed)
+
+LMS Dash now records payments and works out how much of each invoice they cover; the portal shows
+the result. Dash is the source: nothing here changes a payment.
+
+- **Migration `0009_payments`**: `payments` table (with the live-update trigger), `invoices.paid_cents`,
+  `clients.monthly_cents` and `clients.credit_cents`.
+- **`sync_payments` MCP tool** (`src/lib/data/payments.ts`): replaces a client's payments by Dash's
+  ref, keeping `seen_at` so a dismissed notice stays dismissed. `upsert_invoice` takes `paidCents`.
+- **`balance()`** (`src/lib/data/invoices.ts`) counts only the unpaid part of a sent invoice and
+  returns the open list for "Owed for". Billing rules (1st / 16th / 2% after 30 days) are in
+  `src/lib/billing.ts`.
+- **Client UI**: "Payment received" notice on every portal page until dismissed
+  (`PaymentNotice`, `dismissPaymentsAction`; an admin preview never clears it). Billing page moved to
+  the kit: balance card (owed for, paid, monthly with next invoice and due date, credit, late-fee
+  flag), payments list, invoices with "Part paid", and the billing FAQ at the bottom. The FAQ text is
+  `src/kit/billing-faq.json`, synced from lms-dash `app/static/kit` like the rest of the kit.
+- Checks: typecheck, lint (the one old warning), 92 tests, build. Tried end to end against a local
+  Dash: a $1,000 payment showed the notice and the new balance live; a removed payment rolled back.
+- **To deploy** (before or with Dash; ask Lucca first): back up the database, archive `main`,
+  `npm ci && npm run build && npm run db:migrate`, rebuild `../current`, restart `lms-portal`.
+  Then reconnect the Claude Code `lms-portal` MCP client so it lists `sync_payments`.
+
 ## State (2026-11-12, later): sign-in limit and delete_invoice, pushed, not deployed
 
 From the cross-repo audit (`lms-dash/docs/SYSTEM-AUDIT.md`). Two changes on `main`, neither on the

@@ -120,6 +120,20 @@ describe("balance", () => {
       ],
       "2026-11-03",
     );
-    expect(b).toEqual({ owing: 161500, overdue: 125000, overdueCount: 1, paid: 5000, nextDue: "2026-11-16" });
+    expect(b).toMatchObject({ owing: 161500, overdue: 125000, overdueCount: 1, paid: 5000, credit: 0, nextDue: "2026-11-16" });
+    expect(b.open.map((i) => i.leftCents)).toEqual([125000, 36500]);
+  });
+
+  it("only the unpaid part of a part-paid invoice counts, and credit counts as paid", () => {
+    const b = balance(
+      [
+        { number: "LMS-0002", status: "paid", amountCents: 85000, paidCents: 85000, dueOn: "2026-11-01" },
+        { number: "LMS-0003", description: "Monthly", status: "sent", amountCents: 35000, paidCents: 15000, dueOn: "2026-11-16" },
+      ],
+      "2026-11-12",
+      2500,
+    );
+    expect(b).toMatchObject({ owing: 20000, paid: 102500, credit: 2500, overdueCount: 0, nextDue: "2026-11-16" });
+    expect(b.open).toEqual([{ number: "LMS-0003", description: "Monthly", dueOn: "2026-11-16", leftCents: 20000, partPaid: true }]);
   });
 });
