@@ -1,22 +1,31 @@
 "use server";
 
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { checkCredentials, endSession, startSession } from "@/lib/auth/session";
+import { attemptLogin, clientKey } from "@/lib/auth/login";
+import { endSession, startSession } from "@/lib/auth/session";
 import { acceptInvite } from "@/lib/data/invites";
 import { EmailTakenError, signUp } from "@/lib/data/signups";
 import { NotFoundError } from "@/lib/data/viewer";
 
 export type FormState = { error?: string } | undefined;
 
-const loginSchema = z.object({ email: z.string().trim().email(), password: z.string().min(1) });
+const loginSchema = z.object({ email: z.string().trim().email(), password: z.string().min(1).max(200) });
 
 export async function login(_prev: FormState, formData: FormData): Promise<FormState> {
   const parsed = loginSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { error: "Enter your email and password." };
-  const userId = await checkCredentials(parsed.data.email, parsed.data.password);
-  if (!userId) return { error: "That email and password don’t match." };
-  await startSession(userId, formData.get("remember") === "on");
+  const result = await attemptLogin(parsed.data.email, parsed.data.password, clientKey(await headers()));
+  if (!result.ok) {
+    return {
+      error:
+        result.reason === "throttled"
+          ? "Too many tries. Wait fifteen minutes and try again."
+          : "That email and password don’t match.",
+    };
+  }
+  await startSession(result.userId, formData.get("remember") === "on");
   redirect("/");
 }
 

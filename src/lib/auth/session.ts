@@ -5,7 +5,7 @@ import { cache } from "react";
 import { and, eq, gt } from "drizzle-orm";
 import { db } from "@/db";
 import { sessions, users } from "@/db/schema";
-import { randomToken, sha256, verifyPassword } from "./crypto";
+import { randomToken, sha256 } from "./crypto";
 import { NotFoundError, type Viewer } from "@/lib/data/viewer";
 import { previewSessionViewer, previewViewer, PREVIEW_SESSION_TTL_MS, endPreviewSession } from "@/lib/data/preview";
 
@@ -41,16 +41,6 @@ export async function endSession() {
   const token = jar.get(COOKIE)?.value;
   if (token) await db.delete(sessions).where(eq(sessions.id, sha256(token)));
   jar.delete(COOKIE);
-}
-
-/** Returns the user id on success. Same error for unknown email and wrong password. */
-export async function checkCredentials(email: string, password: string): Promise<string | null> {
-  const [user] = await db
-    .select({ id: users.id, passwordHash: users.passwordHash })
-    .from(users)
-    .where(eq(users.email, email.toLowerCase()));
-  if (!user?.passwordHash) return null;
-  return (await verifyPassword(password, user.passwordHash)) ? user.id : null;
 }
 
 export const getViewer = cache(async (): Promise<Viewer | null> => {
