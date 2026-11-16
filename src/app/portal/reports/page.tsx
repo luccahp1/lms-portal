@@ -10,7 +10,13 @@ import { BarList, DailyChart, positionText, rankMove, StatTile } from "@/compone
 
 export const metadata = { title: "Monthly reports" };
 
-const PAGE_NAMES: Record<string, string> = { "/": "Home page" };
+/** "/dry-van-trailer-rental" reads as "Dry van trailer rental"; the home page gets its own name. */
+function pageName(path: string) {
+  const slug = path.replace(/^\/+|\/+$/g, "").replace(/\.html$/, "");
+  if (!slug) return "Home page";
+  const words = slug.split("/").pop()!.replace(/[-_]+/g, " ");
+  return words.charAt(0).toUpperCase() + words.slice(1);
+}
 
 export default async function ReportsPage({ searchParams }: { searchParams: Promise<{ month?: string }> }) {
   const viewer = await requireClient();
@@ -134,7 +140,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
               {cur.pages.length === 0 ? (
                 <Empty>Nothing yet.</Empty>
               ) : (
-                <BarList rows={cur.pages.map((p) => ({ name: PAGE_NAMES[p.name] ?? p.name, n: p.n }))} unit="views" />
+                <BarList rows={cur.pages.map((p) => ({ name: pageName(p.name), n: p.n }))} unit="views" />
               )}
             </Card>
           </div>

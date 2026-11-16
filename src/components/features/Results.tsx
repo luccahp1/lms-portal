@@ -66,7 +66,7 @@ export function DailyChart({ series }: { series: { day: string; visits: number; 
 
 export function BarList({ rows, unit }: { rows: { name: string; n: number }[]; unit: string }) {
   const max = Math.max(1, ...rows.map((r) => r.n));
-  return <Svg html={charts.bars(rows.map((r) => ({ label: r.name, pct: (r.n / max) * 100, note: `${r.n} ${unit}` })))} />;
+  return <Svg html={charts.bars(rows.map((r) => ({ label: r.name, pct: (r.n / max) * 100, note: `${r.n} ${r.n === 1 ? unit.replace(/s$/, "") : unit}`.trim() })))} />;
 }
 
 export function positionText(position: number | null | undefined) {

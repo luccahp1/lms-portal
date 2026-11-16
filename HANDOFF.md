@@ -1,5 +1,18 @@
 # Handoff
 
+## State (2026-11-16): client-view fixes from the Maple Rental walk-through (not deployed)
+
+- Timestamps (`formatDateTime`, `formatDate` on a `Date`) now render in `America/Toronto`. The server
+  runs in UTC, so message, comment and "Updated ..." times showed 5 hours ahead.
+- Reports: page paths read as words ("Dry van trailer rental"), and "1 view" instead of "1 views".
+- Open: Cloudflare Email Obfuscation rewrites emails in the HTML to `[email protected]`, which breaks
+  React hydration on Billing (payment instructions) and To-dos (React error 418, then a client
+  re-render). Fix is turning Email Obfuscation off for `portal.londonmarketingsolutions.ca` in the LMS
+  Cloudflare account (a Configuration Rule), not code.
+- Maple's `clients.monthly_cents` is null, so Billing has no Monthly tile and the FAQ falls back to
+  generic answers. Dash sends it with `sync_payments`.
+- Checks: typecheck, lint (the one old warning), 121 tests, build.
+
 ## State (2026-11-11, merged 2026-11-13): onboarding, templates and Request website changes
 
 Merged into `main` from `claude/loving-babbage-u1e3ts` (PR #2) with the matching lms-dash branch. Docs: docs/adding-a-client.md, docs/website-changes.md; lms-dash docs/onboarding.md.

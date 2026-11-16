@@ -22,14 +22,19 @@ export const fileApprovalLabel: Record<FileApproval, { label: string; tone: Tone
   changes_requested: { label: "Changes requested", tone: "info" },
 };
 
+/** Where the agency and its clients are. The server runs in UTC, so timestamps must name this. */
+export const TIME_ZONE = "America/Toronto";
+
 export function formatDate(value: Date | string) {
   // Plain YYYY-MM-DD dates are calendar days; don't let the timezone shift them.
-  const d = typeof value === "string" ? new Date(`${value}T12:00:00`) : value;
-  return d.toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" });
+  if (typeof value === "string") {
+    return new Date(`${value}T12:00:00Z`).toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
+  }
+  return value.toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric", timeZone: TIME_ZONE });
 }
 
 export function formatDateTime(value: Date) {
-  return value.toLocaleString("en-CA", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+  return value.toLocaleString("en-CA", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZone: TIME_ZONE });
 }
 
 export function formatMonth(value: string) {
@@ -37,7 +42,7 @@ export function formatMonth(value: string) {
 }
 
 /** Today's date (YYYY-MM-DD) where the agency and its clients are. */
-export function today(timeZone = "America/Toronto") {
+export function today(timeZone = TIME_ZONE) {
   return new Date().toLocaleDateString("en-CA", { timeZone });
 }
 
