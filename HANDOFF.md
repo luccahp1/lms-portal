@@ -1,6 +1,8 @@
 # Handoff
 
-## State (2026-11-16): client-view fixes from the Maple Rental walk-through (not deployed)
+## Deployed 2026-11-17 03:11 UTC: c248a26, client-view fixes from the Maple Rental walk-through
+
+Backups: `/srv/backups/lms-portal/*.20261117-030922.pre-tz` (src, current/, db dump). Rollback: `rm -rf current && cp -a /srv/backups/lms-portal/current.20261117-030922.pre-tz current`, restart `lms-portal`.
 
 - Timestamps (`formatDateTime`, `formatDate` on a `Date`) now render in `America/Toronto`. The server
   runs in UTC, so message, comment and "Updated ..." times showed 5 hours ahead.
