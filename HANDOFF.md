@@ -1,5 +1,32 @@
 # Handoff
 
+## State (2026-11-23): clients pay invoices online (Stripe), not deployed
+
+On `main`, with the matching lms-dash change. Docs: [docs/online-payments.md](docs/online-payments.md).
+
+- **Billing**: **Pay** on each unpaid invoice (its unpaid part) and **Pay full balance** (one
+  Stripe Checkout page for everything open). Cards, Apple/Google Pay, Canadian PAD (business
+  mandate), card-only fallback. Return page, processing, failed and held states shown plainly.
+  No Stripe key: no Pay buttons, payment instructions as before.
+- **Dash owns the payment**: the portal tracks Checkout pages in `online_payments` and never
+  writes `payments`. On payment it POSTs `payment.updated` to Dash; Dash pulls
+  `list_online_payments {pending: true}` (also every resync), records a payment with
+  ref = the `pi_...` id, and `sync_payments` brings it back, which marks it recorded.
+- **Migration `0012_online_payments`**: `online_payments` (on the live-notify trigger),
+  `stripe_events`, `invoices.viewed_at`. Webhook `/api/pay/stripe`, Pay route
+  `/portal/billing/pay`, MCP tool `list_online_payments`.
+- Not ported from mikedash: reminder counts (the portal sends no reminders).
+- Checks: typecheck, lint (the one old warning), 147 tests (26 new in `tests/online-pay.test.ts`
+  against a fake Stripe, including a payment surviving `sync_payments`), build.
+- Click-through 2026-11-23 against a throwaway DB, a fake Stripe with a hosted page and a local
+  Dash, at 375 px: View as client (Pay disabled), card payment recorded in Dash and synced back
+  within a second, bank debit processing then cleared, Dash Billing shows both under "Paid online".
+- **Before it goes live (Lucca)**: LMS's Stripe account, Cards + PAD turned on, the webhook
+  endpoint with the 4 events, `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` in the server
+  `.env`. Try with test keys first. Deploy the portal (migration 0012) before or with Dash; either
+  order works (Dash skips a portal without the tool). Reconnect the Claude Code `lms-portal` MCP
+  client so it lists `list_online_payments`.
+
 ## Deployed 2026-11-17 03:11 UTC: c248a26, client-view fixes from the Maple Rental walk-through
 
 Backups: `/srv/backups/lms-portal/*.20261117-030922.pre-tz` (src, current/, db dump). Rollback: `rm -rf current && cp -a /srv/backups/lms-portal/current.20261117-030922.pre-tz current`, restart `lms-portal`.

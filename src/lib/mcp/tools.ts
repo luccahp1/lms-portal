@@ -9,6 +9,7 @@ import * as filesData from "@/lib/data/files";
 import * as updatesData from "@/lib/data/updates";
 import * as invoicesData from "@/lib/data/invoices";
 import * as paymentsData from "@/lib/data/payments";
+import * as onlinePayData from "@/lib/data/online-pay";
 import * as signupsData from "@/lib/data/signups";
 import * as statsData from "@/lib/data/stats";
 import * as rankingsData from "@/lib/data/rankings";
@@ -472,7 +473,7 @@ export const tools: Tool[] = [
   tool({
     name: "sync_payments",
     description:
-      "Replace a client's payments with this set (LMS Dash uses this; payments not listed are removed). Each new payment shows the client a 'Payment received' notice until they dismiss it. Also sets their monthly amount (null: no monthly services) and credit (paid beyond what is owed). Amounts are in cents; ref is the payment's id in LMS Dash.",
+      "Replace a client's payments with this set (LMS Dash uses this; payments not listed are removed). Each new payment shows the client a 'Payment received' notice until they dismiss it. Also sets their monthly amount (null: no monthly services) and credit (paid beyond what is owed). Amounts are in cents; ref is the payment's id in LMS Dash, or the Stripe payment intent (pi_...) for a payment made online in the portal, which marks that online payment recorded.",
     input: z.object({
       clientId,
       monthlyCents: z.number().int().min(0).nullable(),
@@ -491,6 +492,18 @@ export const tools: Tool[] = [
     run: async (viewer, { clientId, monthlyCents, creditCents, payments }) => ({
       payments: (await paymentsData.syncPayments(viewer, clientId, { monthlyCents, creditCents }, payments)).length,
     }),
+  }),
+  tool({
+    name: "list_online_payments",
+    description:
+      "Payments clients made online from their Billing page (Stripe), newest first, after asking Stripe about any still waiting. LMS Dash imports the paid ones (pending: true) as real payments with ref = the Stripe payment intent, then sends them back with sync_payments. status: processing (bank debit clearing), paid, failed (debit bounced), held (money in but not passed on: see problem, refund in Stripe), open/expired (pages not paid, only with all: true). kind 'invoice' pays one invoice's unpaid part; 'balance' pays everything owed and Dash allocates it.",
+    input: z.object({
+      clientId: clientId.optional(),
+      pending: z.boolean().default(false).describe("Only paid ones Dash has not recorded yet"),
+      all: z.boolean().default(false).describe("Include pages that were opened and never paid"),
+      limit: z.number().int().min(1).max(500).default(200),
+    }),
+    run: async (viewer, args) => onlinePayData.listOnlinePayments(viewer, args),
   }),
   tool({
     name: "set_payment_instructions",

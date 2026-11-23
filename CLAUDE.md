@@ -49,3 +49,6 @@ Tests need a real Postgres: see the Gotchas in HANDOFF.md for the embedded-postg
 - `src/templates/*.ts` are HTML inside a template literal: no backticks, no `${`, no backslashes in them.
 - Review and intake writes refuse a viewer with `previewBy` set. Keep that in any new client-side write.
 - `start_links`, `intakes`, `change_notes` and `clients` are on the live-notify trigger (migration 0010).
+- Online payments (docs/online-payments.md): a Stripe payment lives in `online_payments`, never in `payments` (Dash's
+  `sync_payments` replaces that set). Dash imports it via `list_online_payments` and sends it back with ref = `pi_...`.
+  Tests fake Stripe on a local port (`STRIPE_API_BASE`). `online_payments` is on the live-notify trigger (0012).

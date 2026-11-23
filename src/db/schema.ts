@@ -268,6 +268,9 @@ export const invoices = pgTable(
     issuedOn: date("issued_on").notNull(),
     dueOn: date("due_on").notNull(),
     status: invoiceStatus("status").notNull().default("draft"),
+    // The first time a client (not an admin previewing) opened Billing while this invoice was sent.
+    // Kept by the portal; upsert_invoice from LMS Dash never touches it.
+    viewedAt: timestamp("viewed_at", { withTimezone: true }),
     createdAt: createdAt(),
   },
   (t) => [
@@ -296,6 +299,50 @@ export const payments = pgTable(
     uniqueIndex("payments_agency_ref_idx").on(t.agencyId, t.ref),
   ],
 );
+
+// One Stripe Checkout page a client opened from Billing, and what became of it (src/lib/data/online-pay.ts).
+// This is not a payment yet: LMS Dash owns payments. Once paid, Dash pulls it with list_online_payments,
+// records a payment with ref = the payment intent id, and sends it back with sync_payments; that sets
+// recordedAt. Until then the client sees "Received, processing".
+//   kind      'invoice' (one invoice, its unpaid part) or 'balance' (everything owed; Dash allocates)
+//   status    open: page made, not paid. processing: bank debit authorised, not cleared.
+//             paid: money in. failed: the debit bounced (they can pay again). expired: page closed.
+//             held: money in but not passed to Dash (wrong amount, invoice withdrawn or already paid):
+//             problem says why, and it is refunded in Stripe by hand.
+export const onlinePayments = pgTable(
+  "online_payments",
+  {
+    id: id(),
+    agencyId: uuid("agency_id").notNull().references(() => agencies.id, { onDelete: "cascade" }),
+    clientId: uuid("client_id").notNull().references(() => clients.id, { onDelete: "cascade" }),
+    kind: text("kind").notNull(),
+    invoiceNumbers: jsonb("invoice_numbers").$type<string[]>().notNull().default([]),
+    amountCents: integer("amount_cents").notNull(),
+    currency: text("currency").notNull().default("cad"),
+    sessionId: text("session_id"),
+    status: text("status").notNull().default("open"),
+    method: text("method").notNull().default(""),
+    ref: text("ref").notNull().default(""),
+    problem: text("problem").notNull().default(""),
+    createdBy: uuid("created_by").references(() => users.id, { onDelete: "set null" }),
+    paidAt: timestamp("paid_at", { withTimezone: true }),
+    recordedAt: timestamp("recorded_at", { withTimezone: true }),
+    createdAt: createdAt(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index("online_payments_client_idx").on(t.clientId, t.createdAt),
+    uniqueIndex("online_payments_session_idx").on(t.sessionId),
+  ],
+);
+
+// Stripe webhook deliveries already applied, by event id. Stripe can send one event more than once.
+export const stripeEvents = pgTable("stripe_events", {
+  id: text("id").primaryKey(),
+  type: text("type").notNull(),
+  paymentId: uuid("payment_id"),
+  receivedAt: timestamp("received_at", { withTimezone: true }).notNull().defaultNow(),
+});
 
 // Last answer from the client's site stats endpoint, refreshed hourly (src/lib/stats).
 export const siteStats = pgTable("site_stats", {

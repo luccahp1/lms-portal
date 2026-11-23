@@ -18,7 +18,10 @@ export type ActivityEvent =
   | "signup.created"
   // A new client picked a design or sent their answers, or made their login from the start link.
   | "intake.updated"
-  | "start.claimed";
+  | "start.claimed"
+  // An online payment changed (paid, bank debit processing or failed, held). Dash pulls
+  // list_online_payments and records the paid ones (src/lib/data/online-pay.ts).
+  | "payment.updated";
 
 export function sign(body: string, secret: string) {
   return "sha256=" + createHmac("sha256", secret).update(body).digest("hex");

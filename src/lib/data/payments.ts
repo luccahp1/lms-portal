@@ -1,6 +1,7 @@
 import { and, desc, eq, inArray, isNull, notInArray } from "drizzle-orm";
 import { db } from "@/db";
 import { clients, payments } from "@/db/schema";
+import { markRecorded } from "./online-pay";
 import { assertAdmin, resolveClientId, type Viewer } from "./viewer";
 
 export type PaymentInput = { ref: string; amountCents: number; paidOn: string; note?: string };
@@ -44,6 +45,9 @@ export async function syncPayments(
         .onConflictDoUpdate({ target: [payments.agencyId, payments.ref], set: { ...values, clientId: id } });
     }
   });
+  // A Stripe payment Dash has recorded comes back with its payment intent as the ref: from now on
+  // it is a real payment, and Billing stops showing it as "Received, processing".
+  await markRecorded(id, refs);
   return listPayments(viewer, id);
 }
 

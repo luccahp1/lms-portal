@@ -19,7 +19,18 @@ const nextStatus: Partial<Record<InvoiceStatus, { to: InvoiceStatus; label: stri
   sent: { to: "paid", label: "Mark paid" },
 };
 
-export function InvoiceTable({ invoices, admin = false, today }: { invoices: Invoice[]; admin?: boolean; today?: string }) {
+export function InvoiceTable({
+  invoices,
+  admin = false,
+  today,
+  processing = [],
+}: {
+  invoices: Invoice[];
+  admin?: boolean;
+  today?: string;
+  /** Invoice numbers with an online payment on its way (src/lib/data/online-pay.ts). */
+  processing?: string[];
+}) {
   if (invoices.length === 0) {
     return (
       <Card>
@@ -43,7 +54,10 @@ export function InvoiceTable({ invoices, admin = false, today }: { invoices: Inv
           {invoices.map((inv) => {
             const overdue = today && inv.status === "sent" && inv.dueOn < today;
             const partPaid = inv.status === "sent" && (inv.paidCents ?? 0) > 0;
-            const status = overdue
+            const status =
+              inv.status === "sent" && processing.includes(inv.number)
+                ? { label: "Processing", tone: "info" as const }
+                : overdue
               ? { label: "Overdue", tone: "warn" as const }
               : partPaid
                 ? { label: "Part paid", tone: "info" as const }
