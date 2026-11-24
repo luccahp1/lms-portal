@@ -167,11 +167,11 @@ export async function createCheckout(input: CheckoutInput): Promise<StripeResult
         },
       },
     ],
-    // Our clients are businesses, so the debit agreement is a business one.
+    // Our clients are businesses, so the debit agreement is a business one. No `currency` here:
+    // Stripe only takes it in setup mode and refuses the whole session in payment mode.
     payment_method_options: methods.includes("acss_debit")
       ? {
           acss_debit: {
-            currency: cfg.currency,
             verification_method: "automatic",
             mandate_options: { payment_schedule: "sporadic", transaction_type: "business" },
           },
@@ -186,8 +186,9 @@ export async function createCheckout(input: CheckoutInput): Promise<StripeResult
   const first = await call<CheckoutSession>(cfg, "POST", "/v1/checkout/sessions", build(cfg.methods));
   if (first.ok || cfg.methods.length === 1 || !cfg.methods.includes("card")) return first;
 
-  // A method the account has not turned on. Cards always work, so try again with them.
-  if (first.param?.startsWith("payment_method") || /payment method/i.test(first.error)) {
+  // A method the account has not turned on, or Stripe refusing one of its options. Cards always
+  // work, so try again with them.
+  if (first.param?.startsWith("payment_method") || /payment[ _]method/i.test(first.error)) {
     return call<CheckoutSession>(cfg, "POST", "/v1/checkout/sessions", build(["card"]));
   }
   return first;

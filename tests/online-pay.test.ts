@@ -204,6 +204,8 @@ describe("Starting a payment", () => {
     expect(form["payment_method_types[0]"]).toBe("card");
     expect(form["payment_method_types[1]"]).toBe("acss_debit");
     expect(form["payment_method_options[acss_debit][mandate_options][transaction_type]"]).toBe("business");
+    // Stripe refuses the session in payment mode when this is sent (it is setup-mode only).
+    expect(form["payment_method_options[acss_debit][currency]"]).toBeUndefined();
     expect(form["metadata[client_id]"]).toBe(cid);
     expect(form["metadata[invoice_numbers]"]).toBe("LMS-2");
     expect(form["payment_intent_data[metadata][payment_id]"]).toBe(form.client_reference_id);
