@@ -9,9 +9,11 @@ Solutions, `acct_1Uf9...`): Cards and Canadian PAD on, webhook destination "lms-
 `STRIPE_SECRET_KEY`. No sandbox was used. Public `POST /api/pay/stripe` answers 400 "Bad
 signature", so the keys are loaded. Every client with an open invoice now sees Pay.
 
-Open: a real CA$1 payment end to end has not been made yet (Lucca pays by card, then refunds it in
-Stripe and removes the payment in Dash). If Checkout creation fails with a permission error, add
-that permission to the restricted key in Stripe (no new key needed). Stripe account verification
+The first live try failed: Stripe refuses `payment_method_options[acss_debit][currency]` in payment
+mode (the fake Stripe accepted it). Fixed in 4919591, deployed 03:57 UTC. A real CA$1 card payment
+then went through end to end on client "LMS Test (internal)" (invoice TEST-0001, Dash client 3):
+Stripe webhook, Dash import with ref `pi_3UfB5t...`, `sync_payments` back, paid in both. The
+restricted key needs only Checkout Sessions write. Stripe account verification
 (owners, bank account) must be finished for payouts. Reconnect the Claude Code `lms-portal` MCP
 client so it lists `list_online_payments`.
 
