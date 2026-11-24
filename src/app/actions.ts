@@ -20,6 +20,7 @@ import * as signupsData from "@/lib/data/signups";
 import * as statsData from "@/lib/data/stats";
 import * as todosData from "@/lib/data/todos";
 import * as intakeData from "@/lib/data/intake";
+import * as settledData from "@/lib/data/settled";
 import type { IntakeResult } from "@/components/features/IntakeFlow";
 import { requestStatus, invoiceStatus } from "@/db/schema";
 
@@ -394,5 +395,20 @@ export async function saveIntakeAnswersAction(answers: Record<string, string>, s
   if (viewer.role !== "client") return { ok: false, error: "This is a preview, so nothing can be changed here." };
   await intakeData.saveIntake(viewer, { answers: z.record(z.string().max(40), z.string().max(4000)).parse(answers), submit });
   if (submit) refresh();
+  return { ok: true };
+}
+
+// ---- Admin: Invoicing (Settled) add-on ----
+
+export async function setInvoicingAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  const viewer = await requireAdmin();
+  const input = parse(z.object({ clientId: z.string().uuid(), enabled: z.enum(["on", "off"]) }), formData);
+  try {
+    await settledData.setSettledEnabled(viewer, input.clientId, input.enabled === "on");
+  } catch (err) {
+    if (err instanceof settledData.SettledError) return { error: err.message };
+    throw err;
+  }
+  refresh();
   return { ok: true };
 }

@@ -3,6 +3,7 @@ import { requestStatus, invoiceStatus } from "@/db/schema";
 import type { Viewer } from "@/lib/data/viewer";
 import * as clientsData from "@/lib/data/clients";
 import * as dashboardSso from "@/lib/data/dashboard-sso";
+import * as settledData from "@/lib/data/settled";
 import * as requestsData from "@/lib/data/requests";
 import * as messagesData from "@/lib/data/messages";
 import * as filesData from "@/lib/data/files";
@@ -181,6 +182,13 @@ export const tools: Tool[] = [
       }
       return { enabled: true, secret: await dashboardSso.rotateDashboardSsoSecret(viewer, clientId) };
     },
+  }),
+  tool({
+    name: "set_client_invoicing",
+    description:
+      "Switch the Invoicing add-on (Settled: invoices that mark themselves paid from e-Transfers, Stripe and bank statements) on or off for a client. The first time it is switched on, their Settled business is made, with their first portal user as the owner. Off locks the page again but keeps everything in it. The client needs a portal login first.",
+    input: z.object({ clientId, enabled: z.boolean() }),
+    run: async (viewer, { clientId, enabled }) => settledData.setSettledEnabled(viewer, clientId, enabled),
   }),
   tool({
     name: "create_password_reset_link",

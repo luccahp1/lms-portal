@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import { createClientUserAction, setStatsSourceAction } from "@/app/actions";
+import { createClientUserAction, setInvoicingAction, setStatsSourceAction } from "@/app/actions";
 import { Button, Field, FormError, Input } from "@/components/ui";
 import { CopyLink } from "@/components/CopyLink";
 
@@ -51,6 +51,25 @@ export function AddLoginForm({ clientId }: { clientId: string }) {
         </Field>
         <Button type="submit" disabled={pending}>
           Add login
+        </Button>
+      </div>
+    </form>
+  );
+}
+
+export function InvoicingForm({ clientId, enabled, ready }: { clientId: string; enabled: boolean; ready: boolean }) {
+  const [state, action, pending] = useActionState(setInvoicingAction, undefined);
+  return (
+    <form action={action} className="flex max-w-xl flex-col gap-3">
+      <input type="hidden" name="clientId" value={clientId} />
+      <input type="hidden" name="enabled" value={enabled ? "off" : "on"} />
+      <FormError message={state?.error} />
+      <p className="text-[14px]">
+        {enabled ? (ready ? "On. Their Invoicing page is open." : "On, but Settled isn't reachable from here (SETTLED_URL).") : "Off. Their Invoicing page shows what it does and an Ask button."}
+      </p>
+      <div>
+        <Button type="submit" variant={enabled ? "danger" : undefined} disabled={pending}>
+          {pending ? (enabled ? "Switching off…" : "Setting it up…") : enabled ? "Switch off" : "Switch on"}
         </Button>
       </div>
     </form>

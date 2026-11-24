@@ -62,6 +62,8 @@ const paths = {
     </>
   ),
   logout: <path d="M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4M10 16l-4-4 4-4M6 12h10" />,
+  invoicing: <path d="M6 3h12v18l-3-2-3 2-3-2-3 2zM9 11.5l2 2 4-4" />,
+  lock: <path d="M7 11V8a5 5 0 0 1 10 0v3M6 11h12v9H6z" />,
 };
 
 export type IconName = keyof typeof paths;

@@ -1,5 +1,44 @@
 # Handoff
 
+## 2026-11-24 (not deployed): Invoicing (Settled) as a paid add-on
+
+Lucca's direction: Settled should live in the client portal as a service clients unlock with a
+subscription, with the same look and motion as the standalone app. How it works: docs/settled.md.
+
+- **Client side**: an **Invoicing** item in the nav (lock icon until it's on). Locked: what it does,
+  the live demo of an invoice marking itself paid, and **Ask us to switch it on**, which files one
+  portal request. On: the full Settled app inside the portal (overview, invoices and builder,
+  invoice page with the Paid moment, Money in, customers, payments with bank CSV, recurring, setup,
+  settings) under a sticky section bar with the Money in count and Ctrl/Cmd+K search.
+- **Admin side**: MCP `set_client_invoicing { clientId, enabled }` and an **Invoicing (Settled)**
+  card on the old admin client settings page. The first switch-on makes the client's Settled
+  business through Settled's own API (client name, first portal login as owner) and stores its
+  owner key in `clients.settled_api_key` (migration 0013). Off keeps the business.
+- **Proxy** `src/app/portal/invoicing/api/[...path]`: key from the viewer only, preview is
+  read-only, cross-site writes refused, friendly 403 when locked, 502 when Settled is down.
+- **UI** `src/settled`: ported from `settled/src/app`, CSS scoped under `.stl`, Settled tokens mapped
+  onto the kit (`styles/bridge.css`) so it follows the portal's fonts, green and dark mode.
+  Removed for the portal: Settled sign-in, team, API keys, account tabs, Load sample data.
+- New deps: `motion`, `lucide-react` (both already used by the Settled app). New env: `SETTLED_URL`.
+
+**Checks:** typecheck clean, lint (the one old warning), 154 tests pass against embedded Postgres 16
+(`tests/settled.test.ts` is new, 7 tests, fake Settled on a local port). Production build clean.
+In a real browser and Playwright against a local portal and a local Settled engine: locked page,
+Ask button (request appears with a Requests badge), switched on over the real `/api/mcp` endpoint,
+every Invoicing page at 375, 768, 1280 and 1440 in light and dark with no sideways scroll and no
+console errors; built and sent an invoice by keyboard, recorded a cheque and saw the Paid moment,
+confirmed Money in, bank CSV, palette, a Setup step ticking, CSV export through the proxy; a live
+e-Transfer (`npm run notice` in the Settled repo) turned INV-1007 Incoming, then Paid, on the open
+portal page; admin switched it off (client locked, proxy 403) and on again (same business, data intact).
+
+**To go live** (ask Lucca first): deploy Settled somewhere the portal can reach (`SETTLED_URL`)
+with a public https `PUBLIC_URL` for customers' pay links, sending mail (SMTP) and the forwarding
+domain; then deploy the portal with migration 0013 and `SETTLED_URL` set; reconnect the
+`lms-portal` MCP client so it lists `set_client_invoicing`.
+
+**Not done**: an Invoicing switch in LMS Dash's Portal tab (MCP works today); billing the add-on
+(LMS bills it on the monthly invoice from Dash, like other services).
+
 ## Deployed 2026-11-24 03:30 UTC: 9dd779a, online payments live
 
 Migration 0012 applied, Dash 1154f82 deployed with it. Backups

@@ -7,16 +7,18 @@ import { Button, buttonClass, Card, CardTitle, Field, Input } from "@/components
 import { getSiteStats, getStatsSource } from "@/lib/data/stats";
 import { formatDateTime } from "@/lib/format";
 import { ResetLinkButton } from "./ResetLinkButton";
-import { AddLoginForm, StatsSourceForm } from "./SettingsForms";
+import { AddLoginForm, InvoicingForm, StatsSourceForm } from "./SettingsForms";
+import { settledAccess } from "@/lib/data/settled";
 
 export default async function ClientSettings({ params }: { params: Promise<{ id: string }> }) {
   const viewer = await requireAdmin();
   const { id } = await params;
-  const [client, people, source, stats] = await Promise.all([
+  const [client, people, source, stats, invoicing] = await Promise.all([
     getClient(viewer, id),
     listClientUsers(viewer, id),
     getStatsSource(viewer, id),
     getSiteStats(viewer, id),
+    settledAccess(viewer, id),
   ]);
 
   return (
@@ -56,6 +58,16 @@ export default async function ClientSettings({ params }: { params: Promise<{ id:
             <Button type="submit">Save</Button>
           </div>
         </form>
+      </Card>
+
+      <Card>
+        <CardTitle>Invoicing (Settled)</CardTitle>
+        <p className="mb-4 text-[13px] text-muted">
+          A paid add-on: invoices that mark themselves paid from e-Transfers, Stripe and bank statements. Switching it on
+          the first time makes their Settled business, with their first login as the owner. Off locks the page again and
+          keeps everything. MCP: <code>set_client_invoicing</code>. docs/settled.md.
+        </p>
+        <InvoicingForm clientId={id} enabled={invoicing.enabled} ready={invoicing.ready} />
       </Card>
 
       <Card>

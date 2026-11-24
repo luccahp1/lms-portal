@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Icon, type IconName } from "./icons";
 
-export type NavItem = { href: string; label: string; icon: IconName; badge?: number; exact?: boolean };
+export type NavItem = { href: string; label: string; icon: IconName; badge?: number; exact?: boolean; locked?: boolean };
 
 export function NavLinks({ items, group }: { items: NavItem[]; group?: string }) {
   const pathname = usePathname();
@@ -18,6 +18,11 @@ export function NavLinks({ items, group }: { items: NavItem[]; group?: string })
             <Icon name={item.icon} />
             <span>{item.label}</span>
             {!!item.badge && <span className="k-nav__badge">{item.badge}</span>}
+            {item.locked && (
+              <span className="ml-auto text-muted" title="Add-on: ask us to switch it on">
+                <Icon name="lock" className="size-[14px]" />
+              </span>
+            )}
           </Link>
         );
       })}

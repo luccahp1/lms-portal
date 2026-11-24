@@ -89,6 +89,16 @@ export async function requireClient(): Promise<Viewer> {
   return preview;
 }
 
+/** As requireClient, for route handlers: null instead of a redirect when nobody may see a client. */
+export async function clientViewerOrNull(): Promise<Viewer | null> {
+  const fromDash = await getDashPreview();
+  if (fromDash) return fromDash;
+  const viewer = await getViewer();
+  if (!viewer) return null;
+  if (viewer.role === "client") return viewer;
+  return (await getPreview(viewer)) ?? null;
+}
+
 /**
  * Whoever may read client data on a portal route that isn't a page (file downloads, /api/live):
  * a real session first, else a preview session from LMS Dash (pinned to its one client).

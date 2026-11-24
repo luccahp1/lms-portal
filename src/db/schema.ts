@@ -10,6 +10,7 @@ import {
   uniqueIndex,
   jsonb,
   primaryKey,
+  boolean,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 
@@ -71,6 +72,13 @@ export const clients = pgTable(
     // "Into a client's dashboard"). Null: the link opens the dashboard's own login. Never selected
     // for a page.
     dashboardSsoSecretHash: text("dashboard_sso_secret_hash"),
+    // Settled invoicing (docs/settled.md): a paid add-on. Off shows the client a locked Invoicing
+    // page; on, the portal shows their Settled business, which lives in the Settled engine
+    // (SETTLED_URL). settledApiKey is that business's owner key: a secret, never selected for a
+    // page and never sent to a browser (the portal calls Settled for them).
+    settledEnabled: boolean("settled_enabled").notNull().default(false),
+    settledOrgId: text("settled_org_id"),
+    settledApiKey: text("settled_api_key"),
     createdAt: createdAt(),
   },
   (t) => [index("clients_agency_idx").on(t.agencyId)],

@@ -7,6 +7,7 @@ import { countOpenTodos } from "@/lib/data/todos";
 import { LiveRefresh } from "@/components/LiveRefresh";
 import { listPayments } from "@/lib/data/payments";
 import { PaymentNotice } from "@/components/features/PaymentNotice";
+import { settledAccess } from "@/lib/data/settled";
 
 function PreviewBanner({ clientName, personName }: { clientName: string; personName: string }) {
   return (
@@ -25,13 +26,14 @@ function PreviewBanner({ clientName, personName }: { clientName: string; personN
 
 export default async function PortalLayout({ children }: { children: React.ReactNode }) {
   const viewer = await requireClient();
-  const [agency, client, requests, files, todoCount, payments] = await Promise.all([
+  const [agency, client, requests, files, todoCount, payments, settled] = await Promise.all([
     getAgency(viewer),
     getClient(viewer),
     listRequests(viewer),
     listFiles(viewer),
     countOpenTodos(viewer),
     listPayments(viewer),
+    settledAccess(viewer),
   ]);
   const notice = <PaymentNotice payments={payments.filter((p) => !p.seenAt)} />;
 
@@ -51,6 +53,7 @@ export default async function PortalLayout({ children }: { children: React.React
         { href: "/portal/files", label: "Files & approvals", icon: "files", badge: files.filter((f) => f.approval === "pending").length },
         { href: "/portal/brand", label: "Brand", icon: "brand" },
         { href: "/portal/billing", label: "Billing", icon: "billing" },
+        { href: "/portal/invoicing", label: "Invoicing", icon: "invoicing", locked: !settled.enabled },
       ]}
       banner={viewer.previewBy && <PreviewBanner clientName={client.name} personName={viewer.name} />}
     >

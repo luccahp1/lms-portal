@@ -1,0 +1,91 @@
+/*
+  The Settled screens speak their own token names; here they are mapped onto the LMS kit
+  (src/kit/tokens.css), so Invoicing looks like the rest of the portal and follows its light and
+  dark themes. Status colours, motion and spacing are Settled's own.
+*/
+.stl {
+  --bg-tint: var(--surface-2);
+  --border: var(--line);
+  --border-strong: var(--line-2);
+  --text: var(--ink);
+  --text-2: var(--ink-2);
+  --text-3: var(--ink-3);
+  --text-inverse: #ffffff;
+
+  --green-900: #0f2f22;
+  --green-800: var(--forest-deep);
+  --green-700: var(--forest);
+  --green-600: var(--forest);
+  --green-500: #2b9363;
+  --green-400: #5cbf8d;
+  --green-200: #bfe5cf;
+  --green-100: #dcf1e4;
+  --green-50: var(--forest-tint);
+  --gold-500: #e9a83a;
+  --gold-400: #f2bd5c;
+  --gold-100: #fbeccd;
+
+  --primary: var(--forest);
+  --primary-hover: var(--forest-deep);
+  --primary-soft: var(--forest-tint);
+  --primary-text: var(--forest);
+  --accent: var(--amber);
+  --accent-soft: color-mix(in srgb, var(--amber) 14%, var(--surface));
+  --focus: var(--jay);
+  --danger: var(--bad);
+  --danger-soft: color-mix(in srgb, var(--bad) 11%, var(--surface));
+  --warn-soft: color-mix(in srgb, var(--warn) 13%, var(--surface));
+
+  --st-draft: var(--ink-3);
+  --st-draft-bg: var(--surface-2);
+  --st-sent: var(--jay);
+  --st-sent-bg: color-mix(in srgb, var(--jay) 12%, var(--surface));
+  --st-viewed: var(--violet);
+  --st-viewed-bg: color-mix(in srgb, var(--violet) 12%, var(--surface));
+  --st-incoming: #0b7f86;
+  --st-incoming-bg: color-mix(in srgb, #0b7f86 12%, var(--surface));
+  --st-partial: var(--amber);
+  --st-partial-bg: color-mix(in srgb, var(--amber) 13%, var(--surface));
+  --st-overdue: var(--coral);
+  --st-overdue-bg: color-mix(in srgb, var(--coral) 12%, var(--surface));
+  --st-paid: var(--forest);
+  --st-paid-bg: color-mix(in srgb, var(--forest) 13%, var(--surface));
+  --st-void: var(--ink-3);
+  --st-void-bg: var(--surface-2);
+
+  --r-xs: 6px;
+  --r-sm: 8px;
+  --r-md: var(--radius-tile);
+  --r-lg: var(--radius-card);
+  --r-xl: 22px;
+  --r-full: 999px;
+  --shadow-xs: 0 1px 2px rgba(14, 18, 15, 0.05);
+  --shadow-sm: var(--shadow);
+  --shadow-md: var(--shadow-up);
+  --shadow-lg: 0 2px 4px rgba(14, 18, 15, 0.06), 0 16px 36px rgba(14, 18, 15, 0.14);
+  --ring: 0 0 0 3px color-mix(in srgb, var(--focus) 35%, transparent);
+
+  --font-sans: var(--font-body);
+  --t-xs: 12px;
+  --t-sm: 13px;
+  --t-base: 15px;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --d-fast: 140ms;
+  --d-base: 220ms;
+  --d-slow: 360ms;
+  --tabbar-h: 0px;
+  --content-max: 1180px;
+}
+:root[data-theme="dark"] .stl {
+  --st-incoming: #4fd0d6;
+  --st-incoming-bg: color-mix(in srgb, #4fd0d6 13%, var(--surface));
+  --text-inverse: #06120b;
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 2px 6px rgba(0, 0, 0, 0.45), 0 18px 40px rgba(0, 0, 0, 0.45);
+}
+/* Headings in Invoicing use the kit's display face, like every other portal page. */
+.stl h1,
+.stl h2 {
+  font-family: var(--font-display);
+}

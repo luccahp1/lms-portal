@@ -52,3 +52,8 @@ Tests need a real Postgres: see the Gotchas in HANDOFF.md for the embedded-postg
 - Online payments (docs/online-payments.md): a Stripe payment lives in `online_payments`, never in `payments` (Dash's
   `sync_payments` replaces that set). Dash imports it via `list_online_payments` and sends it back with ref = `pi_...`.
   Tests fake Stripe on a local port (`STRIPE_API_BASE`). `online_payments` is on the live-notify trigger (0012).
+- Invoicing (Settled) is a paid add-on (docs/settled.md). Screens live in `src/settled` (ported from the Settled
+  repo), all CSS scoped under `.stl` with tokens mapped onto the kit in `src/settled/styles/bridge.css`. They talk only
+  to `/portal/invoicing/api/*` (the proxy), which uses the client's `clients.settled_api_key`: never select that
+  column for a page. Switch it with MCP `set_client_invoicing`. `.stl` must not get `overflow: hidden` (breaks the
+  sticky section bar); use `clip`.
