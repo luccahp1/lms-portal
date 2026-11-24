@@ -1,6 +1,21 @@
 # Handoff
 
-## State (2026-11-23): clients pay invoices online (Stripe), not deployed
+## Deployed 2026-11-24 03:30 UTC: 9dd779a, online payments live
+
+Migration 0012 applied, Dash 1154f82 deployed with it. Backups
+`/srv/backups/lms-portal/*.20261124-032304.pre-stripe`. Live Stripe account (London Marketing
+Solutions, `acct_1Uf9...`): Cards and Canadian PAD on, webhook destination "lms-portal" with the 4
+`checkout.session` events, restricted key "lms-portal" (Checkout Sessions write only) in
+`STRIPE_SECRET_KEY`. No sandbox was used. Public `POST /api/pay/stripe` answers 400 "Bad
+signature", so the keys are loaded. Every client with an open invoice now sees Pay.
+
+Open: a real CA$1 payment end to end has not been made yet (Lucca pays by card, then refunds it in
+Stripe and removes the payment in Dash). If Checkout creation fails with a permission error, add
+that permission to the restricted key in Stripe (no new key needed). Stripe account verification
+(owners, bank account) must be finished for payouts. Reconnect the Claude Code `lms-portal` MCP
+client so it lists `list_online_payments`.
+
+## State (2026-11-23): clients pay invoices online (Stripe)
 
 On `main`, with the matching lms-dash change. Docs: [docs/online-payments.md](docs/online-payments.md).
 
